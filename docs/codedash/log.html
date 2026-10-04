@@ -95,11 +95,33 @@
             <aside class="log-sidebar">
                 <div class="sidebar-title">更新记录</div>
                 <ul class="log-nav">
-                    <li><a href="#v0.1.0" class="active">v0.1.0</a></li>
+                    <li><a href="#v0.2.0" class="active">v0.2.0</a></li>
+                    <li><a href="#v0.1.0">v0.1.0</a></li>
                 </ul>
             </aside>
             <main class="log-content">
         <h1>更新日志</h1>
+
+        <p class="update-date">v0.2.0 — 2026-10-04</p>
+
+        <section id="v0.2.0">
+        <h2>v0.2.0 新增 macOS 版本</h2>
+
+        <h3>主要更新</h3>
+        <ol>
+            <li><strong>macOS 版本发布</strong> — 正式支持 Apple Silicon（M 系列）与 Intel 芯片，提供 <code>.dmg</code> 安装包，与 Windows 版功能完全一致</li>
+            <li><strong>不再依赖系统 Node.js</strong> — Agent 引擎改用应用内置运行时启动，用户机器上无需预装 Node.js 即可使用全部 AI 能力</li>
+            <li><strong>Agent 引擎随包分发</strong> — agent-core 及其全部原生依赖（代码解析、向量检索、嵌入式数据库、终端）一起打包，安装后开箱可用</li>
+            <li><strong>安装包体积优化</strong> — 剔除与当前平台无关的预编译产物，安装包体积减少约 40%</li>
+        </ol>
+
+        <h3>说明</h3>
+        <ol>
+            <li>macOS 安装包未使用 Apple 开发者证书签名（ad-hoc 签名），首次打开需要在「系统设置 → 隐私与安全性」中点击「仍要打开」放行一次，详见 <a href="docs.html#qs-install-mac">文档 · macOS 首次打开</a></li>
+            <li>Windows 版本次未改动，仍为 v0.1.0，可继续从该版本下载</li>
+            <li>macOS 版语音转文字依赖的 <code>ffi-napi</code> 在 Apple Silicon 上暂无预编译产物，该功能会自动不可用，不影响其余功能</li>
+        </ol>
+        </section>
 
         <p class="update-date">v0.1.0 — 2026-07-27</p>
 
@@ -139,7 +161,7 @@
         </div>
     </div>
     <footer class="footer">
-        <p>构建 · CodeDash v0.1.0 · 开源 · 免费 · AI 原生桌面 IDE</p>
+        <p>构建 · CodeDash v0.2.0 · 开源 · 免费 · AI 原生桌面 IDE</p>
     </footer>
     <script>
         const t=document.getElementById('themeToggle'),e=document.documentElement;

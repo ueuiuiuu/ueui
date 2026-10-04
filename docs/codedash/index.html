@@ -313,6 +313,71 @@
         .hero .cta-secondary:hover {
             background: var(--surface-subtle-hover); color: var(--text);
         }
+        .hero .cta-note {
+            margin-top: 1.1rem; font-size: 0.82rem; color: var(--text-muted);
+            letter-spacing: 0.3px;
+        }
+        .cta-tag {
+            display: inline-block; margin-left: 0.5rem; padding: 0.08rem 0.5rem;
+            border-radius: 20px; background: #10b981; color: #062018;
+            font-size: 0.68rem; font-weight: 800; letter-spacing: 0;
+            vertical-align: middle;
+        }
+        /* === Download Section === */
+        .download-section { margin: 4rem auto 0; max-width: 900px; }
+        .download-grid {
+            display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-top: 2.5rem;
+        }
+        .download-card {
+            background: var(--card-bg); border: 1px solid var(--card-border);
+            border-radius: var(--radius); padding: 1.8rem;
+            box-shadow: var(--shadow); text-align: left;
+            display: flex; flex-direction: column;
+        }
+        .download-card.featured {
+            border-color: rgba(16,185,129,0.45);
+            box-shadow: 0 0 0 1px rgba(16,185,129,0.18), var(--shadow-lg);
+        }
+        .download-head { display: flex; align-items: center; gap: 0.9rem; margin-bottom: 0.9rem; }
+        .download-head h3 { font-size: 1.25rem; font-weight: 800; color: var(--text); margin: 0; }
+        .platform-icon { font-size: 1.9rem; line-height: 1; }
+        .version-pill {
+            display: inline-block; margin-top: 0.35rem; padding: 0.12rem 0.6rem;
+            border-radius: 20px; font-size: 0.7rem; font-weight: 700;
+            background: rgba(255,255,255,0.12); color: var(--text-light);
+            border: 1px solid var(--border);
+        }
+        [data-theme="light"] .version-pill { background: rgba(0,0,0,0.05); }
+        .download-card.featured .version-pill {
+            background: rgba(16,185,129,0.18); color: #10b981;
+            border-color: rgba(16,185,129,0.35);
+        }
+        .download-desc { font-size: 0.88rem; color: var(--text-light); line-height: 1.75; margin: 0 0 1.2rem; }
+        .download-actions { display: flex; flex-direction: column; gap: 0.6rem; margin-top: auto; }
+        .dl-btn {
+            display: block; text-align: center; padding: 0.75rem 1rem;
+            border-radius: var(--radius-sm); text-decoration: none;
+            font-size: 0.88rem; font-weight: 600; color: var(--text-light);
+            background: var(--surface-subtle); border: 1px solid var(--border);
+            transition: all 0.25s;
+        }
+        .dl-btn:hover { background: var(--surface-subtle-hover); color: var(--text); }
+        .dl-btn.primary {
+            background: linear-gradient(135deg, var(--primary), #6b7280); color: #fff;
+            border-color: transparent; font-weight: 700;
+        }
+        .dl-btn.primary:hover {
+            color: #fff; transform: translateY(-1px);
+            box-shadow: 0 6px 24px rgba(255,255,255,0.25);
+        }
+        .download-note { margin: 1rem 0 0; font-size: 0.78rem; color: var(--text-muted); line-height: 1.7; }
+        .download-note code {
+            background: var(--surface-subtle); padding: 0.1rem 0.35rem;
+            border-radius: 4px; font-size: 0.75rem;
+        }
+        @media (max-width: 768px) {
+            .download-grid { grid-template-columns: 1fr; }
+        }
         /* === Video Showcase === */
         .video-section {
             margin: 4rem auto;
@@ -796,16 +861,18 @@
     <div class="content-overlay">
     <div class="container">
         <section class="hero" id="hero">
-            <span class="badge">v0.1.0 — 开源 · 免费 · AI 原生</span>
+            <span class="badge">v0.2.0 — 新增 macOS 版本 · 开源 · 免费</span>
             <h1>重新定义 AI 编码体验</h1>
             <p class="subtitle">
                 CodeDash 是一款 <strong>AI 原生桌面 IDE</strong>，自研 Agent 引擎、深度代码理解、
                 浏览器自动化、计算机控制 — 全方位赋能开发者。
             </p>
             <div class="cta-buttons">
-                <a href="#features" class="cta-primary">了解更多</a>
-                <a href="https://github.com/ueuiuiuu/ueui/releases/tag/v0.1.0" class="cta-secondary" target="_blank">下载 Windows</a>
+                <a href="https://github.com/ueuiuiuu/ueui/releases/tag/v0.2.0" class="cta-primary" target="_blank" rel="noopener">下载 macOS<span class="cta-tag">新</span></a>
+                <a href="https://github.com/ueuiuiuu/ueui/releases/tag/v0.1.0" class="cta-secondary" target="_blank" rel="noopener">下载 Windows</a>
+                <a href="#features" class="cta-secondary">了解更多</a>
             </div>
+            <p class="cta-note">macOS：支持 Apple Silicon (M 系列) 与 Intel 芯片 · Windows：10 / 11</p>
             <div class="stats-row" id="statsRow">
                 <div class="stat-item">
                     <span class="num" id="statFiles" data-target="128">0</span>
@@ -822,6 +889,52 @@
                 <div class="stat-item">
                     <span class="num" id="statComponents" data-target="42">0</span>
                     <span class="label">UI 组件</span>
+                </div>
+            </div>
+        </section>
+        <!-- === Download === -->
+        <section id="download">
+            <h2 class="section-title">下载安装</h2>
+            <div class="section-divider"></div>
+            <p class="section-subtitle">v0.2.0 起正式支持 macOS，与 Windows 版本功能完全一致。</p>
+            <div class="download-grid">
+                <div class="download-card featured fade-in">
+                    <div class="download-head">
+                        <span class="platform-icon">&#63743;</span>
+                        <div>
+                            <h3>macOS</h3>
+                            <span class="version-pill">v0.2.0 · 新版本</span>
+                        </div>
+                    </div>
+                    <p class="download-desc">
+                        原生支持 Apple Silicon 与 Intel 芯片，内置完整 Agent 引擎、终端与代码检索能力。
+                    </p>
+                    <div class="download-actions">
+                        <a href="https://github.com/ueuiuiuu/ueui/releases/download/v0.2.0/CodeDash-0.2.0-arm64.dmg" class="dl-btn primary" target="_blank" rel="noopener">Apple Silicon（M 系列）· .dmg</a>
+                        <a href="https://github.com/ueuiuiuu/ueui/releases/download/v0.2.0/CodeDash-0.2.0-x64.dmg" class="dl-btn" target="_blank" rel="noopener">Intel 芯片 · .dmg</a>
+                    </div>
+                    <p class="download-note">
+                        首次打开会被 Gatekeeper 拦截：请在「系统设置 → 隐私与安全性」中点「仍要打开」，
+                        或执行 <code>xattr -dr com.apple.quarantine /Applications/CodeDash.app</code>。
+                    </p>
+                </div>
+                <div class="download-card fade-in">
+                    <div class="download-head">
+                        <span class="platform-icon">&#9598;</span>
+                        <div>
+                            <h3>Windows</h3>
+                            <span class="version-pill">v0.1.0</span>
+                        </div>
+                    </div>
+                    <p class="download-desc">
+                        支持 Windows 10 / 11，提供图形化安装程序，安装过程可选择安装目录。
+                    </p>
+                    <div class="download-actions">
+                        <a href="https://github.com/ueuiuiuu/ueui/releases/tag/v0.1.0" class="dl-btn primary" target="_blank" rel="noopener">Windows 安装程序 · .exe</a>
+                    </div>
+                    <p class="download-note">
+                        所有版本与历史记录见 GitHub Releases，源码与更新日志同样在该仓库。
+                    </p>
                 </div>
             </div>
         </section>
@@ -1005,7 +1118,7 @@
             <a href="#modes">工作模式</a>
             <a href="#tech">技术栈</a>
         </div>
-        <p>用 <span class="heart">❤</span> 构建 · CodeDash v0.1.0 · 开源 · 免费 · AI 原生桌面 IDE</p>
+        <p>用 <span class="heart">❤</span> 构建 · CodeDash v0.2.0 · 开源 · 免费 · AI 原生桌面 IDE</p>
     </footer>
     <button class="back-to-top" id="backToTop" title="回到顶部">&#8593;</button>
     <script>
