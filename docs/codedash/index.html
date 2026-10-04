@@ -205,6 +205,12 @@
             -webkit-background-clip: text; -webkit-text-fill-color: transparent;
             background-clip: text;
         }
+        [data-theme="light"] .section-title {
+            /* 同 hero 标题：浅色模式下改用近黑色，否则 #9ca3af 在浅底上几乎看不清 */
+            background: linear-gradient(135deg, #1f2937 0%, #0b0f14 100%);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
         .section-subtitle {
             text-align: center; color: var(--text-muted);
             font-size: 1.05rem; max-width: 600px;
@@ -254,9 +260,11 @@
             filter: drop-shadow(0 0 30px rgba(255,255,255,0.08));
         }
         [data-theme="light"] .hero h1 {
-            background: linear-gradient(135deg, #333 0%, #555 50%, #222 100%);
-            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-            background-clip: text;
+            /* 浅色模式下标题必须是近黑色，灰渐变在浅底上会显得发灰、没有重量 */
+            background: none;
+            -webkit-background-clip: border-box;
+            -webkit-text-fill-color: currentColor;
+            color: #0b0f14;
             filter: none;
         }
         .hero .subtitle {
@@ -430,21 +438,34 @@
         @media (max-width: 768px) {
             .download-grid { grid-template-columns: 1fr; }
         }
-        /* === Video Showcase === */
-        .video-section {
+        /* === Video Carousel ===
+           滚动驱动的横向轮播：向下滚动时下一个视频从右侧滑入，接管上一个的位置。
+           视频列表完全由脚本里的 VIDEOS 数组驱动，新增视频只需追加一项。 */
+        .video-carousel {
+            position: relative;
             margin: 4rem auto;
-            max-width: 800px;
-            text-align: center;
+            /* 宽度同时受视口高度约束，保证 16:9 的画面在矮屏上也放得下 */
+            max-width: min(900px, calc((100vh - 220px) * 16 / 9));
+            /* 高度由 JS 按视频数量计算，用于决定吸附滚动的距离 */
         }
-        .video-section .video-label {
+        .video-carousel__inner {
+            position: sticky;
+            height: calc(100vh - 88px);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        .video-label {
             font-size: 0.75rem;
             text-transform: uppercase;
             letter-spacing: 2px;
             color: var(--text-muted);
             font-weight: 700;
             margin-bottom: 1rem;
+            min-height: 1.5em;
         }
-        .video-player {
+        .video-stage {
             position: relative;
             width: 100%;
             aspect-ratio: 16 / 9;
@@ -453,20 +474,43 @@
             background: rgba(0,0,0,0.4);
             border: 1px solid var(--border);
             box-shadow: var(--shadow-lg);
-            cursor: pointer;
             transition: box-shadow 0.3s, border-color 0.3s;
         }
-        .video-player:hover {
+        .video-stage:hover {
             border-color: rgba(255,255,255,0.3);
             box-shadow: var(--shadow-lg), 0 0 60px rgba(255,255,255,0.06);
         }
+        .video-slide {
+            position: absolute;
+            inset: 0;
+        }
+        .video-slide .video-player {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            cursor: pointer;
+        }
+        .video-dots {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-top: 1.1rem;
+        }
+        .video-dots button {
+            width: 8px; height: 8px; padding: 0;
+            border: none; border-radius: 4px; cursor: pointer;
+            background: var(--text-muted); opacity: 0.35;
+            transition: width 0.25s, opacity 0.25s;
+        }
+        .video-dots button:hover { opacity: 0.65; }
+        .video-dots button.active { width: 24px; opacity: 1; }
         /* 浅色模式下视频占位块不能是纯黑盒子，否则在浅色页面里像两个黑洞 */
-        [data-theme="light"] .video-player {
+        [data-theme="light"] .video-stage {
             background: linear-gradient(135deg, #f5f6f8, #e6e9ee);
             border-color: rgba(0,0,0,0.08);
             box-shadow: 0 10px 30px rgba(0,0,0,0.06);
         }
-        [data-theme="light"] .video-player:hover {
+        [data-theme="light"] .video-stage:hover {
             border-color: rgba(0,0,0,0.18);
             box-shadow: 0 12px 36px rgba(0,0,0,0.1);
         }
@@ -546,6 +590,49 @@
             width: 100%;
             height: 100%;
             border: none;
+        }
+        /* 移动端 / 用户开启「减少动效」时：退回纵向堆叠，不做吸附与横向位移 */
+        .video-carousel--stacked { height: auto !important; max-width: 800px; }
+        .video-carousel--stacked .video-carousel__inner {
+            position: static; height: auto;
+        }
+        .video-carousel--stacked .video-label,
+        .video-carousel--stacked .video-dots { display: none; }
+        .video-carousel--stacked .video-stage {
+            aspect-ratio: auto; overflow: visible;
+            background: none; border: none; box-shadow: none; border-radius: 0;
+            display: flex; flex-direction: column; gap: 2.5rem;
+        }
+        .video-carousel--stacked .video-stage:hover { border: none; box-shadow: none; }
+        .video-carousel--stacked .video-slide {
+            position: static; transform: none !important;
+            display: flex; flex-direction: column;
+            background: none; border: none; box-shadow: none; border-radius: 0;
+        }
+        .video-carousel--stacked .video-slide__label {
+            display: block;
+        }
+        .video-carousel--stacked .video-slide .video-player {
+            aspect-ratio: 16 / 9;
+            border-radius: var(--radius); overflow: hidden;
+            background: rgba(0,0,0,0.4);
+            border: 1px solid var(--border);
+            box-shadow: var(--shadow-lg);
+        }
+        [data-theme="light"] .video-carousel--stacked .video-slide .video-player {
+            background: linear-gradient(135deg, #f5f6f8, #e6e9ee);
+            border-color: rgba(0,0,0,0.08);
+        }
+        /* 堆叠模式下每个视频各自的标题 */
+        .video-slide__label {
+            display: none;
+            text-align: center;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: var(--text-muted);
+            font-weight: 700;
+            margin-bottom: 0.9rem;
         }
         .features-grid {
             display: grid;
@@ -1020,28 +1107,14 @@
                 </div>
             </div>
         </section>
-        <!-- === Video Showcase === -->
-        <section class="video-section" id="videoShowcase">
-            <div class="video-label">产品演示</div>
-            <div class="video-player" id="videoPlayer">
-                <div class="video-overlay" id="videoOverlay">
-                    <img src="icon-codedash.svg" alt="CodeDash" class="overlay-icon" id="overlayIcon">
-                    <div class="play-icon-circle">&#9654;</div>
-                    <div class="overlay-text">点击播放视频介绍</div>
-                </div>
-                <div id="bilibiliContainer" style="width:100%;height:100%;display:none;"></div>
-            </div>
-        </section>
-        <!-- === Video Showcase 2 === -->
-        <section class="video-section" id="videoShowcase2">
-            <div class="video-label">更多演示</div>
-            <div class="video-player" id="videoPlayer2">
-                <div class="video-overlay" id="videoOverlay2">
-                    <img src="icon-codedash.svg" alt="CodeDash" class="overlay-icon" id="overlayIcon2">
-                    <div class="play-icon-circle">&#9654;</div>
-                    <div class="overlay-text">点击播放视频介绍</div>
-                </div>
-                <div id="bilibiliContainer2" style="width:100%;height:100%;display:none;"></div>
+        <!-- === Video Carousel ===
+             容器留空，视频卡片由脚本里的 VIDEOS 数组生成。
+             新增视频：往 VIDEOS 里追加一项即可，DOM、圆点、滚动距离都会自动跟着变。 -->
+        <section class="video-carousel" id="videoCarousel">
+            <div class="video-carousel__inner" id="videoCarouselInner">
+                <div class="video-label" id="videoLabel"></div>
+                <div class="video-stage" id="videoStage"></div>
+                <div class="video-dots" id="videoDots"></div>
             </div>
         </section>
 
@@ -1284,30 +1357,155 @@
             });
         });
 
-        // === Video Players ===
-        function setupVideo(playerId, overlayId, containerId, bvid) {
-            const player = document.getElementById(playerId);
-            const overlay = document.getElementById(overlayId);
-            const container = document.getElementById(containerId);
-            let loaded = false;
+        // === Video Carousel ===
+        // 新增视频：往这个数组追加一项即可，卡片、圆点、滚动距离都会自动生成。
+        const VIDEOS = [
+            { label: '产品演示', bvid: 'BV1tjJp6bEvZ' },
+            { label: '更多演示', bvid: 'BV1CP3m6NEM9' }
+        ];
 
-            player.addEventListener('click', () => {
-                if (!loaded) {
-                    loaded = true;
+        const STICK_TOP = 88;      // 吸附时距视口顶部的距离（导航栏 72px + 16px）
+        const STEP_RATIO = 0.6;    // 切换一个视频需要滚动的距离（相对视口高度）
+        const TAIL_RATIO = 0.15;   // 最后一个视频额外停留的滚动距离
+
+        function initVideoCarousel() {
+            const root = document.getElementById('videoCarousel');
+            const inner = document.getElementById('videoCarouselInner');
+            const stage = document.getElementById('videoStage');
+            const dots = document.getElementById('videoDots');
+            const label = document.getElementById('videoLabel');
+            if (!root || !inner || !stage || !dots || !label || VIDEOS.length === 0) return;
+
+            // ---- 按 VIDEOS 生成卡片 ----
+            const slides = VIDEOS.map((video, i) => {
+                const slide = document.createElement('div');
+                slide.className = 'video-slide';
+
+                // 堆叠布局（窄屏 / 减少动效）下每个视频显示自己的标题
+                const slideLabel = document.createElement('div');
+                slideLabel.className = 'video-slide__label';
+                slideLabel.textContent = video.label;
+
+                const player = document.createElement('div');
+                player.className = 'video-player';
+
+                const overlay = document.createElement('div');
+                overlay.className = 'video-overlay';
+                overlay.innerHTML =
+                    '<img src="icon-codedash.svg" alt="" class="overlay-icon">' +
+                    '<div class="play-icon-circle">&#9654;</div>' +
+                    '<div class="overlay-text">点击播放视频介绍</div>';
+
+                const holder = document.createElement('div');
+                holder.style.cssText = 'width:100%;height:100%;display:none;';
+
+                player.appendChild(overlay);
+                player.appendChild(holder);
+                slide.appendChild(slideLabel);
+                slide.appendChild(player);
+                stage.appendChild(slide);
+
+                const dot = document.createElement('button');
+                dot.type = 'button';
+                dot.setAttribute('aria-label', '切换到第 ' + (i + 1) + ' 个视频');
+                dots.appendChild(dot);
+
+                const state = { slide, overlay, holder, dot, loaded: false };
+
+                player.addEventListener('click', () => {
+                    if (state.loaded) return;
+                    state.loaded = true;
                     const iframe = document.createElement('iframe');
-                    iframe.src = 'https://player.bilibili.com/player.html?bvid=' + bvid + '&autoplay=1&high_quality=1';
+                    iframe.src = 'https://player.bilibili.com/player.html?bvid=' + video.bvid + '&autoplay=1&high_quality=1';
                     iframe.allow = 'autoplay; fullscreen';
                     iframe.allowFullscreen = true;
-                    iframe.style.cssText = 'width:100%;height:100%;border:none;';
-                    container.appendChild(iframe);
-                    container.style.display = '';
+                    holder.appendChild(iframe);
+                    holder.style.display = '';
                     overlay.classList.add('hidden');
-                }
+                });
+
+                dot.addEventListener('click', () => {
+                    window.scrollTo({ top: stickStart + i * step, behavior: 'smooth' });
+                });
+
+                return state;
             });
+
+            // ---- 布局与滚动驱动 ----
+            const reduced = window.matchMedia('(prefers-reduced-motion: reduce)');
+            const narrow = window.matchMedia('(max-width: 768px)');
+            const N = slides.length;
+            let step = 0;
+            let stickStart = 0;
+            let active = -1;
+            let ticking = false;
+
+            const isStacked = () => narrow.matches || reduced.matches;
+
+            function layout() {
+                root.classList.toggle('video-carousel--stacked', isStacked());
+
+                if (isStacked()) {
+                    // 纵向堆叠：清掉吸附与位移，全部卡片依次排列
+                    root.style.height = '';
+                    inner.style.top = '';
+                    slides.forEach((s) => { s.slide.style.transform = ''; });
+                    setActive(0, true);
+                    return;
+                }
+
+                inner.style.top = STICK_TOP + 'px';
+                step = Math.round(window.innerHeight * STEP_RATIO);
+                const tail = Math.round(window.innerHeight * TAIL_RATIO);
+                root.style.height = (inner.offsetHeight + (N - 1) * step + tail) + 'px';
+                stickStart = root.getBoundingClientRect().top + window.scrollY - STICK_TOP;
+
+                if (N < 2) {
+                    slides.forEach((s) => { s.slide.style.transform = ''; });
+                    setActive(0, true);
+                    return;
+                }
+                update();
+            }
+
+            function update() {
+                if (isStacked() || N < 2) return;
+                const t = Math.max(0, Math.min(1, (window.scrollY - stickStart) / ((N - 1) * step)));
+                slides.forEach((s, i) => {
+                    s.slide.style.transform = 'translateX(' + ((i - t * (N - 1)) * 100).toFixed(3) + '%)';
+                });
+                setActive(Math.round(t * (N - 1)));
+            }
+
+            function setActive(idx, force) {
+                if (!force && idx === active) return;
+                active = idx;
+                slides.forEach((s, i) => {
+                    s.dot.classList.toggle('active', i === idx);
+                    s.slide.style.zIndex = i === idx ? '2' : '1';
+                    // 划走的视频销毁 iframe，避免在屏幕外继续播放
+                    if (i !== idx && s.loaded) {
+                        s.loaded = false;
+                        s.holder.innerHTML = '';
+                        s.holder.style.display = 'none';
+                        s.overlay.classList.remove('hidden');
+                    }
+                });
+                label.textContent = VIDEOS[idx] ? VIDEOS[idx].label : '';
+            }
+
+            function onScroll() {
+                if (ticking) return;
+                ticking = true;
+                requestAnimationFrame(() => { ticking = false; update(); });
+            }
+
+            window.addEventListener('scroll', onScroll, { passive: true });
+            window.addEventListener('resize', layout);
+            layout();
         }
 
-        setupVideo('videoPlayer', 'videoOverlay', 'bilibiliContainer', 'BV1tjJp6bEvZ');
-        setupVideo('videoPlayer2', 'videoOverlay2', 'bilibiliContainer2', 'BV1CP3m6NEM9');
+        initVideoCarousel();
 
         console.log('CodeDash website loaded!');
     </script>
