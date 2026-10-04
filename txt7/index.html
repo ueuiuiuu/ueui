@@ -1353,12 +1353,12 @@ vector可以像List一样有add,remove,isEmpty,size[push_back,erase]</p>
 <p>int[] a = {1,2,3};  int a[] = {1,2,3};  vector<int> a = {1,2,3};均合法</p>
 <p>int[][] a = new int[n][m];
 // Java — 当 List 用（只建外层，内层待添加）
-List<List\<Integer>> list = new ArrayList&lt;&gt;();
+List&lt;List<Integer>&gt; list = new ArrayList&lt;&gt;();
 对应CPP为
 // C++ — 当数组用（行列固定，全 0）
-vector<vector\<int>> a(n, vector<int>(m, 0));
+vector&lt;vector<int>&gt; a(n, vector<int>(m, 0));
 // C++ — 当 List 用（外层 n 个空 vector，和 Java 循环 add 效果一样）
-vector<vector\<int>> a(n);</p>
+vector&lt;vector<int>&gt; a(n);</p>
 <p>// Java — 拷贝一份加入
 list.add(new ArrayList&lt;&gt;(list2));
 // Java — 共享引用加入
