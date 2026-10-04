@@ -105,20 +105,26 @@
         <p class="update-date">v0.2.0 — 2026-10-04</p>
 
         <section id="v0.2.0">
-        <h2>v0.2.0 新增 macOS 版本</h2>
+        <h2>v0.2.0 — macOS 版本发布 · 学习模式上线</h2>
 
         <h3>主要更新</h3>
         <ol>
             <li><strong>macOS 版本发布</strong> — 正式支持 Apple Silicon（M 系列）与 Intel 芯片，提供 <code>.dmg</code> 安装包，与 Windows 版功能完全一致</li>
-            <li><strong>不再依赖系统 Node.js</strong> — Agent 引擎改用应用内置运行时启动，用户机器上无需预装 Node.js 即可使用全部 AI 能力</li>
-            <li><strong>Agent 引擎随包分发</strong> — agent-core 及其全部原生依赖（代码解析、向量检索、嵌入式数据库、终端）一起打包，安装后开箱可用</li>
-            <li><strong>安装包体积优化</strong> — 剔除与当前平台无关的预编译产物，安装包体积减少约 40%</li>
+            <li><strong>学习模式</strong> — 全新的题库工作区：按文件夹组织题目，支持「会了 / 不会」练习、收藏与置顶、刷题统计与热力图；可以直接让右侧 AI 从资料里提取题目并一键保存到题库</li>
+            <li><strong>便携记录</strong> — 待办、语录、统计与热力图一体的记录面板，Agent 可以通过工具直接读写记录</li>
+            <li><strong>一键生成学习周报</strong> — 聚合学习时长与刷题记录生成 Markdown 周报，每项指标都与上一周对比，生成后自动归档到资料文件夹并在编辑器中打开</li>
+            <li><strong>交互式提问卡片</strong> — Agent 遇到需要确认的问题时会弹出选项卡片，作答后继续执行</li>
+            <li><strong>MCP 插件能力增强</strong> — 插件编辑器新增「启动 / 停止」按钮；修复插件工具被白名单过滤导致模型看不到的问题，修复 mcp-admin 停止后无法再启动的问题；新增内置示例插件 <code>demo</code>（echo / now）</li>
+            <li><strong>品牌与「关于」页</strong> — 应用名统一为 CodeDash，设置里新增「关于」页，显示版本号、GitHub 与官网入口</li>
+            <li><strong>Agent 引擎随包分发</strong> — agent-core 及其全部原生依赖（代码解析、向量检索、嵌入式数据库、终端）与内置插件一起打包，安装后开箱可用；macOS 版剔除与平台无关的预编译产物，安装包体积减少约 40%</li>
         </ol>
 
         <h3>说明</h3>
         <ol>
             <li>macOS 安装包未使用 Apple 开发者证书签名（ad-hoc 签名），首次打开需要在「系统设置 → 隐私与安全性」中点击「仍要打开」放行一次，详见 <a href="docs.html#qs-install-mac">文档 · macOS 首次打开</a></li>
-            <li>Windows 版本次未改动，仍为 v0.1.0，可继续从该版本下载</li>
+            <li>Windows 版同步更新到 v0.2.0，包含上述全部新功能；Agent 引擎通过系统 Node.js 启动，使用前需先安装 Node.js</li>
+            <li>macOS 版 Agent 引擎改用应用内置运行时启动，无需预装系统 Node.js</li>
+            <li>Windows 安装包未做代码签名，首次运行 SmartScreen 可能提示「未知发布者」，选择「仍要运行」即可</li>
             <li>macOS 版语音转文字依赖的 <code>ffi-napi</code> 在 Apple Silicon 上暂无预编译产物，该功能会自动不可用，不影响其余功能</li>
         </ol>
         </section>
