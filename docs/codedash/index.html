@@ -208,15 +208,16 @@
         .section-subtitle {
             text-align: center; color: var(--text-muted);
             font-size: 1.05rem; max-width: 600px;
-            margin: 0 auto 3rem;
+            margin: 0 auto 2.5rem;
         }
         .section-divider {
-            width: 60px; height: 3px;
-            background: linear-gradient(90deg, var(--primary), #9ca3af);
-            border-radius: 3px; margin: 1rem auto 2rem;
+            width: 40px; height: 2px;
+            background: var(--text-muted);
+            opacity: 0.4;
+            border-radius: 2px; margin: 0.9rem auto 1.2rem;
         }
         .hero {
-            text-align: center; padding: 6rem 0 4rem;
+            text-align: center; padding: 2rem 0 0;
             position: relative;
         }
         .hero::before {
@@ -264,17 +265,20 @@
         }
         .hero .stats-row {
             display: flex; justify-content: center;
-            gap: 3rem; margin-top: 2.5rem; flex-wrap: wrap;
+            margin-top: 2.25rem; flex-wrap: wrap;
+        }        .hero .stat-item {
+            text-align: center; padding: 0 2.1rem;
+            border-left: 1px solid var(--border);
         }
-        .hero .stat-item { text-align: center; }
+        .hero .stat-item:first-child { border-left: none; }
         .hero .stat-item .num {
-            font-size: 2rem; font-weight: 800; color: var(--stat-num);
+            font-size: 1.6rem; font-weight: 700; color: var(--stat-num);
             display: block; font-variant-numeric: tabular-nums;
-            text-shadow: 0 0 20px rgba(255,255,255,0.1);
+            letter-spacing: -0.5px; line-height: 1.2;
         }
         .hero .stat-item .label {
-            font-size: 0.8rem; color: var(--text-muted);
-            text-transform: uppercase; letter-spacing: 1px;
+            font-size: 0.72rem; color: var(--text-muted);
+            letter-spacing: 0.4px;
             margin-top: 0.2rem;
         }
         .hero .cta-buttons {
@@ -282,12 +286,12 @@
             justify-content: center; flex-wrap: wrap;
         }
         .hero .cta-primary {
-            display: inline-block; padding: 0.9rem 2.5rem;
-            background: linear-gradient(135deg, var(--primary), #6b7280);
-            color: white; border: none; border-radius: 50px;
+            display: inline-block; padding: 0.9rem 2.4rem;
+            background: linear-gradient(135deg, #ffffff, #ccd2d9);
+            color: #0d1117; border: none; border-radius: 50px;
             font-size: 1rem; font-weight: 700; cursor: pointer;
             text-decoration: none; transition: all 0.3s;
-            box-shadow: 0 4px 20px rgba(255,255,255,0.4);
+            box-shadow: 0 6px 26px rgba(255,255,255,0.18);
             position: relative;
         }
         .hero .cta-primary::after {
@@ -295,41 +299,65 @@
             position: absolute;
             inset: -2px;
             border-radius: 52px;
-            background: linear-gradient(135deg, var(--primary), #d1d5db, var(--primary-dark));
+            background: linear-gradient(135deg, #ffffff, #d1d5db);
             z-index: -1;
             opacity: 0;
             transition: opacity 0.3s;
-            filter: blur(8px);
+            filter: blur(10px);
         }
         .hero .cta-primary:hover {
             transform: translateY(-2px);
-            box-shadow: 0 8px 40px rgba(255,255,255,0.5), 0 0 60px rgba(255,255,255,0.15);
+            box-shadow: 0 10px 40px rgba(255,255,255,0.3), 0 0 60px rgba(255,255,255,0.12);
         }
         .hero .cta-primary:hover::after {
-            opacity: 0.6;
+            opacity: 0.5;
+        }
+        [data-theme="light"] .hero .cta-primary {
+            background: linear-gradient(135deg, #4b5563, #1f2937);
+            color: #ffffff;
+            box-shadow: 0 8px 24px rgba(15,23,42,0.22);
+        }
+        [data-theme="light"] .hero .cta-primary::after {
+            background: linear-gradient(135deg, #4b5563, #1f2937);
+        }
+        [data-theme="light"] .hero .cta-primary:hover {
+            box-shadow: 0 12px 34px rgba(15,23,42,0.3);
         }
         .hero .cta-secondary {
-            display: inline-block; padding: 0.9rem 2.5rem;
-            background: rgba(255,255,255,0.05); color: var(--text-light);
+            display: inline-block; padding: 0.9rem 2.2rem;
+            background: rgba(255,255,255,0.04); color: var(--text-light);
             border: 1px solid var(--border); border-radius: 50px;
-            font-size: 1rem; font-weight: 600; cursor: pointer;
-            text-decoration: none; transition: all 0.3s;
+            font-size: 0.95rem; font-weight: 600; cursor: pointer;
+            text-decoration: none; transition: all 0.25s;
         }
         .hero .cta-secondary:hover {
             background: var(--surface-subtle-hover); color: var(--text);
+            border-color: rgba(255,255,255,0.2);
+        }
+        [data-theme="light"] .hero .cta-secondary {
+            background: #ffffff;
+            border-color: rgba(0,0,0,0.12);
+            color: #374151;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+        [data-theme="light"] .hero .cta-secondary:hover {
+            background: #ffffff;
+            border-color: rgba(0,0,0,0.24);
+            color: #111827;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
         }
         .hero .cta-note {
             margin-top: 1.1rem; font-size: 0.82rem; color: var(--text-muted);
             letter-spacing: 0.3px;
         }
         .cta-tag {
-            display: inline-block; margin-left: 0.5rem; padding: 0.08rem 0.5rem;
-            border-radius: 20px; background: #10b981; color: #062018;
-            font-size: 0.68rem; font-weight: 800; letter-spacing: 0;
-            vertical-align: middle;
+            display: inline-block; margin-left: 0.5rem; padding: 0.12rem 0.48rem;
+            border-radius: 20px; background: #10b981; color: #04231a;
+            font-size: 0.7rem; font-weight: 800; letter-spacing: 0;
+            vertical-align: 1px; line-height: 1.45;
         }
         /* === Download Section === */
-        .download-section { margin: 4rem auto 0; max-width: 900px; }
+        .download-section { margin: 4.5rem auto 0; max-width: 900px; }
         .download-grid {
             display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-top: 2.5rem;
         }
@@ -362,7 +390,7 @@
             border-color: rgba(16,185,129,0.35);
         }
         .download-desc { font-size: 0.88rem; color: var(--text-light); line-height: 1.75; margin: 0 0 1.2rem; }
-        .download-actions { display: flex; flex-direction: column; gap: 0.6rem; margin-top: auto; }
+        .download-actions { display: flex; flex-direction: column; gap: 0.6rem; }
         .dl-btn {
             display: block; text-align: center; padding: 0.75rem 1rem;
             border-radius: var(--radius-sm); text-decoration: none;
@@ -372,17 +400,32 @@
         }
         .dl-btn:hover { background: var(--surface-subtle-hover); color: var(--text); }
         .dl-btn.primary {
-            background: linear-gradient(135deg, var(--primary), #6b7280); color: #fff;
+            background: linear-gradient(135deg, #f0f2f4, #cbd2d9); color: #0d1117;
             border-color: transparent; font-weight: 700;
         }
         .dl-btn.primary:hover {
-            color: #fff; transform: translateY(-1px);
-            box-shadow: 0 6px 24px rgba(255,255,255,0.25);
+            color: #0d1117; transform: translateY(-1px);
+            box-shadow: 0 6px 24px rgba(255,255,255,0.22);
         }
-        .download-note { margin: 1rem 0 0; font-size: 0.78rem; color: var(--text-muted); line-height: 1.7; }
-        .download-note code {
-            background: var(--surface-subtle); padding: 0.1rem 0.35rem;
-            border-radius: 4px; font-size: 0.75rem;
+        [data-theme="light"] .dl-btn.primary {
+            background: linear-gradient(135deg, #4b5563, #1f2937);
+            color: #ffffff;
+        }
+        [data-theme="light"] .dl-btn.primary:hover {
+            color: #ffffff;
+            box-shadow: 0 6px 20px rgba(15,23,42,0.25);
+        }
+        .download-note {
+            margin: 0; padding-top: 1.25rem;
+            font-size: 0.8rem; color: var(--text-muted); line-height: 1.7;
+        }
+        .download-note code.cmd {
+            display: block; margin-top: 0.55rem; padding: 0.5rem 0.65rem;
+            background: var(--surface-subtle); border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+            font-size: 0.7rem; line-height: 1.6; color: var(--text-light);
+            word-break: normal; overflow-wrap: break-word;
         }
         @media (max-width: 768px) {
             .download-grid { grid-template-columns: 1fr; }
@@ -416,6 +459,35 @@
         .video-player:hover {
             border-color: rgba(255,255,255,0.3);
             box-shadow: var(--shadow-lg), 0 0 60px rgba(255,255,255,0.06);
+        }
+        /* 浅色模式下视频占位块不能是纯黑盒子，否则在浅色页面里像两个黑洞 */
+        [data-theme="light"] .video-player {
+            background: linear-gradient(135deg, #f5f6f8, #e6e9ee);
+            border-color: rgba(0,0,0,0.08);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.06);
+        }
+        [data-theme="light"] .video-player:hover {
+            border-color: rgba(0,0,0,0.18);
+            box-shadow: 0 12px 36px rgba(0,0,0,0.1);
+        }
+        [data-theme="light"] .video-player .video-overlay {
+            background: rgba(255,255,255,0.5);
+        }
+        [data-theme="light"] .video-player .video-overlay .play-icon-circle {
+            border-color: rgba(0,0,0,0.18);
+            background: rgba(0,0,0,0.04);
+            color: #374151;
+        }
+        [data-theme="light"] .video-player .video-overlay:hover .play-icon-circle {
+            border-color: rgba(0,0,0,0.35);
+            background: rgba(0,0,0,0.07);
+            box-shadow: 0 0 40px rgba(0,0,0,0.08);
+        }
+        [data-theme="light"] .video-player .video-overlay .overlay-icon {
+            filter: none;
+        }
+        [data-theme="light"] .video-player .video-overlay .overlay-text {
+            color: #4b5563;
         }
         .video-player .video-overlay {
             position: absolute;
@@ -879,7 +951,6 @@
             <div class="cta-buttons">
                 <a href="https://github.com/ueuiuiuu/ueui/releases/tag/v0.2.0" class="cta-primary" target="_blank" rel="noopener">下载 macOS<span class="cta-tag">新</span></a>
                 <a href="https://github.com/ueuiuiuu/ueui/releases/tag/v0.1.0" class="cta-secondary" target="_blank" rel="noopener">下载 Windows</a>
-                <a href="#features" class="cta-secondary">了解更多</a>
             </div>
             <p class="cta-note">macOS：支持 Apple Silicon (M 系列) 与 Intel 芯片 · Windows：10 / 11</p>
             <div class="stats-row" id="statsRow">
@@ -902,7 +973,7 @@
             </div>
         </section>
         <!-- === Download === -->
-        <section id="download">
+        <section id="download" class="download-section">
             <h2 class="section-title">下载安装</h2>
             <div class="section-divider"></div>
             <p class="section-subtitle">v0.2.0 起正式支持 macOS，与 Windows 版本功能完全一致。</p>
@@ -923,8 +994,9 @@
                         <a href="https://github.com/ueuiuiuu/ueui/releases/download/v0.2.0/CodeDash-0.2.0-x64.dmg" class="dl-btn" target="_blank" rel="noopener">Intel 芯片 · .dmg</a>
                     </div>
                     <p class="download-note">
-                        首次打开会被 Gatekeeper 拦截：请在「系统设置 → 隐私与安全性」中点「仍要打开」，
-                        或执行 <code>xattr -dr com.apple.quarantine /Applications/CodeDash.app</code>。
+                        首次打开会被 macOS 拦截（未使用 Apple 开发者证书签名）。
+                        在「系统设置 → 隐私与安全性」点「仍要打开」，或执行：
+                        <code class="cmd">xattr -dr com.apple.quarantine <wbr>/Applications/CodeDash.app</code>
                     </p>
                 </div>
                 <div class="download-card fade-in">
@@ -940,9 +1012,10 @@
                     </p>
                     <div class="download-actions">
                         <a href="https://github.com/ueuiuiuu/ueui/releases/tag/v0.1.0" class="dl-btn primary" target="_blank" rel="noopener">Windows 安装程序 · .exe</a>
+                        <a href="https://github.com/ueuiuiuu/ueui/releases" class="dl-btn" target="_blank" rel="noopener">查看全部版本 · Releases</a>
                     </div>
                     <p class="download-note">
-                        所有版本与历史记录见 GitHub Releases，源码与更新日志同样在该仓库。
+                        本次未改动，功能与 macOS 版一致；历史版本、源码与更新日志都在 GitHub Releases。
                     </p>
                 </div>
             </div>
