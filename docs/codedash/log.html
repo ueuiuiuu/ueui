@@ -95,12 +95,35 @@
             <aside class="log-sidebar">
                 <div class="sidebar-title">更新记录</div>
                 <ul class="log-nav">
-                    <li><a href="#v0.2.0" class="active">v0.2.0</a></li>
+                    <li><a href="#v0.2.1" class="active">v0.2.1</a></li>
+                    <li><a href="#v0.2.0">v0.2.0</a></li>
                     <li><a href="#v0.1.0">v0.1.0</a></li>
                 </ul>
             </aside>
             <main class="log-content">
         <h1>更新日志</h1>
+
+        <p class="update-date">v0.2.1 — 2026-10-10</p>
+
+        <section id="v0.2.1">
+        <h2>v0.2.1 — macOS 修复版</h2>
+
+        <p>这一版集中修复 v0.2.0 在 macOS 上暴露的四个问题，建议 macOS 用户升级。从 v0.2.0 升级无需卸载，直接用新包替换「应用程序」里的 CodeDash 即可。Windows 版当前仍为 v0.2.0。</p>
+
+        <h3>修复</h3>
+        <ol>
+            <li><strong>填完 API Key 不生效</strong> — 在设置里填好 Base URL / API Key 后直接开始对话，会报 <code>You didn't provide an API key</code>，日志显示 <code>Key: (empty)</code>。原因是模型配置只写进了本地存储，没有推送给 Agent 引擎，必须重启应用才生效。现在保存后立即生效，新添加的模型也会马上出现在聊天面板的模型下拉里。</li>
+            <li><strong>关掉窗口再打开会报错</strong> — macOS 上关闭窗口不会退出应用，再点 Dock 图标重新打开时窗口起不来（<code>Attempted to register a second handler</code>）。原因是重建窗口时重复注册了内部通信通道。现在可以反复关闭、重开。</li>
+            <li><strong>左上角图标显示成占位图</strong> — 标题栏的 CodeDash 图标加载失败，显示为碎图。原因是图标用了绝对路径，打包后走 <code>file://</code> 协议会解析到文件系统根目录，已改为相对路径。</li>
+            <li><strong>数据被写进应用包内部</strong> — 会话历史与代码索引原先写在 app 包里的 <code>Contents/Resources/agent-core/dist</code> 下，导致每次更新或重装应用都会丢失历史记录，且索引会持续撑大应用包。现已统一改到 <code>~/Library/Application Support/</code> 下。</li>
+        </ol>
+
+        <h3>说明</h3>
+        <ol>
+            <li>本次修复针对 macOS 版，尚未合入 Windows 构建；Windows 版当前为 v0.2.0</li>
+            <li>macOS 版语音转文字依赖的 <code>ffi-napi</code> 在 Apple Silicon 上暂无预编译产物，该功能会自动不可用，不影响其余功能</li>
+        </ol>
+        </section>
 
         <p class="update-date">v0.2.0 — 2026-10-04</p>
 
@@ -167,7 +190,7 @@
         </div>
     </div>
     <footer class="footer">
-        <p>构建 · CodeDash v0.2.0 · 开源 · 免费 · AI 原生桌面 IDE</p>
+        <p>构建 · CodeDash v0.2.1 · 开源 · 免费 · AI 原生桌面 IDE</p>
     </footer>
     <script>
         const t=document.getElementById('themeToggle'),e=document.documentElement;
