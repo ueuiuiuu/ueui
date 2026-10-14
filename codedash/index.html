@@ -12,6 +12,11 @@
     <meta property="og:type" content="website">
     <meta name="theme-color" content="#9ca3af">
     <link rel="icon" href="icon-codedash.svg">
+    <!-- React 岛用到的 ESM 依赖提前预热，缩短 hero 背景与下载区骨架屏的等待时间 -->
+    <link rel="modulepreload" href="https://esm.sh/react@18.3.1">
+    <link rel="modulepreload" href="https://esm.sh/react-dom@18.3.1/client?deps=react@18.3.1">
+    <link rel="modulepreload" href="https://esm.sh/react-loading-skeleton@3.5.0?deps=react@18.3.1">
+    <link rel="modulepreload" href="https://esm.sh/htm@3.1.1">
     <style>
         :root, [data-theme="dark"] {
             --primary: #9ca3af;
@@ -47,6 +52,12 @@
             --hero-bg-end: #111111;
             --stat-num: white;
             --footer-bg: transparent;
+            /* Hero 的 Shader Gradient 背景：--hero-base 是 WebGL 就绪前的静态渐变兜底，
+               --hero-scrim 压在画布上，保证文字对比度；--sk-* 是骨架屏底色。 */
+            --hero-base: radial-gradient(120% 120% at 15% 0%, #1f2937 0%, #0d1117 58%, #000000 100%);
+            --hero-scrim: linear-gradient(180deg, rgba(13,17,23,0.30) 0%, rgba(13,17,23,0.78) 100%);
+            --sk-base: rgba(255,255,255,0.07);
+            --sk-hl: rgba(255,255,255,0.16);
         }
         [data-theme="light"] {
             --primary: #9ca3af;
@@ -82,6 +93,11 @@
             --hero-bg-end: #e8e8ea;
             --stat-num: #1a1a1a;
             --footer-bg: transparent;
+            /* 浅色主题下的 hero 兜底渐变、压暗层与骨架屏底色 */
+            --hero-base: radial-gradient(120% 120% at 15% 0%, #e5e7eb 0%, #f4f5f7 58%, #ffffff 100%);
+            --hero-scrim: linear-gradient(180deg, rgba(255,255,255,0.02) 0%, rgba(255,255,255,0.16) 55%, rgba(255,255,255,0.46) 100%);
+            --sk-base: rgba(0,0,0,0.06);
+            --sk-hl: rgba(0,0,0,0.13);
         }
         * { margin: 0; padding: 0; box-sizing: border-box; }
         html { scroll-behavior: smooth; }
@@ -1006,6 +1022,135 @@
             }
         }
 
+        /* === Hero 的 Shader Gradient 背景层 ===
+           hero 变成一张卡片：.shader-layer 铺满整块，React 把 WebGL canvas 挂到 #shaderMount。
+           data-shader 有四种状态：loading 显示占位骨架，ready 画布淡入，
+           fallback 保留纯 CSS 渐变（无 WebGL / 减少动效 / CDN 不可用时）。 */
+        .hero {
+            position: relative;
+            padding: 3.5rem 2rem 2.5rem;
+            border: 1px solid var(--card-border);
+            border-radius: 28px;
+            background: var(--hero-base);
+            box-shadow: var(--shadow);
+            overflow: hidden;
+            isolation: isolate;
+        }
+        .hero-inner { position: relative; z-index: 4; }
+        .shader-layer { position: absolute; inset: 0; z-index: 0; pointer-events: none; }
+        .shader-base { position: absolute; inset: 0; z-index: 0; background: var(--hero-base); }
+        .shader-mount { position: absolute; inset: 0; z-index: 2; }
+        .shader-probe,
+        .shader-canvas { position: absolute; inset: 0; }
+        .shader-canvas { opacity: 0; transition: opacity 0.9s ease; }
+        .shader-layer[data-shader="ready"] .shader-canvas { opacity: 1; }
+        .shader-canvas canvas { display: block; width: 100% !important; height: 100% !important; }
+        .shader-layer::after {
+            content: '';
+            position: absolute; inset: 0; z-index: 3;
+            background: var(--hero-scrim);
+        }
+        .shader-placeholder {
+            display: none;
+            position: absolute; inset: 0; z-index: 1;
+            flex-direction: column; align-items: center; justify-content: center;
+            gap: 0.9rem; background: var(--hero-base);
+        }
+        .shader-layer[data-shader="loading"] .shader-placeholder { display: flex; }
+        .shader-placeholder__bar {
+            position: relative; overflow: hidden;
+            width: min(420px, 68%); height: 10px; border-radius: 6px;
+            background: var(--sk-base);
+        }
+        .shader-placeholder__bar::after {
+            content: '';
+            position: absolute; inset: 0;
+            background: linear-gradient(90deg, transparent, var(--sk-hl), transparent);
+            transform: translateX(-100%);
+            animation: hero-shimmer 1.5s ease-in-out infinite;
+        }
+        @keyframes hero-shimmer { 100% { transform: translateX(100%); } }
+        .shader-placeholder__text { font-size: 0.78rem; color: var(--text-muted); letter-spacing: 0.4px; }
+        .shader-status {
+            position: absolute; top: 0.85rem; right: 1rem; z-index: 5;
+            max-width: min(78%, 420px); text-align: right;
+        }
+        .shader-status__pill {
+            display: inline-block; padding: 0.3rem 0.7rem; border-radius: 20px;
+            font-size: 0.7rem; line-height: 1.5; color: var(--text-muted);
+            background: var(--surface-subtle); border: 1px solid var(--border);
+            backdrop-filter: blur(8px);
+        }
+        /* 浅色主题下渐变文字压在浅色画布上会糊，改为实色 */
+        [data-theme="light"] .hero h1 {
+            background: none;
+            -webkit-background-clip: border-box;
+            -webkit-text-fill-color: currentColor;
+            color: #0b0f14;
+            filter: none;
+        }
+
+        /* === 下载区：真实 GitHub Releases 数据 + 骨架屏 === */
+        .release-meta {
+            display: flex; align-items: center; justify-content: center;
+            flex-wrap: wrap; gap: 0.4rem 0.9rem;
+            margin: -1.6rem auto 0; min-height: 34px;
+            font-size: 0.78rem; color: var(--text-muted);
+        }
+        .release-meta__pill {
+            display: inline-block; padding: 0.2rem 0.7rem; border-radius: 20px;
+            font-size: 0.75rem; font-weight: 700;
+            background: rgba(16,185,129,0.18); color: #10b981;
+            border: 1px solid rgba(16,185,129,0.35);
+        }
+        [data-theme="light"] .release-meta__pill { color: #047857; }
+        .sk-card .sk-head { display: flex; align-items: center; gap: 0.9rem; margin-bottom: 1rem; }
+        .sk-card .sk-head > div { flex: 1; min-width: 0; }
+        .dl-btn__count {
+            display: block; margin-top: 0.15rem;
+            font-size: 0.68rem; font-weight: 500; opacity: 0.72;
+        }
+
+        /* react-loading-skeleton@3.5.0 的 dist/skeleton.css 内联版，
+           只额外把 --base-color / --highlight-color 映射到站点主题变量。 */
+        @keyframes react-loading-skeleton { 100% { transform: translateX(100%); } }
+        .react-loading-skeleton {
+            --base-color: var(--sk-base);
+            --highlight-color: var(--sk-hl);
+            --animation-duration: 1.5s;
+            --animation-direction: normal;
+            --pseudo-element-display: block;
+            background-color: var(--base-color);
+            width: 100%; border-radius: 0.25rem;
+            display: inline-flex; line-height: 1; position: relative;
+            user-select: none; overflow: hidden;
+        }
+        .react-loading-skeleton::after {
+            content: ' ';
+            display: var(--pseudo-element-display);
+            position: absolute; top: 0; left: 0; right: 0; height: 100%;
+            background-repeat: no-repeat;
+            background-image: var(--custom-highlight-background, linear-gradient(90deg, var(--base-color) 0%, var(--highlight-color) 50%, var(--base-color) 100%));
+            transform: translateX(-100%);
+            animation-name: react-loading-skeleton;
+            animation-direction: var(--animation-direction);
+            animation-duration: var(--animation-duration);
+            animation-timing-function: ease-in-out;
+            animation-iteration-count: infinite;
+        }
+        @media (prefers-reduced-motion: reduce) {
+            .react-loading-skeleton { --pseudo-element-display: none; }
+            .shader-placeholder__bar::after { animation: none; }
+        }
+
+        @media (max-width: 900px) {
+            .hero { padding: 2.75rem 1.4rem 2.25rem; border-radius: 22px; }
+            .shader-status { display: none; }
+        }
+        @media (max-width: 480px) {
+            .hero { padding: 2.25rem 1.1rem 1.9rem; border-radius: 18px; }
+        }
+
     </style>
 </head>
 <body>
@@ -1029,42 +1174,58 @@
     <div class="content-overlay">
     <div class="container">
         <section class="hero" id="hero">
-            <span class="badge">v0.2.1 — macOS 修复版 · Windows / macOS 双平台</span>
-            <h1>重新定义 AI 编码体验</h1>
-            <p class="subtitle">
-                CodeDash 是一款 <strong>AI 原生桌面 IDE</strong>，自研 Agent 引擎、深度代码理解、
-                浏览器自动化、计算机控制 — 全方位赋能开发者。
-            </p>
-            <div class="cta-buttons">
-                <a href="https://github.com/ueuiuiuu/ueui/releases/tag/v0.2.1" class="cta-primary" target="_blank" rel="noopener">下载 macOS</a>
-                <a href="https://github.com/ueuiuiuu/ueui/releases/tag/v0.2.0" class="cta-secondary" target="_blank" rel="noopener">下载 Windows</a>
-            </div>
-            <p class="cta-note">macOS：支持 Apple Silicon (M 系列) 与 Intel 芯片 · Windows：10 / 11</p>
-            <div class="stats-row" id="statsRow">
-                <div class="stat-item">
-                    <span class="num" id="statFiles" data-target="128">0</span>
-                    <span class="label">Agent 核心文件</span>
-                </div>
-                <div class="stat-item">
-                    <span class="num" id="statLines" data-target="28500">0</span>
-                    <span class="label">代码行数</span>
-                </div>
-                <div class="stat-item">
-                    <span class="num" id="statTools" data-target="15">0</span>
-                    <span class="label">内置工具</span>
-                </div>
-                <div class="stat-item">
-                    <span class="num" id="statComponents" data-target="42">0</span>
-                    <span class="label">UI 组件</span>
+            <!-- Shader Gradient 背景层：静态渐变先顶上，React 岛就绪后 WebGL 画布淡入接管。
+                 默认 fallback（无 JS 时也是静态渐变），脚本接管后先切到 loading 显示占位骨架。 -->
+            <div class="shader-layer" id="shaderLayer" data-shader="fallback" aria-hidden="true">
+                <div class="shader-base"></div>
+                <div class="shader-mount" id="shaderMount"></div>
+                <div class="shader-placeholder">
+                    <span class="shader-placeholder__bar"></span>
+                    <span class="shader-placeholder__text">正在加载 WebGL 着色器背景…</span>
                 </div>
             </div>
+            <div class="hero-inner">
+                <span class="badge">v0.2.1 — macOS 修复版 · Windows / macOS 双平台</span>
+                <h1>重新定义 AI 编码体验</h1>
+                <p class="subtitle">
+                    CodeDash 是一款 <strong>AI 原生桌面 IDE</strong>，自研 Agent 引擎、深度代码理解、
+                    浏览器自动化、计算机控制 — 全方位赋能开发者。
+                </p>
+                <div class="cta-buttons">
+                    <a href="https://github.com/ueuiuiuu/ueui/releases/tag/v0.2.1" class="cta-primary" target="_blank" rel="noopener">下载 macOS</a>
+                    <a href="https://github.com/ueuiuiuu/ueui/releases/tag/v0.2.0" class="cta-secondary" target="_blank" rel="noopener">下载 Windows</a>
+                </div>
+                <p class="cta-note">macOS：支持 Apple Silicon (M 系列) 与 Intel 芯片 · Windows：10 / 11</p>
+                <div class="stats-row" id="statsRow">
+                    <div class="stat-item">
+                        <span class="num" id="statFiles" data-target="128">0</span>
+                        <span class="label">Agent 核心文件</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="num" id="statLines" data-target="28500">0</span>
+                        <span class="label">代码行数</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="num" id="statTools" data-target="15">0</span>
+                        <span class="label">内置工具</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="num" id="statComponents" data-target="42">0</span>
+                        <span class="label">UI 组件</span>
+                    </div>
+                </div>
+            </div>
+            <div class="shader-status" id="shaderStatusSlot"></div>
         </section>
         <!-- === Download === -->
         <section id="download" class="download-section">
             <h2 class="section-title">下载安装</h2>
             <div class="section-divider"></div>
             <p class="section-subtitle">macOS 版已更新到 v0.2.1 修复版，Windows 版当前为 v0.2.0，两个平台功能保持一致。</p>
-            <div class="download-grid">
+            <!-- 版本信息条：由 React 岛读取 GitHub Releases API 的真实数据后填充 -->
+            <div class="release-meta" id="releaseMetaSlot"></div>
+            <!-- 下面两张静态卡片是 React 岛不可用（脚本被拦 / CDN 不通）时的兜底内容 -->
+            <div class="download-grid" id="downloadGrid">
                 <div class="download-card featured fade-in">
                     <div class="download-head">
                         <span class="platform-icon"><svg width="30" height="30" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M17.05 12.53c-.02-2.2 1.8-3.26 1.88-3.31-1.02-1.5-2.62-1.7-3.19-1.72-1.36-.14-2.65.8-3.34.8-.69 0-1.75-.78-2.87-.76-1.48.02-2.84.86-3.6 2.18-1.53 2.66-.39 6.6 1.1 8.76.73 1.06 1.6 2.25 2.74 2.2 1.1-.04 1.51-.71 2.84-.71 1.32 0 1.7.71 2.86.69 1.18-.02 1.94-1.08 2.66-2.14.84-1.23 1.18-2.42 1.2-2.48-.03-.01-2.3-.88-2.32-3.5zM14.9 6.02c.6-.73 1.01-1.75.9-2.76-.87.04-1.93.58-2.55 1.3-.56.65-1.05 1.68-.92 2.67.97.08 1.96-.49 2.57-1.21z"/></svg></span>
@@ -1510,7 +1671,474 @@
 
         initVideoCarousel();
 
+        // === Shader Gradient hero 背景：模块脚本接管前的兜底 ===
+        // 立即切到 loading 显示占位骨架；若 8 秒内 React 岛仍没把画布挂上
+        // （CDN 不通、import 报错等），退回静态渐变，避免骨架一直转下去。
+        const shaderLayerEl = document.getElementById('shaderLayer');
+        if (shaderLayerEl) {
+            shaderLayerEl.dataset.shader = 'loading';
+            window.setTimeout(() => {
+                if (shaderLayerEl.dataset.shader === 'loading') {
+                    shaderLayerEl.dataset.shader = 'fallback';
+                }
+            }, 8000);
+        }
+
         console.log('CodeDash website loaded!');
+    </script>
+    <!-- ============================================================
+         React 岛：hero 的 Shader Gradient 背景 + 下载区的 Loading Skeleton。
+         页面没有构建步骤，依赖全部走 esm.sh 的 ESM 产物。
+         所有 esm.sh 地址统一用 ?deps=react@18.3.1 钉住 React：
+         esm.sh 默认把 react 解析到 19，而 @react-three/fiber 8 只支持 18；
+         钉死之后 react / react-dom / react-loading-skeleton 内部的 import
+         都指向同一个 /react@18.3.1/es2022/react.mjs，页面里只有一个 React 实例，
+         因此不需要 import map。three 与 fiber 也一并钉版本，避免重复下载。
+         ============================================================ -->
+    <script type="module">
+        import React, { useState, useEffect, useMemo, useRef } from 'https://esm.sh/react@18.3.1';
+        import { createRoot } from 'https://esm.sh/react-dom@18.3.1/client?deps=react@18.3.1';
+        import Skeleton from 'https://esm.sh/react-loading-skeleton@3.5.0?deps=react@18.3.1';
+        import htm from 'https://esm.sh/htm@3.1.1';
+
+        // 没有 JSX 编译步骤，用 htm 的标签模板代替
+        const html = htm.bind(React.createElement);
+
+        const SHADER_GRADIENT_URL =
+            'https://esm.sh/@shadergradient/react@2.4.20' +
+            '?deps=react@18.3.1,react-dom@18.3.1,three@0.169.0,@react-three/fiber@8.17.10';
+        const RELEASES_API = 'https://api.github.com/repos/ueuiuiuu/ueui/releases?per_page=30';
+        const MIN_SKELETON_MS = 1000;
+
+        /* ------------------------------------------------------------ 工具 */
+
+        const prefersReducedMotion = () =>
+            window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+        function hasWebGL() {
+            try {
+                const canvas = document.createElement('canvas');
+                return !!(canvas.getContext('webgl2') || canvas.getContext('webgl'));
+            } catch (err) {
+                return false;
+            }
+        }
+
+        const formatDate = value => {
+            if (!value) return '';
+            const date = new Date(value);
+            if (Number.isNaN(date.getTime())) return String(value);
+            return date.getFullYear() + '-' +
+                String(date.getMonth() + 1).padStart(2, '0') + '-' +
+                String(date.getDate()).padStart(2, '0');
+        };
+
+        // 站点主题是 data-theme 属性驱动的，跟着它走
+        function useTheme() {
+            const [theme, setTheme] = useState(
+                () => document.documentElement.getAttribute('data-theme') || 'dark'
+            );
+            useEffect(() => {
+                const observer = new MutationObserver(() => {
+                    setTheme(document.documentElement.getAttribute('data-theme') || 'dark');
+                });
+                observer.observe(document.documentElement, {
+                    attributes: true,
+                    attributeFilter: ['data-theme']
+                });
+                return () => observer.disconnect();
+            }, []);
+            return theme;
+        }
+
+        function useInView(ref, rootMargin) {
+            const [inView, setInView] = useState(false);
+            useEffect(() => {
+                const node = ref.current;
+                if (!node || typeof IntersectionObserver === 'undefined') {
+                    setInView(true);
+                    return;
+                }
+                const observer = new IntersectionObserver(entries => {
+                    if (entries.some(entry => entry.isIntersecting)) setInView(true);
+                }, { rootMargin });
+                observer.observe(node);
+                return () => observer.disconnect();
+            }, []);
+            return inView;
+        }
+
+        // three + fiber 体积不小，只有真的要渲染时才去拉
+        let shaderModulePromise = null;
+        function loadShaderGradient() {
+            if (!shaderModulePromise) shaderModulePromise = import(SHADER_GRADIENT_URL);
+            return shaderModulePromise;
+        }
+
+        /* ------------------------------------------------- Hero 背景着色器 */
+
+        const HERO_SHADER_PROPS = {
+            control: 'props',
+            type: 'plane',
+            animate: 'on',
+            uSpeed: 0.3,
+            uStrength: 1.2,
+            uDensity: 1.1,
+            uFrequency: 5.5,
+            uAmplitude: 1.1,
+            reflection: 0.1,
+            color1: '#9ca3af',
+            color2: '#4b5563',
+            color3: '#d1d5db',
+            positionX: -1.4,
+            positionY: 0,
+            positionZ: 0,
+            rotationX: 0,
+            rotationY: 10,
+            rotationZ: 50,
+            cAzimuthAngle: 180,
+            cPolarAngle: 90,
+            cDistance: 3.6,
+            cameraZoom: 1,
+            lightType: '3d',
+            brightness: 1.2,
+            envPreset: 'city',
+            grain: 'on',
+            wireframe: false
+        };
+
+        // 浅色主题单独一套参数：暗色那套灰阶压在浅底上会糊成一片白，
+        // 所以把三个颜色的明暗差拉开、起伏调明显，并关掉会显脏的噪点。
+        const LIGHT_HERO_SHADER_PROPS = {
+            ...HERO_SHADER_PROPS,
+            color1: '#a3aebd',
+            color2: '#d7dde5',
+            color3: '#ffffff',
+            brightness: 1.15,
+            uDensity: 1.35,
+            uStrength: 1.5,
+            grain: 'off'
+        };
+
+        function ShaderBackground({ onState }) {
+            const hostRef = useRef(null);
+            const inView = useInView(hostRef, '200px');
+            const [module, setModule] = useState(null);
+            const decided = useRef(false);
+            const theme = useTheme();
+
+            useEffect(() => {
+                if (!inView || decided.current) return;
+                decided.current = true;
+
+                if (prefersReducedMotion()) {
+                    onState('fallback', '已按系统「减少动效」设置跳过 WebGL，使用静态渐变背景');
+                    return;
+                }
+                if (!hasWebGL()) {
+                    onState('fallback', '当前浏览器未启用 WebGL，使用静态渐变背景');
+                    return;
+                }
+
+                let alive = true;
+                loadShaderGradient()
+                    .then(mod => {
+                        if (!alive) return;
+                        setModule(mod);
+                    })
+                    .catch(err => {
+                        if (!alive) return;
+                        console.warn('[codedash] 着色器模块加载失败，回退静态渐变：', err);
+                        onState('fallback', 'WebGL 着色器加载失败，已回退静态渐变背景');
+                    });
+                return () => { alive = false; };
+            }, [inView]);
+
+            // 画布挂上 DOM 之后再切 ready，这样 .shader-canvas 才有淡入过渡
+            useEffect(() => {
+                if (!module) return;
+                const raf = requestAnimationFrame(() => onState('ready'));
+                return () => cancelAnimationFrame(raf);
+            }, [module]);
+
+            const props = useMemo(() => (theme === 'light'
+                ? LIGHT_HERO_SHADER_PROPS
+                : HERO_SHADER_PROPS), [theme]);
+
+            if (!module) return html`<div ref=${hostRef} class="shader-probe"></div>`;
+
+            const ShaderGradientCanvas = module.ShaderGradientCanvas;
+            const ShaderGradient = module.ShaderGradient;
+
+            return html`
+                <div ref=${hostRef} class="shader-canvas">
+                    <${ShaderGradientCanvas}
+                        style=${{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%' }}
+                        pixelDensity=${1}
+                        pointerEvents="none"
+                        fov=${45}
+                    >
+                        <${ShaderGradient} control="props" ...${props} />
+                    <//>
+                </div>
+            `;
+        }
+
+        /* --------------------------------------------- 下载区：Releases 数据 */
+
+        // hero 与下载区共用同一次请求，也共用同一个"骨架屏最少停留时间"
+        let releasesPromise = null;
+        function loadReleases() {
+            if (!releasesPromise) {
+                releasesPromise = (async () => {
+                    const started = Date.now();
+                    let releases = [];
+                    try {
+                        const response = await fetch(RELEASES_API, {
+                            headers: { Accept: 'application/vnd.github+json' }
+                        });
+                        if (!response.ok) throw new Error('HTTP ' + response.status);
+                        const payload = await response.json();
+                        if (Array.isArray(payload)) releases = payload;
+                    } catch (err) {
+                        console.warn('[codedash] GitHub Releases 拉取失败，下载区回落到内置版本信息：', err);
+                    }
+                    // 数据回来太快的话骨架屏会"闪一下"，这里保证至少显示 MIN_SKELETON_MS
+                    const rest = MIN_SKELETON_MS - (Date.now() - started);
+                    if (rest > 0) await new Promise(resolve => window.setTimeout(resolve, rest));
+                    return releases;
+                })();
+            }
+            return releasesPromise;
+        }
+
+        function useReleases() {
+            const [releases, setReleases] = useState(null);
+            useEffect(() => {
+                let alive = true;
+                loadReleases().then(value => { if (alive) setReleases(value); });
+                return () => { alive = false; };
+            }, []);
+            return releases; // null 表示还在加载
+        }
+
+        const MacosIcon = () => html`
+            <svg width="30" height="30" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                <path d="M17.05 12.53c-.02-2.2 1.8-3.26 1.88-3.31-1.02-1.5-2.62-1.7-3.19-1.72-1.36-.14-2.65.8-3.34.8-.69 0-1.75-.78-2.87-.76-1.48.02-2.84.86-3.6 2.18-1.53 2.66-.39 6.6 1.1 8.76.73 1.06 1.6 2.25 2.74 2.2 1.1-.04 1.51-.71 2.84-.71 1.32 0 1.7.71 2.86.69 1.18-.02 1.94-1.08 2.66-2.14.84-1.23 1.18-2.42 1.2-2.48-.03-.01-2.3-.88-2.32-3.5zM14.9 6.02c.6-.73 1.01-1.75.9-2.76-.87.04-1.93.58-2.55 1.3-.56.65-1.05 1.68-.92 2.67.97.08 1.96-.49 2.57-1.21z"/>
+            </svg>
+        `;
+
+        const WindowsIcon = () => html`
+            <svg width="26" height="26" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                <path d="M3 5.5l7.2-1v7.1H3V5.5zm8.2-1.15L21 3v8.6h-9.8V4.35zM3 12.6h7.2v7.1L3 18.6v-6zm8.2 0H21V21l-9.8-1.35V12.6z"/>
+            </svg>
+        `;
+
+        const RELEASES_PAGE = 'https://github.com/ueuiuiuu/ueui/releases';
+
+        // 每个平台的文案、图标、资产匹配规则与接口不可用时的兜底按钮。
+        // 兜底按钮与页面里的静态卡片保持一致，接口不通时视觉上完全等价。
+        const PLATFORMS = [
+            {
+                id: 'macos',
+                name: 'macOS',
+                icon: MacosIcon,
+                featured: true,
+                desc: '原生支持 Apple Silicon 与 Intel 芯片，内置完整 Agent 引擎、终端与代码检索能力。',
+                note: '首次打开会被 macOS 拦截（未使用 Apple 开发者证书签名）。在「系统设置 → 隐私与安全性」点「仍要打开」，或执行：',
+                cmd: 'xattr -dr com.apple.quarantine /Applications/CodeDash.app',
+                fallbackPill: 'v0.2.1 · 修复版',
+                pillSuffix: '修复版',
+                match: asset => /\.dmg$/i.test(asset.name),
+                label: asset => /arm64|aarch64/i.test(asset.name)
+                    ? 'Apple Silicon（M 系列）· .dmg'
+                    : /x64|x86_64|intel|universal/i.test(asset.name)
+                        ? 'Intel 芯片 · .dmg'
+                        : asset.name,
+                fallbackButtons: [
+                    {
+                        label: 'Apple Silicon（M 系列）· .dmg',
+                        url: 'https://github.com/ueuiuiuu/ueui/releases/download/v0.2.1/CodeDash-0.2.1-arm64.dmg',
+                        primary: true
+                    },
+                    {
+                        label: 'Intel 芯片 · .dmg',
+                        url: 'https://github.com/ueuiuiuu/ueui/releases/download/v0.2.1/CodeDash-0.2.1-x64.dmg',
+                        primary: false
+                    }
+                ]
+            },
+            {
+                id: 'windows',
+                name: 'Windows',
+                icon: WindowsIcon,
+                featured: false,
+                desc: '支持 Windows 10 / 11，提供图形化安装程序，安装过程可选择安装目录。',
+                note: '安装包未做代码签名，首次运行可能被 SmartScreen 拦截，选择「仍要运行」即可。Agent 引擎通过系统 Node.js 启动，请先确认机器上已安装 Node.js。历史版本、源码与更新日志都在 GitHub Releases。',
+                cmd: '',
+                fallbackPill: 'v0.2.0 · 新版本',
+                pillSuffix: '新版本',
+                match: asset => /\.(exe|msi)$/i.test(asset.name),
+                label: asset => /\.msi$/i.test(asset.name) ? asset.name : 'Windows 安装程序 · .exe',
+                fallbackButtons: [
+                    {
+                        label: 'Windows 安装程序 · .exe',
+                        url: 'https://github.com/ueuiuiuu/ueui/releases/download/v0.2.0/CodeDash.Setup.0.2.0.exe',
+                        primary: true
+                    }
+                ],
+                extraButtons: [
+                    { label: '查看全部版本 · Releases', url: RELEASES_PAGE, primary: false }
+                ]
+            }
+        ];
+
+        function ReleaseMeta() {
+            const releases = useReleases();
+
+            if (!releases) {
+                return html`
+                    <${React.Fragment}>
+                        <${Skeleton} width=${84} height=${24} borderRadius=${20} />
+                        <${Skeleton} width=${220} height=${14} />
+                        <${Skeleton} width=${104} height=${14} />
+                    <//>
+                `;
+            }
+
+            const latest = releases[0];
+            if (!latest) {
+                return html`<span>未能读取 GitHub Releases 接口，下载区显示页面内置的版本信息。</span>`;
+            }
+
+            const downloads = releases.reduce((total, release) =>
+                total + (release.assets || [])
+                    .reduce((inner, asset) => inner + (asset.download_count || 0), 0), 0);
+
+            return html`
+                <${React.Fragment}>
+                    <span class="release-meta__pill">${latest.tag_name}</span>
+                    <span>GitHub Releases 最新版本 · 发布于 ${formatDate(latest.published_at)}</span>
+                    <span>累计下载 ${downloads} 次</span>
+                <//>
+            `;
+        }
+
+        function CardSkeleton() {
+            return html`
+                <div class="download-card sk-card" aria-hidden="true">
+                    <div class="sk-head">
+                        <${Skeleton} circle=${true} width=${44} height=${44} />
+                        <div>
+                            <${Skeleton} width=${104} height=${22} />
+                            <${Skeleton} width=${146} height=${12} style=${{ marginTop: '0.5rem' }} />
+                        </div>
+                    </div>
+                    <${Skeleton} count=${2} height=${12} style=${{ marginBottom: '0.5rem' }} />
+                    <div style=${{ marginTop: '1.4rem' }}>
+                        <${Skeleton} height=${42} borderRadius=${8} style=${{ marginBottom: '0.6rem' }} />
+                        <${Skeleton} height=${42} borderRadius=${8} />
+                    </div>
+                    <${Skeleton} count=${2} height=${11} style=${{ marginTop: '1.5rem', marginBottom: '0.45rem' }} />
+                </div>
+            `;
+        }
+
+        function PlatformCard({ platform, releases }) {
+            // 最新 release 里没有该平台的安装包时（比如只发了 macOS），
+            // 往前找最近一个带匹配资产的版本，Windows 卡就不会被连累成空的。
+            const release = releases.find(item =>
+                (item.assets || []).some(platform.match)) || null;
+            const assets = release ? (release.assets || []).filter(platform.match) : [];
+
+            const buttons = assets.length
+                ? assets.map((asset, index) => ({
+                    label: platform.label(asset),
+                    url: asset.browser_download_url,
+                    primary: index === 0,
+                    count: asset.download_count || 0
+                })).concat(platform.extraButtons || [])
+                : platform.fallbackButtons;
+
+            return html`
+                <div class=${'download-card' + (platform.featured ? ' featured' : '')}>
+                    <div class="download-head">
+                        <span class="platform-icon"><${platform.icon} /></span>
+                        <div>
+                            <h3>${platform.name}</h3>
+                            <span class="version-pill">
+                                ${release ? release.tag_name + ' · ' + platform.pillSuffix : platform.fallbackPill}
+                            </span>
+                        </div>
+                    </div>
+                    <p class="download-desc">${platform.desc}</p>
+                    <div class="download-actions">
+                        ${buttons.map((button, index) => html`
+                            <a key=${index}
+                               class=${'dl-btn' + (button.primary ? ' primary' : '')}
+                               href=${button.url}
+                               target="_blank"
+                               rel="noopener">
+                                ${button.label}
+                                ${button.count ? html`<span class="dl-btn__count">已下载 ${button.count} 次</span>` : null}
+                            </a>
+                        `)}
+                    </div>
+                    <p class="download-note">
+                        ${platform.note}
+                        ${platform.cmd ? html`<code class="cmd">${platform.cmd}</code>` : null}
+                    </p>
+                </div>
+            `;
+        }
+
+        function DownloadCards() {
+            const releases = useReleases();
+
+            if (!releases) {
+                return html`
+                    <${React.Fragment}>
+                        <${CardSkeleton} key="a" />
+                        <${CardSkeleton} key="b" />
+                    <//>
+                `;
+            }
+
+            return html`
+                <${React.Fragment}>
+                    ${PLATFORMS.map(platform => html`
+                        <${PlatformCard} key=${platform.id} platform=${platform} releases=${releases} />
+                    `)}
+                <//>
+            `;
+        }
+
+        /* -------------------------------------------------------------- 挂载 */
+
+        const layerNode = document.getElementById('shaderLayer');
+        const statusNode = document.getElementById('shaderStatusSlot');
+        const shaderMount = document.getElementById('shaderMount');
+        const metaSlot = document.getElementById('releaseMetaSlot');
+        const gridSlot = document.getElementById('downloadGrid');
+
+        function setShaderState(status, message) {
+            if (layerNode) layerNode.dataset.shader = status;
+            if (!statusNode) return;
+            statusNode.innerHTML = (status === 'fallback' && message)
+                ? '<span class="shader-status__pill">' + message + '</span>'
+                : '';
+        }
+
+        try {
+            if (shaderMount) {
+                createRoot(shaderMount).render(html`<${ShaderBackground} onState=${setShaderState} />`);
+            }
+            if (metaSlot) createRoot(metaSlot).render(html`<${ReleaseMeta} />`);
+            if (gridSlot) createRoot(gridSlot).render(html`<${DownloadCards} />`);
+        } catch (err) {
+            console.warn('[codedash] React 岛挂载失败，页面保留静态内容：', err);
+            setShaderState('fallback', '');
+        }
     </script>
 </body>
 </html>
