@@ -44,6 +44,7 @@ nav:
         - 压缩Java内存: txt4.md
         - 传播App经验: txt5.md
         - 粗浅理解深度学习: txt6.md
+    - 回顾近两年来的历程: txt12.md
   - 算法:
       - 自制Skill进行代码转化的情况: txt10.md
       - 像写Java一样写C++: txt7.md

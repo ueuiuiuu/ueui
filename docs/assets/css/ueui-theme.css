@@ -177,7 +177,7 @@ body, body * {
 /* --- Typography --- */
 .md-typeset {
   font-size: 0.8rem !important;
-  line-height: 1.6 !important;
+  line-height: 1.8 !important;
   color: var(--md-default-fg-color--light) !important;
 }
 
@@ -196,17 +196,27 @@ body, body * {
   font-size: 0.9em !important;
   font-weight: normal !important;
   letter-spacing: 0.1em !important;
+  /* 标题与上下文拉开距离，避免和正文糊在一起 */
+  margin: 2.2rem 0 0.9rem !important;
 }
 
 .md-typeset h3 {
   font-size: 0.85em !important;
   font-weight: normal !important;
+  margin: 1.6rem 0 0.6rem !important;
 }
 
+/* 行距与段距：中文长段落需要比默认更松一点 */
 .md-typeset p,
 .md-typeset li {
   font-size: 0.8rem !important;
-  line-height: 1.6 !important;
+  line-height: 1.8 !important;
+}
+
+/* 段距单独给，且不加 !important：
+   这样主题里更具体的规则（列表项内的段落、提示框最后一个子元素等）仍能生效 */
+.md-typeset p {
+  margin: 1.1rem 0;
 }
 
 /* --- Sidebar (left nav) --- */
@@ -756,8 +766,12 @@ body, body * {
 }
 
 
+/* 首页副标题：带上 .md-typeset 提高优先级，
+   否则会被上面 .md-typeset p 的段距覆盖掉原本的 2rem 下边距 */
+.md-typeset p.home-hero__desc,
 .home-hero__desc {
   color: var(--md-default-fg-color--light) !important;
+  margin-top: 0 !important;
   margin-bottom: 2rem !important;
 }
 
