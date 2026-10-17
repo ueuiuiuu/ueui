@@ -4,7 +4,7 @@ theme:
   name: material
   language: zh
   logo: assets/ueui-logo.svg
-  favicon: codedash/icon-codedash.svg
+  favicon: market/codedash/icon-codedash.svg
   palette:
     - scheme: slate
       primary: black
@@ -26,15 +26,16 @@ extra_javascript:
   - assets/js/mobile-toc.js
   - assets/js/prev-next.js
   - assets/js/water-grid.js
-  - assets/js/tool-coverflow.js
   - assets/js/theme-reveal.js
 
 # 👇 左侧菜单栏（你可以自由增删）
 nav:
   - 首页: index.md
-  - 官网: codedash/index.html
+  - 集市:
+      - 工具: market/tools/index.md
+      - 官网: market/codedash/index.html
+      - 存档: market/archive/index.html
   - 关于: deploy-guide.md
-  - 工具: tool.md
   - 文章:
     - 学习日志:
         - 智能体消息缓冲机制: txt11.md
