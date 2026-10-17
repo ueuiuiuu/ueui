@@ -31,11 +31,11 @@ extra_javascript:
 # 👇 左侧菜单栏（你可以自由增删）
 nav:
   - 首页: index.md
+  - 关于: deploy-guide.md
   - 集市:
       - 工具: market/tools/index.md
       - 官网: market/codedash/index.html
       - 存档: market/archive/index.html
-  - 关于: deploy-guide.md
   - 文章:
     - 学习日志:
         - 智能体消息缓冲机制: txt11.md
