@@ -866,6 +866,89 @@ body, body * {
   color: var(--md-default-fg-color) !important;
 }
 
+/* --- Archive gate (存档中间页) --- */
+.archive-gate {
+  max-width: 640px;
+  margin: 0 auto;
+  padding: 3rem 1rem 2rem;
+  text-align: center;
+}
+
+.archive-gate__eyebrow {
+  display: block;
+  font-size: 0.7rem;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  opacity: 0.6;
+}
+
+.archive-gate__title {
+  border-bottom: none !important;
+  font-size: 1.6rem !important;
+  letter-spacing: 0.08em !important;
+  margin: 0.4rem 0 0.6rem !important;
+}
+
+.md-typeset p.archive-gate__desc,
+.archive-gate__desc {
+  color: var(--md-default-fg-color--light) !important;
+  margin: 0 0 2rem !important;
+}
+
+.md-typeset blockquote.archive-gate__notice,
+.archive-gate__notice {
+  margin: 0 0 2rem !important;
+  padding: 1rem 1.2rem !important;
+  border: 1px solid var(--md-default-fg-color--lighter) !important;
+  border-left: 2px solid var(--md-default-fg-color--light) !important;
+  border-radius: 12px !important;
+  background: rgba(255, 255, 255, 0.05) !important;
+  color: var(--md-default-fg-color--light) !important;
+  font-size: 0.78rem !important;
+  line-height: 1.75 !important;
+  text-align: left;
+}
+
+[data-md-color-scheme="default"] .archive-gate__notice {
+  background: rgba(0, 0, 0, 0.03) !important;
+}
+
+.archive-gate__notice p {
+  margin: 0 0 0.6rem !important;
+}
+
+.archive-gate__notice p:last-child {
+  margin-bottom: 0 !important;
+}
+
+.md-typeset a.archive-gate__start,
+.archive-gate__start {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 2.6rem;
+  border: 1px solid var(--md-default-fg-color) !important;
+  border-radius: 999px !important;
+  background: var(--md-default-fg-color) !important;
+  color: var(--md-default-bg-color) !important;
+  font-size: 0.85rem !important;
+  font-weight: 600;
+  letter-spacing: 0.15em;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.md-typeset a.archive-gate__start:hover,
+.archive-gate__start:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
+  color: var(--md-default-bg-color) !important;
+}
+
+.archive-gate__start::after {
+  content: '→';
+  font-size: 0.9em;
+}
+
 /* --- Tool cards --- */
 .tool-grid {
   display: grid;
