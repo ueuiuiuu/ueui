@@ -1,0 +1,286 @@
+<!doctype html><html lang=zh-CN><head><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name=theme-color content=#162019><meta name=description content="ReCallTry Minecraft 世界在线档案"><title>ReCallTry 世界档案</title><link rel=icon href=icon.png><link rel=stylesheet href=styles.css></head><body>
+    <main id=app>
+      <div id=viewport aria-label="ReCallTry 三维世界"></div>
+
+      <header class=topbar>
+        <div class=brand>
+          <span class=brand-mark><img src=icon.png alt></span>
+          <span class=brand-copy>
+            <strong id=world-title>ReCallTry</strong>
+            <small>世界档案</small>
+          </span>
+          <span class=version-pill id=version-pill>JAVA 1.20.1</span>
+        </div>
+
+        <div class=top-actions>
+          <button class=text-button id=locate-button type=button aria-label=前往坐标>
+            <i data-lucide=locate-fixed></i>
+            <span>定位</span>
+          </button>
+          <button class=icon-button id=quality-button type=button aria-label=渲染视距 data-tooltip=渲染视距>
+            <i data-lucide=layers-3></i>
+          </button>
+          <span class=world-chip><i data-lucide=mountain-snow></i>主世界</span>
+        </div>
+      </header>
+
+      <aside class=map-panel id=map-panel aria-label=世界地图 aria-hidden=true>
+        <div class=panel-heading>
+          <div>
+            <span class=eyebrow>世界总览</span>
+            <strong id=map-coordinate>X 2370 · Z 1327</strong>
+          </div>
+          <button class="icon-button compact" id=map-collapse type=button aria-label=关闭世界总览>
+            <i data-lucide=x></i>
+          </button>
+        </div>
+        <button class=map-stage id=map-stage type=button aria-label=在地图上选择位置>
+          <img id=world-map src=world-map.png alt="ReCallTry 世界俯视图">
+          <span class=player-marker id=player-marker aria-hidden=true></span>
+          <span class=target-marker id=target-marker aria-hidden=true>
+            <span></span>
+          </span>
+        </button>
+        <div class=map-meta>
+          <span><b id=region-stat>—</b> 区域</span>
+          <span><b id=chunk-stat>—</b> 区块</span>
+          <span><b id=distance-stat>3</b> 视距</span>
+        </div>
+      </aside>
+
+      <div class=view-toolbar aria-label=视图工具>
+        <button class=icon-button id=settings-button type=button aria-label=设置 data-tooltip=设置>
+          <i data-lucide=settings-2></i>
+        </button>
+        <button class=icon-button id=overview-button type=button aria-label=世界总览 data-tooltip=世界总览>
+          <i data-lucide=map-pinned></i>
+        </button>
+        <button class=icon-button id=reset-button type=button aria-label=回到玩家位置 data-tooltip=回到玩家位置>
+          <i data-lucide=home></i>
+        </button>
+        <button class=icon-button id=top-button type=button aria-label=俯视视角 data-tooltip=俯视视角>
+          <i data-lucide=map></i>
+        </button>
+        <button class=icon-button id=speed-button type=button aria-label=移动速度 data-tooltip=移动速度>
+          <i data-lucide=gauge></i>
+        </button>
+        <button class=icon-button id=control-button type=button aria-label=控制方式 data-tooltip=控制方式>
+          <i data-lucide=mouse-pointer-2></i>
+        </button>
+        <button class=icon-button id=first-person-button type=button aria-label=飞行模式 data-tooltip=飞行模式>
+          <i data-lucide=person-standing></i>
+        </button>
+        <button class=icon-button id=walk-button type=button aria-label=步行模式 data-tooltip=步行模式>
+          <i data-lucide=footprints></i>
+        </button>
+        <button class=icon-button id=collision-button type=button aria-label=碰撞箱 data-tooltip=碰撞箱>
+          <i data-lucide=scan-line></i>
+        </button>
+        <button class=icon-button id=palette-button type=button aria-label=界面配色 data-tooltip=界面配色>
+          <i data-lucide=palette></i>
+        </button>
+        <button class=icon-button id=screenshot-button type=button aria-label=保存截图 data-tooltip=保存截图>
+          <i data-lucide=camera></i>
+        </button>
+        <button class=icon-button id=fullscreen-button type=button aria-label=全屏 data-tooltip=全屏>
+          <i data-lucide=maximize-2></i>
+        </button>
+      </div>
+
+      <div class=theme-menu id=theme-menu hidden>
+        <span class=menu-title>界面配色</span>
+        <button type=button data-theme-option=minimal class=active>
+          <span>简洁</span><small>默认</small>
+        </button>
+        <button type=button data-theme-option=vanilla>
+          <span>原版</span><small>经典色彩</small>
+        </button>
+      </div>
+
+      <div class=speed-menu id=speed-menu hidden>
+        <span class=menu-title>移动速度</span>
+        <label class=speed-field>
+          <span>飞行速度 <b id=flight-speed-value>8.5</b></span>
+          <input id=flight-speed type=range min=1 max=40 step=0.5 value=8.5>
+        </label>
+        <label class=speed-field>
+          <span>步行速度 <b id=walk-speed-value>4.3</b></span>
+          <input id=walk-speed type=range min=1 max=12 step=0.5 value=4.3>
+        </label>
+      </div>
+
+      <div class=control-menu id=control-menu hidden>
+        <span class=menu-title>控制方式</span>
+        <div class=control-section>
+          <span>视角控制</span>
+          <div class=segmented-control>
+            <button type=button data-aim-mode=locked class=active>指针锁定</button>
+            <button type=button data-aim-mode=drag>拖动视角</button>
+          </div>
+        </div>
+        <button class=switch-row id=joystick-toggle type=button aria-pressed=false>
+          <span>左侧移动摇杆</span>
+          <span class=switch-track><i></i></span>
+        </button>
+        <button class=switch-row id=performance-toggle type=button aria-pressed=false>
+          <span>1:4 性能模式</span>
+          <span class=switch-track><i></i></span>
+        </button>
+        <button class=switch-row id=lod-toggle type=button aria-pressed=false>
+          <span>远距离 LOD</span>
+          <span class=switch-track><i></i></span>
+        </button>
+        <div class=lod-settings id=lod-settings hidden>
+          <label class=speed-field>
+            <span>近景完整方块 <b id=lod-near-value>3 区块</b></span>
+            <input id=lod-near type=range min=1 max=8 step=1 value=3>
+          </label>
+          <label class=speed-field>
+            <span>中景简化体素 <b id=lod-mid-value>24 区块</b></span>
+            <input id=lod-mid type=range min=8 max=64 step=2 value=24>
+          </label>
+          <label class=speed-field>
+            <span>远景高度地形 <b id=lod-far-value>128 区块</b></span>
+            <input id=lod-far type=range min=32 max=512 step=16 value=128>
+          </label>
+        </div>
+      </div>
+
+      <div class=move-joystick id=move-joystick hidden aria-label=移动摇杆>
+        <div class=joystick-ring>
+          <div class=joystick-knob id=joystick-knob></div>
+        </div>
+      </div>
+
+      <div class=joystick-actions id=joystick-actions hidden>
+        <button class=joystick-action id=joystick-rise type=button aria-label=上升>
+          <i data-lucide=chevron-up></i>
+        </button>
+        <button class=joystick-action id=joystick-sink type=button aria-label=下降>
+          <i data-lucide=chevron-down></i>
+        </button>
+        <button class=joystick-action id=joystick-jump type=button aria-label=跳跃 hidden>
+          <i data-lucide=arrow-up></i>
+        </button>
+      </div>
+
+      <div class=first-person-reticle id=first-person-reticle hidden aria-hidden=true>
+        <span></span>
+      </div>
+
+      <footer class=statusbar>
+        <span class=status-copy><i data-lucide=box></i><span id=chunk-status>正在读取世界</span></span>
+        <span class=coordinate-copy id=position-readout>X 2370　Y 59　Z 1327</span>
+      </footer>
+
+      <aside class=settings-panel id=settings-panel hidden aria-label=设置面板>
+        <div class=settings-heading>
+          <div>
+            <span class=eyebrow>ReCallTry</span>
+            <strong>设置</strong>
+          </div>
+          <button class="icon-button compact" id=settings-close type=button aria-label=关闭设置>
+            <i data-lucide=x></i>
+          </button>
+        </div>
+        <div class=settings-scroll>
+          <div id=settings-options></div>
+
+          <section class=settings-section>
+            <h3>移动控件布局</h3>
+            <div class=settings-actions>
+              <button class=secondary-button id=layout-edit-toggle type=button>
+                <i data-lucide=move></i>
+                编辑位置
+              </button>
+              <button class=secondary-button id=layout-reset type=button>
+                <i data-lucide=rotate-ccw></i>
+                重置
+              </button>
+            </div>
+            <label class=settings-range>
+              <span>摇杆大小 <b id=joystick-size-value>116 px</b></span>
+              <input id=joystick-size type=range min=80 max=180 step=2 value=116>
+            </label>
+            <label class=settings-range>
+              <span>动作按钮大小 <b id=action-size-value>44 px</b></span>
+              <input id=action-size type=range min=32 max=80 step=2 value=44>
+            </label>
+          </section>
+
+          <section class=settings-section>
+            <h3>工具</h3>
+            <div class=settings-grid>
+              <button type=button data-settings-action=overview><i data-lucide=map-pinned></i>世界总览</button>
+              <button type=button data-settings-action=locate><i data-lucide=locate-fixed></i>定位</button>
+              <button type=button data-settings-action=flight><i data-lucide=person-standing></i>飞行</button>
+              <button type=button data-settings-action=walk><i data-lucide=footprints></i>步行</button>
+              <button type=button data-settings-action=home><i data-lucide=home></i>回家</button>
+              <button type=button data-settings-action=top><i data-lucide=map></i>俯视</button>
+              <button type=button data-settings-action=collision><i data-lucide=scan-line></i>碰撞箱</button>
+              <button type=button data-settings-action=screenshot><i data-lucide=camera></i>截图</button>
+              <button type=button data-settings-action=fullscreen><i data-lucide=maximize-2></i>全屏</button>
+            </div>
+          </section>
+
+          <a class=main-site-link href=https://ueuiuiuu.github.io/ueui target=_blank rel=noreferrer>
+            <i data-lucide=arrow-left></i>
+            返回主站
+          </a>
+          <p class=third-party-credit>
+            材质：<a href=https://github.com/Faithful-Resource-Pack/Faithful-32x-Java/tree/1.20.1 target=_blank rel=noreferrer>Faithful 32x Java 1.20.1</a>
+            降采样为 16x · <a href=https://faithfulpack.net target=_blank rel=noreferrer>Faithful</a>
+            · <a href=licenses/faithful-16x/LICENSE.txt target=_blank>Faithful License</a>
+          </p>
+        </div>
+      </aside>
+
+      <div class=quality-menu id=quality-menu hidden>
+        <span class=menu-title>渲染视距</span>
+        <button type=button data-view-distance=2><span>近</span><small>2 区块</small></button>
+        <button type=button data-view-distance=3 class=active><span>标准</span><small>3 区块</small></button>
+        <button type=button data-view-distance=5><span>远</span><small>5 区块</small></button>
+      </div>
+
+      <div class=loading-screen id=loading-screen>
+        <div class=loading-mark>
+          <span></span><span></span><span></span>
+        </div>
+        <span class=eyebrow>ReCallTry 世界档案</span>
+        <strong id=loading-title>正在读取世界</strong>
+        <div class=loading-track><span id=loading-progress></span></div>
+        <small id=loading-detail>准备邻近区块</small>
+      </div>
+
+      <dialog class=jump-dialog id=jump-dialog>
+        <form id=jump-form>
+          <div class=dialog-heading>
+            <div>
+              <span class=eyebrow>坐标定位</span>
+              <strong>前往世界位置</strong>
+            </div>
+            <button class="icon-button compact" id=jump-close type=button aria-label=关闭>
+              <i data-lucide=x></i>
+            </button>
+          </div>
+          <div class=coordinate-fields>
+            <label>X<input id=jump-x name=x type=number inputmode=decimal required></label>
+            <label>Z<input id=jump-z name=z type=number inputmode=decimal required></label>
+          </div>
+          <div class=dialog-presets>
+            <button type=button data-jump-player>玩家位置</button>
+            <button type=button data-jump-spawn>世界出生点</button>
+          </div>
+          <button class=primary-button type=submit>
+            <i data-lucide=navigation></i>
+            前往
+          </button>
+        </form>
+      </dialog>
+
+      <div class=toast id=toast role=status aria-live=polite></div>
+    </main>
+    <script src=app.js></script>
+  
+
+</body></html>
