@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>ReCallTry · Three.js</title>
+  <link rel="icon" href="data:,">
+  <link rel="stylesheet" href="./styles.css">
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "./vendor/three.module.js"
+      }
+    }
+  </script>
+</head>
+<body>
+  <main id="viewport" aria-label="Three.js 世界查看器"></main>
+
+  <section class="panel panel-left">
+    <p class="eyebrow">PURE THREE.JS</p>
+    <h1>ReCallTry</h1>
+    <p class="subtitle">存档静态几何 · 未使用 prismarine-viewer</p>
+    <dl class="stats">
+      <div><dt>中心</dt><dd id="center-readout">--</dd></div>
+      <div><dt>区块</dt><dd id="tile-readout">0 / 0</dd></div>
+      <div><dt>顶点</dt><dd id="vertex-readout">--</dd></div>
+    </dl>
+  </section>
+
+  <section class="panel panel-controls" aria-label="视角控制">
+    <button type="button" data-view="school">学校</button>
+    <button type="button" data-view="spawn">出生点</button>
+    <button type="button" data-view="top">俯视</button>
+    <button type="button" data-view="reset">重置视角</button>
+  </section>
+
+  <button id="settings-button" class="settings-button" type="button" aria-expanded="false">设置</button>
+  <section id="settings-panel" class="settings-panel" aria-label="控制设置" hidden>
+    <header class="settings-head">
+      <strong>控制设置</strong>
+      <button id="settings-close" type="button">关闭</button>
+    </header>
+    <div class="setting-row">
+      <span>第一人称</span>
+      <button id="first-person-toggle" class="toggle" type="button" aria-pressed="false">关闭</button>
+    </div>
+    <div class="setting-row">
+      <span>移动端控制</span>
+      <button id="mobile-toggle" class="toggle" type="button" aria-pressed="false">关闭</button>
+    </div>
+    <div class="setting-row">
+      <span>摇杆位置</span>
+      <div class="segmented" role="group" aria-label="摇杆位置">
+        <button type="button" data-joystick-side="left" class="active">左侧</button>
+        <button type="button" data-joystick-side="right">右侧</button>
+      </div>
+    </div>
+    <p class="setting-note">第一人称拖动画面转视角；WASD 移动，空格跳跃。移动端会显示摇杆和按钮，并开启碰撞检测。</p>
+  </section>
+
+  <div id="mobile-controls" class="mobile-controls" data-side="left" hidden>
+    <div id="joystick" class="joystick" aria-label="移动摇杆">
+      <div id="joystick-knob" class="joystick-knob"></div>
+    </div>
+    <div id="mobile-actions" class="mobile-actions">
+      <div id="vertical-buttons" class="vertical-buttons" hidden>
+        <button id="move-up" type="button">上移</button>
+        <button id="move-down" type="button">下移</button>
+      </div>
+      <button id="jump-button" class="jump-button" type="button">跳跃</button>
+    </div>
+  </div>
+
+  <p class="help">拖动旋转 · 滚轮缩放 · 右键平移 · 设置中可开启第一人称和移动端控制</p>
+  <div id="loading" class="loading">正在读取 Three.js 世界数据…</div>
+  <div id="error" class="error" hidden></div>
+
+  <script type="module" src="./viewer.js"></script>
+</body>
+</html>
