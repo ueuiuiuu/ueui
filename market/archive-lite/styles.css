@@ -52,30 +52,21 @@ body.first-person #viewport canvas {
   backdrop-filter: blur(16px);
 }
 
-.panel-left {
-  top: 20px;
-  left: 20px;
-  width: min(320px, calc(100vw - 40px));
-  padding: 18px 20px 16px;
-  border-radius: 16px;
+.settings-heading {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
 }
 
-.eyebrow {
-  margin: 0 0 6px;
+.settings-eyebrow {
   color: #a9d4b4;
   font-size: 10px;
   font-weight: 700;
-  letter-spacing: 0.24em;
-}
-
-h1 {
-  margin: 0;
-  font-size: 25px;
-  letter-spacing: -0.03em;
+  letter-spacing: 0.12em;
 }
 
 .subtitle {
-  margin: 5px 0 14px;
+  margin: 0 0 12px;
   color: #b9c2bd;
   font-size: 12px;
 }
@@ -193,7 +184,7 @@ dd {
   top: 66px;
   right: 20px;
   z-index: 6;
-  width: min(340px, calc(100vw - 40px));
+  width: min(360px, calc(100vw - 40px));
   padding: 16px;
   color: #f3f0e8;
   background: rgba(22, 28, 26, 0.94);
@@ -217,9 +208,17 @@ dd {
 
 .settings-head {
   margin-bottom: 14px;
+  align-items: flex-start;
 }
 
-.settings-head button {
+.settings-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.settings-head button,
+.settings-back {
   padding: 4px 8px;
   color: #b9c2bd;
   background: transparent;
@@ -227,6 +226,12 @@ dd {
   font: inherit;
   font-size: 11px;
   cursor: pointer;
+  text-decoration: none;
+}
+
+.settings-head button:hover,
+.settings-back:hover {
+  color: #f3f0e8;
 }
 
 .setting-row {
@@ -373,13 +378,6 @@ body.first-person .panel-controls {
 }
 
 @media (max-width: 720px) {
-  .panel-left {
-    top: 12px;
-    left: 12px;
-    width: calc(100vw - 100px);
-    padding: 14px 16px;
-  }
-
   .panel-controls {
     left: 12px;
     bottom: 12px;
