@@ -17,17 +17,6 @@
 <body>
   <main id="viewport" aria-label="Three.js 世界查看器"></main>
 
-  <section class="panel panel-left">
-    <p class="eyebrow">PURE THREE.JS</p>
-    <h1>ReCallTry</h1>
-    <p class="subtitle">存档静态几何 · 未使用 prismarine-viewer</p>
-    <dl class="stats">
-      <div><dt>中心</dt><dd id="center-readout">--</dd></div>
-      <div><dt>区块</dt><dd id="tile-readout">0 / 0</dd></div>
-      <div><dt>顶点</dt><dd id="vertex-readout">--</dd></div>
-    </dl>
-  </section>
-
   <section class="panel panel-controls" aria-label="视角控制">
     <button type="button" data-view="school">学校</button>
     <button type="button" data-view="spawn">出生点</button>
@@ -38,9 +27,21 @@
   <button id="settings-button" class="settings-button" type="button" aria-expanded="false">设置</button>
   <section id="settings-panel" class="settings-panel" aria-label="控制设置" hidden>
     <header class="settings-head">
-      <strong>控制设置</strong>
-      <button id="settings-close" type="button">关闭</button>
+      <div class="settings-heading">
+        <span class="settings-eyebrow">ReCallTry · PURE THREE.JS</span>
+        <strong>控制设置</strong>
+      </div>
+      <div class="settings-actions">
+        <a class="settings-back" href="https://ueuiuiuu.github.io/ueui/" title="返回 ueuiuiuu.github.io/ueui">返回</a>
+        <button id="settings-close" type="button">关闭</button>
+      </div>
     </header>
+    <p class="subtitle">存档静态几何 · 未使用 prismarine-viewer</p>
+    <dl class="stats">
+      <div><dt>中心</dt><dd id="center-readout">--</dd></div>
+      <div><dt>区块</dt><dd id="tile-readout">0 / 0</dd></div>
+      <div><dt>顶点</dt><dd id="vertex-readout">--</dd></div>
+    </dl>
     <div class="setting-row">
       <span>第一人称</span>
       <button id="first-person-toggle" class="toggle" type="button" aria-pressed="false">关闭</button>
