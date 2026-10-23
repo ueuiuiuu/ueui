@@ -1,205 +1,696 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>日志 — CodeDash · AI 原生桌面 IDE</title>
-    <link rel="icon" href="icon-codedash.svg">
-    <style>
-        :root,[data-theme="dark"]{--primary:#9ca3af;--primary-dark:#6b7280;--primary-light:#d1d5db;--bg:#0d1117;--bg-light:#161b22;--card-bg:rgba(22,27,34,0.7);--card-border:rgba(255,255,255,0.1);--text:#e6edf3;--text-light:#8b949e;--text-muted:#6e7681;--border:rgba(255,255,255,0.08);--radius:16px;--radius-sm:8px;--nav-bg:rgba(10,10,10,0.85);--nav-bg-scrolled:rgba(10,10,10,0.96);--nav-mobile-bg:rgba(10,10,10,0.97);--nav-shadow:0 4px 30px rgba(0,0,0,0.4);--nav-text:white;--nav-link-hover:white;--scrollbar-thumb:rgba(255,255,255,0.2);--scrollbar-thumb-hover:rgba(255,255,255,0.35);--surface-subtle:rgba(255,255,255,0.05);}
-        [data-theme="light"]{--primary:#9ca3af;--bg:#eaecf0;--card-bg:rgba(255,255,255,0.9);--card-border:rgba(0,0,0,0.1);--text:#1a1a1a;--text-light:#444;--text-muted:#888;--border:rgba(0,0,0,0.08);--nav-bg:rgba(255,255,255,0.92);--nav-bg-scrolled:rgba(255,255,255,0.98);--nav-mobile-bg:rgba(255,255,255,0.98);--nav-shadow:0 4px 30px rgba(0,0,0,0.08);--nav-text:#333;--nav-link-hover:#000;--scrollbar-thumb:rgba(0,0,0,0.18);--surface-subtle:rgba(0,0,0,0.04);}
-        *{margin:0;padding:0;box-sizing:border-box}
-        html{scroll-behavior:smooth}
-        body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC','Microsoft YaHei',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;line-height:1.7}
-        ::-webkit-scrollbar{width:6px}
-        ::-webkit-scrollbar-thumb{background:var(--scrollbar-thumb);border-radius:3px}
-        .navbar{position:sticky;top:0;z-index:1000;background:var(--nav-bg);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);padding:0 3rem;height:72px;display:flex;align-items:center;justify-content:space-between}
-        .navbar .logo{display:flex;align-items:center;gap:.6rem;font-size:1.4rem;font-weight:800;color:var(--nav-text);text-decoration:none}
-        .navbar .logo .logo-icon{width:36px;height:36px;background:linear-gradient(135deg,var(--primary),#9ca3af);border-radius:10px;display:flex;align-items:center;justify-content:center;font-weight:700;color:#fff}
-        .navbar .nav-links{display:flex;gap:2.5rem;list-style:none;align-items:center}
-        .navbar .nav-links a{text-decoration:none;color:var(--text-light);font-weight:500;font-size:.9rem;transition:color .2s}
-        .navbar .nav-links a:hover{color:var(--nav-link-hover)}
-        .navbar .nav-links a.active{color:var(--nav-link-hover)}
-        .theme-toggle{background:none;border:none;font-size:1rem;cursor:pointer;padding:.3rem;border-radius:50%;width:36px;height:36px;display:flex;align-items:center;justify-content:center;color:var(--text-light);font-family:inherit}
-        .theme-toggle:hover{background:var(--surface-subtle);color:var(--nav-link-hover)}
-        .nav-links .gh-btn{background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.3);color:var(--primary-light);padding:.4rem 1rem;border-radius:20px;font-size:.85rem;font-weight:600}
-        .nav-links .gh-btn:hover{background:rgba(255,255,255,0.25);border-color:var(--primary)}
-        @media(max-width:900px){.navbar{padding:0 1.5rem}.navbar .nav-links{position:fixed;top:72px;left:0;right:0;flex-direction:column;background:var(--nav-mobile-bg);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);padding:1rem 0;transform:translateY(-110%);transition:transform .3s ease}.navbar .nav-links.open{transform:translateY(0)}.navbar .nav-links li{padding:.8rem 0}.navbar .hamburger{display:flex}}
-        .container{max-width:1100px;margin:0 auto;padding:4rem 2rem}
-        .log-layout{display:flex;gap:2rem;min-height:60vh}
-        .log-sidebar{width:200px;flex-shrink:0;position:sticky;top:92px;height:fit-content}
-        .log-sidebar .sidebar-title{font-size:0.7rem;text-transform:uppercase;letter-spacing:2px;color:var(--text-muted);font-weight:700;margin-bottom:1rem}
-        .log-sidebar .log-nav{list-style:none}
-        .log-sidebar .log-nav a{display:block;padding:0.5rem 0.8rem;font-size:0.88rem;color:var(--text-light);text-decoration:none;border-left:2px solid transparent;transition:all 0.2s}
-        .log-sidebar .log-nav a:hover{color:var(--text);border-left-color:var(--text-muted)}
-        .log-sidebar .log-nav a.active{color:var(--text);border-left-color:var(--primary)}
-        .log-content{flex:1;min-width:0}
-        h1{font-size:2rem;font-weight:800;letter-spacing:-1px;margin-bottom:2rem}
-        h2{font-size:1.3rem;font-weight:700;margin:2.5rem 0 1rem;color:var(--text)}
-        h3{font-size:1.05rem;font-weight:600;margin:1.5rem 0 0.6rem;color:var(--text-light)}
-        p,li{font-size:0.93rem;line-height:1.8;color:var(--text-light)}
-        ul,ol{margin:0.5rem 0 1rem 1.5rem}
-        li{margin-bottom:0.3rem}
-        .update-date{color:var(--text-muted);font-size:0.8rem;margin-bottom:2rem}
-        @media(max-width:768px){.log-layout{flex-direction:column}.log-sidebar{position:static;width:100%}}
-        .footer{text-align:center;padding:3rem 2rem;color:var(--text-muted);font-size:.85rem;border-top:1px solid var(--border);margin-top:3rem}
-        /* ===== 导航栏汉堡菜单（移动端） ===== */
-        .navbar .hamburger {
-            display: none; flex-direction: column; gap: 5px;
-            background: none; border: none; cursor: pointer; padding: 4px;
-        }
-        .navbar .hamburger span {
-            width: 24px; height: 2px; background: var(--nav-text); border-radius: 2px;
-            transition: all 0.3s;
-        }
-        .navbar .hamburger.active span:nth-child(1) { transform: rotate(45deg) translate(5px,5px); }
-        .navbar .hamburger.active span:nth-child(2) { opacity: 0; }
-        .navbar .hamburger.active span:nth-child(3) { transform: rotate(-45deg) translate(5px,-5px); }
-        @media (max-width: 900px) {
-            .navbar { height: 64px; padding: 0 1rem; }
-            .navbar .nav-links { top: 64px; padding: 0.8rem 1rem 1.2rem; align-items: stretch; }
-            .navbar .nav-links li { text-align: left; padding: 0.25rem 0; }
-            .navbar .nav-links a,
-            .navbar .nav-links .theme-toggle {
-                display: flex; align-items: center; justify-content: flex-start;
-                width: 100%; padding: 0.8rem 1rem; border-radius: 8px; font-size: 0.95rem;
-            }
-            .navbar .nav-links .theme-toggle { height: auto; }
-            .navbar .nav-links .gh-btn {
-                justify-content: center; margin: 0.25rem 0 0.5rem;
-                padding: 0.7rem 1rem; border-radius: 8px;
-            }
-            .navbar .hamburger { display: flex; }
-        }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>更新日志 — CodeDash · AI 原生桌面 IDE</title>
+<meta name="description" content="CodeDash 版本更新记录：v0.2.1 macOS 修复版、v0.2.0 学习模式上线、v0.1.0 首次发布。">
+<meta name="theme-color" content="#ffffff">
+<link rel="icon" href="icon-codedash.svg">
+<script>
+  /* 主题初始化：与官网首页共用同一个 localStorage 键 */
+  (function () {
+    document.documentElement.classList.add('js');
+    var s = null;
+    try { s = localStorage.getItem('codedash-theme'); } catch (e) {}
+    var dark = s ? s === 'dark'
+                 : (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
+    if (dark) document.documentElement.classList.add('dark');
+  })();
+</script>
+<style>
+  /* ==========================================================
+     更新日志 — 沿用官网首页的单色设计系统
+     标题：衬线大字 · 正文：系统无衬线 · 标注：等宽 · 分隔：1px 细线
+     ========================================================== */
 
-    </style>
+  :root {
+    --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC",
+            "Hiragino Sans GB", "Microsoft YaHei", ui-sans-serif, system-ui, sans-serif;
+    --serif: "Songti SC", "STSong", "Noto Serif SC", "Source Han Serif SC",
+             "Noto Serif CJK SC", "SimSun", Georgia, serif;
+    --mono: ui-monospace, "Cascadia Mono", "JetBrains Mono", "SF Mono",
+            Consolas, "Liberation Mono", monospace;
+
+    --bg: #ffffff;
+    --muted: #f5f5f5;
+    --card: #ffffff;
+    --border: #e8e8e8;
+    --border-strong: #d4d4d4;
+    --fg: #0a0a0a;
+    --text-2: #525252;
+    --muted-fg: #858585;
+    --primary: #121212;
+    --primary-fg: #fafafa;
+    --ring: #0d0d0d;
+    --glass-bg: rgba(255, 255, 255, .72);
+
+    --radius: 8px;
+    --radius-lg: 12px;
+    --nav-h: 64px;
+    --maxw: 1120px;
+    --ease: cubic-bezier(.22, 1, .36, 1);
+    color-scheme: light;
+  }
+
+  html.dark {
+    --bg: #0a0a0a;
+    --muted: #171717;
+    --card: #171717;
+    --border: #282828;
+    --border-strong: #404040;
+    --fg: #fafafa;
+    --text-2: #a1a1a1;
+    --muted-fg: #737373;
+    --primary: #e5e5e5;
+    --primary-fg: #171717;
+    --ring: #737373;
+    --glass-bg: rgba(10, 10, 10, .64);
+    color-scheme: dark;
+  }
+
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html { -webkit-text-size-adjust: 100%; scroll-behavior: smooth; overflow-x: hidden; }
+  html.dark body { background: var(--bg); }
+
+  body {
+    font-family: var(--sans);
+    background: var(--bg);
+    color: var(--fg);
+    font-size: 15.5px;
+    line-height: 1.75;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    overflow-x: hidden;
+    padding-top: var(--nav-h);
+    transition: background-color .3s ease, color .3s ease;
+  }
+
+  a { color: inherit; text-decoration: none; }
+  button { font-family: inherit; cursor: pointer; border: none; background: none; color: inherit; }
+  ul, ol { list-style: none; }
+
+  ::selection { background: var(--primary); color: var(--primary-fg); }
+  :focus-visible { outline: 2px solid var(--ring); outline-offset: 2px; border-radius: 4px; }
+
+  ::-webkit-scrollbar { width: 10px; height: 10px; }
+  ::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 10px; border: 2px solid var(--bg); }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+
+  .container { width: 100%; max-width: var(--maxw); margin: 0 auto; padding: 0 24px; }
+
+  /* ---------- 导航 ---------- */
+  .nav {
+    position: fixed; top: 0; left: 0; right: 0; margin: 0 auto;
+    width: 100%; height: var(--nav-h); z-index: 200;
+    background: var(--bg);
+    transition: width .42s var(--ease), height .42s var(--ease),
+                top .42s var(--ease), border-radius .42s var(--ease),
+                background-color .3s ease;
+  }
+  .nav.is-pinned {
+    top: 12px;
+    width: min(760px, calc(100% - 16px));
+    height: 52px;
+    border-radius: 16px;
+    background: var(--glass-bg);
+    -webkit-backdrop-filter: blur(20px) saturate(160%);
+    backdrop-filter: blur(20px) saturate(160%);
+    box-shadow: 0 1px 0 0 var(--border), 0 12px 32px -20px rgba(0, 0, 0, .25);
+  }
+  .nav-inner {
+    height: 100%; padding: 0 20px;
+    display: grid; grid-template-columns: 1fr auto 1fr;
+    align-items: center; gap: 12px;
+    transition: padding .42s var(--ease), gap .42s ease;
+  }
+  .nav-brand {
+    justify-self: start; display: flex; align-items: center; gap: 9px;
+    font-weight: 700; font-size: 15px; letter-spacing: -.01em;
+  }
+  .nav-brand svg { width: 26px; height: 26px; border-radius: 6px; transition: width .42s var(--ease), height .42s var(--ease); }
+  .nav-links { justify-self: center; display: flex; align-items: center; gap: 2px; white-space: nowrap; }
+  .nav-links a {
+    display: inline-flex; align-items: center; gap: 5px;
+    padding: 8px 12px; font-size: 14px; color: var(--text-2);
+    border-radius: var(--radius);
+    transition: color .2s ease, background .2s ease;
+  }
+  .nav-links a:hover { color: var(--fg); background: var(--muted); }
+  .nav-links a.active { color: var(--fg); }
+  .nav-right { justify-self: end; display: flex; align-items: center; gap: 8px; }
+  .icon-btn {
+    width: 38px; height: 38px; display: inline-flex; align-items: center; justify-content: center;
+    color: var(--text-2); border: 1px solid var(--border); border-radius: var(--radius);
+    transition: color .2s, border-color .2s, background .2s, width .42s var(--ease), height .42s var(--ease);
+  }
+  .icon-btn:hover { color: var(--fg); border-color: var(--border-strong); background: var(--muted); }
+  .icon-btn svg { width: 18px; height: 18px; }
+  .theme-toggle .icon-sun { display: block; }
+  .theme-toggle .icon-moon { display: none; }
+  html.dark .theme-toggle .icon-sun { display: none; }
+  html.dark .theme-toggle .icon-moon { display: block; }
+  .nav-menu-btn { display: none; }
+  .nav-menu-btn svg { width: 20px; height: 20px; }
+
+  .nav.is-pinned .nav-inner { padding: 0 14px; gap: 8px; }
+  .nav.is-pinned .nav-brand svg { width: 22px; height: 22px; }
+  .nav.is-pinned .nav-links a { padding: 7px 9px; font-size: 13px; }
+  .nav.is-pinned .icon-btn { width: 34px; height: 34px; }
+  .nav.is-pinned .btn { height: 34px; padding: 0 13px; font-size: 13px; }
+
+  .nav-drawer {
+    position: fixed; top: var(--nav-h); left: 0; right: 0; z-index: 199;
+    background: var(--bg); max-height: 0; overflow: hidden; visibility: hidden;
+    transition: max-height .3s ease, visibility .3s ease;
+  }
+  .nav-drawer.open { max-height: 400px; visibility: visible; border-bottom: 1px solid var(--border); }
+  .nav.is-pinned ~ .nav-drawer {
+    top: 64px; width: min(760px, calc(100% - 16px)); margin: 0 auto;
+    border-radius: 0 0 16px 16px; background: var(--glass-bg);
+    -webkit-backdrop-filter: blur(20px) saturate(160%);
+    backdrop-filter: blur(20px) saturate(160%);
+  }
+  .nav-drawer-links { padding: 10px 22px 18px; }
+  .nav-drawer-links a {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 13px 2px; font-size: 15px; color: var(--text-2);
+    border-bottom: 1px solid var(--border);
+  }
+  .nav-drawer-links a.active { color: var(--fg); }
+  .nav-drawer-links li:last-child a { border-bottom: none; }
+
+  /* ---------- 按钮 ---------- */
+  .btn {
+    display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+    height: 38px; padding: 0 16px;
+    font-size: 14px; font-weight: 600;
+    border-radius: var(--radius); border: 1px solid transparent;
+    white-space: nowrap;
+    transition: background .16s ease, color .16s ease, border-color .16s ease;
+  }
+  .btn svg { width: 16px; height: 16px; flex: none; }
+  .btn-primary { background: var(--primary); color: var(--primary-fg); }
+  .btn-primary:hover { opacity: .88; }
+
+  /* ---------- 页头 ---------- */
+  .page-head {
+    padding: clamp(48px, 7vw, 80px) 0 clamp(26px, 4vw, 38px);
+    border-bottom: 1px solid var(--border);
+    position: relative; overflow: hidden;
+  }
+  .glyph {
+    position: absolute; font-family: var(--mono); font-weight: 800;
+    color: var(--fg); opacity: .04; line-height: 1;
+    user-select: none; pointer-events: none;
+  }
+  .page-head .g1 { font-size: clamp(120px, 20vw, 260px); top: -.18em; right: -.03em; }
+  .sec-eyebrow {
+    font-family: var(--mono); font-size: 12.5px; letter-spacing: .06em;
+    color: var(--muted-fg); margin-bottom: 14px;
+  }
+  .sec-eyebrow .h { color: var(--fg); opacity: .4; margin-right: 8px; font-weight: 700; }
+  .page-title {
+    font-family: var(--serif); font-weight: 800;
+    font-size: clamp(34px, 5.4vw, 58px);
+    line-height: 1.14; letter-spacing: -.015em;
+    position: relative;
+  }
+  .page-desc {
+    font-size: 15.5px; color: var(--text-2);
+    max-width: 40em; line-height: 1.85; margin-top: 16px;
+    position: relative;
+  }
+  .page-tags {
+    display: flex; flex-wrap: wrap; gap: 8px; margin-top: 22px;
+    font-family: var(--mono); font-size: 11.5px; letter-spacing: .08em;
+    color: var(--muted-fg); position: relative;
+  }
+  .page-tags span {
+    display: inline-flex; align-items: center; gap: 7px;
+    border: 1px solid var(--border); border-radius: 100px;
+    padding: 5px 12px; background: var(--card);
+  }
+  .page-tags .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--fg); }
+
+  /* ---------- 两栏 ---------- */
+  .log-wrap {
+    display: grid; grid-template-columns: 200px minmax(0, 1fr);
+    gap: clamp(28px, 4vw, 56px);
+    padding: clamp(36px, 5vw, 56px) 0 clamp(56px, 8vw, 88px);
+  }
+  .log-side { position: sticky; top: calc(var(--nav-h) + 28px); align-self: start; }
+  .side-label {
+    font-family: var(--mono); font-size: 11px; letter-spacing: .14em;
+    text-transform: uppercase; color: var(--muted-fg); margin-bottom: 12px;
+  }
+  .log-nav { border-top: 1px solid var(--border); }
+  .log-nav a {
+    display: flex; align-items: center; justify-content: space-between; gap: 10px;
+    padding: 10px 0; font-size: 13.5px; color: var(--text-2);
+    border-bottom: 1px solid var(--border);
+    transition: color .2s ease;
+  }
+  .log-nav a .d { font-family: var(--mono); font-size: 10.5px; color: var(--muted-fg); }
+  .log-nav a:hover { color: var(--fg); }
+  .log-nav a.active { color: var(--fg); }
+  .log-nav a.active .d { color: var(--fg); }
+  .side-note {
+    margin-top: 16px; font-family: var(--mono); font-size: 10.5px;
+    line-height: 1.8; color: var(--muted-fg); letter-spacing: .04em;
+  }
+  .side-note a { border-bottom: 1px solid var(--border-strong); color: var(--text-2); }
+  .side-note a:hover { color: var(--fg); }
+
+  /* ---------- 日志条目 ---------- */
+  .log-entry { scroll-margin-top: calc(var(--nav-h) + 24px); padding-bottom: clamp(34px, 4vw, 48px); }
+  .log-entry + .log-entry {
+    border-top: 1px solid var(--border);
+    padding-top: clamp(34px, 4vw, 48px);
+  }
+  .log-meta {
+    display: flex; align-items: center; flex-wrap: wrap; gap: 10px;
+    font-family: var(--mono); font-size: 11.5px; letter-spacing: .08em;
+    color: var(--muted-fg);
+  }
+  .log-meta .tag {
+    border: 1px solid var(--border); border-radius: 100px;
+    padding: 3px 10px; background: var(--muted); color: var(--text-2);
+    font-size: 10.5px;
+  }
+  .log-entry h2 {
+    font-family: var(--serif); font-weight: 700;
+    font-size: clamp(23px, 3.1vw, 33px); line-height: 1.3;
+    letter-spacing: -.005em; margin: 12px 0 14px;
+  }
+  .log-entry h2 code {
+    font-family: var(--mono); font-size: .72em; font-weight: 600;
+    vertical-align: .06em;
+  }
+  .log-entry p { font-size: 15px; color: var(--text-2); line-height: 1.9; }
+  .log-entry p + p { margin-top: 10px; }
+  .log-entry p a { border-bottom: 1px solid var(--border-strong); color: var(--fg); }
+  .log-entry p a:hover { border-bottom-color: var(--fg); }
+
+  .log-entry h3 {
+    display: flex; align-items: center; gap: 12px;
+    font-family: var(--mono); font-size: 11.5px; font-weight: 600;
+    letter-spacing: .16em; text-transform: uppercase;
+    color: var(--muted-fg); margin: 28px 0 2px;
+  }
+  .log-entry h3::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+  .log-list { counter-reset: log-item; }
+  .log-list li {
+    counter-increment: log-item;
+    position: relative;
+    padding: 13px 0 13px 42px;
+    border-top: 1px solid var(--border);
+    font-size: 14.5px; line-height: 1.85; color: var(--text-2);
+  }
+  .log-list li::before {
+    content: counter(log-item, decimal-leading-zero);
+    position: absolute; left: 0; top: 13px;
+    font-family: var(--mono); font-size: 11.5px; color: var(--muted-fg);
+  }
+  .log-list li strong { color: var(--fg); font-weight: 600; }
+
+  code {
+    font-family: var(--mono); font-size: 12.2px;
+    padding: 1px 6px; border-radius: 5px;
+    background: var(--muted); border: 1px solid var(--border);
+    color: var(--fg); word-break: break-word;
+  }
+
+  /* ---------- 页脚 ---------- */
+  .site-footer { border-top: 1px solid var(--border); padding: clamp(44px, 7vw, 64px) 0 30px; }
+  .footer-grid {
+    display: grid; grid-template-columns: 1.6fr 1fr 1fr 1fr;
+    gap: 32px; margin-bottom: 40px;
+  }
+  .footer-brand { display: flex; align-items: center; gap: 9px; font-weight: 700; font-size: 15px; }
+  .footer-brand svg { width: 26px; height: 26px; border-radius: 6px; }
+  .footer-tagline { margin-top: 14px; font-size: 13.5px; color: var(--text-2); max-width: 26em; line-height: 1.8; }
+  .footer-col h4 {
+    font-family: var(--mono); font-size: 11px; letter-spacing: .12em;
+    text-transform: uppercase; color: var(--muted-fg);
+    margin-bottom: 14px; font-weight: 600;
+  }
+  .footer-col a {
+    display: flex; align-items: center; gap: 5px;
+    padding: 5px 0; font-size: 14px; color: var(--text-2);
+    transition: color .2s;
+  }
+  .footer-col a:hover { color: var(--fg); }
+  .footer-col a[aria-current="page"] { color: var(--fg); }
+  .footer-bottom {
+    border-top: 1px solid var(--border); padding-top: 22px;
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 12px; flex-wrap: wrap; font-size: 12.5px; color: var(--muted-fg);
+  }
+  .footer-bottom .sep { opacity: .5; }
+
+  /* ---------- 响应式 ---------- */
+  @media (max-width: 1024px) {
+    .footer-grid { grid-template-columns: 1fr 1fr; }
+  }
+
+  @media (max-width: 860px) {
+    .log-wrap { grid-template-columns: 1fr; gap: 28px; }
+    .log-side { position: static; }
+    .log-nav { display: flex; flex-wrap: wrap; gap: 8px; border-top: none; }
+    .log-nav li { flex: none; }
+    .log-nav a {
+      border: 1px solid var(--border); border-radius: 100px;
+      padding: 6px 13px; font-size: 12.5px; gap: 8px;
+    }
+    .log-nav a.active { background: var(--muted); border-color: var(--border-strong); }
+    .side-note { margin-top: 12px; }
+  }
+
+  @media (max-width: 768px) {
+    .nav-links, .nav-right .btn { display: none; }
+    .nav-menu-btn { display: inline-flex; }
+    .nav-inner { grid-template-columns: 1fr auto; }
+    .nav.is-pinned { width: calc(100% - 16px); }
+    .nav.is-pinned ~ .nav-drawer { width: calc(100% - 16px); }
+    .footer-grid { grid-template-columns: 1fr; gap: 24px; }
+  }
+
+  @media (max-width: 560px) {
+    .container { padding: 0 18px; }
+    .log-list li { padding-left: 34px; }
+    .log-entry h3 { letter-spacing: .1em; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: .001ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: .001ms !important;
+    }
+    html { scroll-behavior: auto; }
+  }
+
+  ::view-transition-old(root), ::view-transition-new(root) { animation: none; mix-blend-mode: normal; }
+</style>
 </head>
 <body>
-    <nav class="navbar" id="navbar">
-        <a href="./index.html" class="logo">
-            <span class="logo-icon"><svg width="36" height="36" viewBox="0 0 128 128"><rect x="0" y="0" width="128" height="128" rx="16" fill="#0d1117"/><rect x="0" y="0" width="48" height="28" fill="#f0f0f0"/><rect x="48" y="0" width="40" height="28" fill="#c0c0c0"/><rect x="88" y="0" width="40" height="28" fill="#808080"/><rect x="0" y="20" width="128" height="8" fill="#0d1117"/><text x="64" y="82" font-family="'Courier New',monospace" font-size="44" font-weight="bold" fill="#e6edf3" text-anchor="middle">cd</text><rect x="38" y="102" width="52" height="4" rx="2" fill="#8b949e"/></svg></span>
-            CodeDash
-        </a>
-        <button class="hamburger" id="hamburger" aria-label="菜单"><span></span><span></span><span></span></button>
-        <ul class="nav-links" id="navLinks">
-            <li><a href="./index.html">首页</a></li>
-            <li><a href="features.html">功能</a></li>
-            <li><a href="docs.html">文档</a></li>
-            <li><a href="log.html" class="active">日志</a></li>
-            <li><button class="theme-toggle" id="themeToggle" aria-label="切换主题">暗</button></li>
-            <li><a href="https://github.com/ueuiuiuu" target="_blank" class="gh-btn">GitHub</a></li>
-        </ul>
-    </nav>
-    <div class="container">
-        <div class="log-layout">
-            <aside class="log-sidebar">
-                <div class="sidebar-title">更新记录</div>
-                <ul class="log-nav">
-                    <li><a href="#v0.2.1" class="active">v0.2.1</a></li>
-                    <li><a href="#v0.2.0">v0.2.0</a></li>
-                    <li><a href="#v0.1.0">v0.1.0</a></li>
-                </ul>
-            </aside>
-            <main class="log-content">
-        <h1>更新日志</h1>
 
-        <p class="update-date">v0.2.1 — 2026-10-10</p>
+<!-- ░░ NAV ░░ -->
+<nav class="nav" id="nav">
+  <div class="container nav-inner">
+    <a class="nav-brand" href="index.html" aria-label="CodeDash 首页">
+      <svg viewBox="0 0 128 128" aria-hidden="true">
+        <rect width="128" height="128" rx="16" fill="#0d1117"/>
+        <rect width="48" height="26" fill="#f0f0f0"/>
+        <rect x="48" width="40" height="26" fill="#c0c0c0"/>
+        <rect x="88" width="40" height="26" fill="#808080"/>
+        <rect x="0" y="19" width="128" height="7" fill="#0d1117"/>
+        <text x="64" y="82" font-family="'Courier New',monospace" font-size="42" font-weight="bold" fill="#e6edf3" text-anchor="middle">cd</text>
+        <rect x="38" y="100" width="52" height="4" rx="2" fill="#8b949e"/>
+      </svg>
+      CodeDash
+    </a>
+    <ul class="nav-links">
+      <li><a href="index.html#features">特性</a></li>
+      <li><a href="index.html#architecture">架构</a></li>
+      <li><a href="index.html#videos">视频</a></li>
+      <li><a href="index.html#download">下载</a></li>
+      <li><a href="index.html#tech">技术栈</a></li>
+      <li><a href="log.html" class="active" aria-current="page">更新日志</a></li>
+    </ul>
+    <div class="nav-right">
+      <a class="icon-btn" href="https://github.com/ueuiuiuu" target="_blank" rel="noopener noreferrer" aria-label="GitHub">
+        <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 .5C5.65.5.5 5.65.5 12c0 5.08 3.29 9.39 7.86 10.91.58.1.79-.25.79-.55 0-.27-.01-1.17-.02-2.12-3.2.7-3.87-1.36-3.87-1.36-.52-1.33-1.28-1.68-1.28-1.68-1.04-.71.08-.7.08-.7 1.15.08 1.76 1.18 1.76 1.18 1.03 1.76 2.69 1.25 3.35.96.1-.75.4-1.25.72-1.54-2.55-.29-5.23-1.28-5.23-5.68 0-1.26.45-2.28 1.18-3.09-.12-.29-.51-1.46.11-3.05 0 0 .96-.31 3.15 1.18a10.9 10.9 0 0 1 5.74 0c2.19-1.49 3.15-1.18 3.15-1.18.62 1.59.23 2.76.11 3.05.73.81 1.18 1.83 1.18 3.09 0 4.41-2.69 5.38-5.25 5.66.41.35.77 1.05.77 2.12 0 1.53-.01 2.76-.01 3.14 0 .3.2.66.8.55A11.51 11.51 0 0 0 23.5 12C23.5 5.65 18.35.5 12 .5z"/></svg>
+      </a>
+      <button class="icon-btn theme-toggle" id="themeToggle" aria-label="切换亮暗主题">
+        <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
+        <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+      </button>
+      <a class="btn btn-primary" href="index.html#download">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+        下载
+      </a>
+      <button class="icon-btn nav-menu-btn" id="menuBtn" aria-label="打开菜单" aria-expanded="false">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><line x1="3" y1="7" x2="21" y2="7"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="17" x2="21" y2="17"/></svg>
+      </button>
+    </div>
+  </div>
+</nav>
+<div class="nav-drawer" id="drawer">
+  <ul class="nav-drawer-links">
+    <li><a href="index.html#features">特性</a></li>
+    <li><a href="index.html#architecture">双进程架构</a></li>
+    <li><a href="index.html#videos">视频</a></li>
+    <li><a href="index.html#download">下载安装</a></li>
+    <li><a href="index.html#tech">技术栈</a></li>
+    <li><a href="log.html" class="active" aria-current="page">更新日志</a></li>
+    <li><a href="../tools/index.html">集市 · 工具</a></li>
+  </ul>
+</div>
 
-        <section id="v0.2.1">
+<!-- ░░ 页头 ░░ -->
+<header class="page-head">
+  <span class="glyph g1" aria-hidden="true">#</span>
+  <div class="container">
+    <div class="sec-eyebrow"><span class="h">##</span>Changelog</div>
+    <h1 class="page-title">更新日志</h1>
+    <p class="page-desc">从首次发布到现在的每一次改动，按版本倒序排列。每个版本都写清楚改了什么、为什么改，以及升级时要注意的地方。</p>
+    <div class="page-tags">
+      <span><i class="dot"></i>最新 v0.2.1 · 2026-10-10</span>
+      <span>3 个版本</span>
+      <span>开源 · 免费</span>
+    </div>
+  </div>
+</header>
+
+<main class="container">
+  <div class="log-wrap">
+    <aside class="log-side">
+      <div class="side-label">版本索引</div>
+      <ul class="log-nav">
+        <li><a href="#v021" class="active">v0.2.1<span class="d">2026-10-10</span></a></li>
+        <li><a href="#v020">v0.2.0<span class="d">2026-10-04</span></a></li>
+        <li><a href="#v010">v0.1.0<span class="d">2026-07-27</span></a></li>
+      </ul>
+      <p class="side-note">历史安装包都在 <a href="https://github.com/ueuiuiuu/ueui/releases" target="_blank" rel="noopener noreferrer">GitHub Releases</a>。</p>
+    </aside>
+
+    <div class="log-content">
+      <article class="log-entry" id="v021">
+        <div class="log-meta"><span class="tag">LATEST</span><span>v0.2.1</span><span>2026-10-10</span></div>
         <h2>v0.2.1 — macOS 修复版</h2>
-
         <p>这一版集中修复 v0.2.0 在 macOS 上暴露的四个问题，建议 macOS 用户升级。从 v0.2.0 升级无需卸载，直接用新包替换「应用程序」里的 CodeDash 即可。Windows 版当前仍为 v0.2.0。</p>
 
         <h3>修复</h3>
-        <ol>
-            <li><strong>填完 API Key 不生效</strong> — 在设置里填好 Base URL / API Key 后直接开始对话，会报 <code>You didn't provide an API key</code>，日志显示 <code>Key: (empty)</code>。原因是模型配置只写进了本地存储，没有推送给 Agent 引擎，必须重启应用才生效。现在保存后立即生效，新添加的模型也会马上出现在聊天面板的模型下拉里。</li>
-            <li><strong>关掉窗口再打开会报错</strong> — macOS 上关闭窗口不会退出应用，再点 Dock 图标重新打开时窗口起不来（<code>Attempted to register a second handler</code>）。原因是重建窗口时重复注册了内部通信通道。现在可以反复关闭、重开。</li>
-            <li><strong>左上角图标显示成占位图</strong> — 标题栏的 CodeDash 图标加载失败，显示为碎图。原因是图标用了绝对路径，打包后走 <code>file://</code> 协议会解析到文件系统根目录，已改为相对路径。</li>
-            <li><strong>数据被写进应用包内部</strong> — 会话历史与代码索引原先写在 app 包里的 <code>Contents/Resources/agent-core/dist</code> 下，导致每次更新或重装应用都会丢失历史记录，且索引会持续撑大应用包。现已统一改到 <code>~/Library/Application Support/</code> 下。</li>
+        <ol class="log-list">
+          <li><strong>填完 API Key 不生效</strong> — 在设置里填好 Base URL / API Key 后直接开始对话，会报 <code>You didn't provide an API key</code>，日志显示 <code>Key: (empty)</code>。原因是模型配置只写进了本地存储，没有推送给 Agent 引擎，必须重启应用才生效。现在保存后立即生效，新添加的模型也会马上出现在聊天面板的模型下拉里。</li>
+          <li><strong>关掉窗口再打开会报错</strong> — macOS 上关闭窗口不会退出应用，再点 Dock 图标重新打开时窗口起不来（<code>Attempted to register a second handler</code>）。原因是重建窗口时重复注册了内部通信通道。现在可以反复关闭、重开。</li>
+          <li><strong>左上角图标显示成占位图</strong> — 标题栏的 CodeDash 图标加载失败，显示为碎图。原因是图标用了绝对路径，打包后走 <code>file://</code> 协议会解析到文件系统根目录，已改为相对路径。</li>
+          <li><strong>数据被写进应用包内部</strong> — 会话历史与代码索引原先写在 app 包里的 <code>Contents/Resources/agent-core/dist</code> 下，导致每次更新或重装应用都会丢失历史记录，且索引会持续撑大应用包。现已统一改到 <code>~/Library/Application Support/</code> 下。</li>
         </ol>
 
         <h3>说明</h3>
-        <ol>
-            <li>本次修复针对 macOS 版，尚未合入 Windows 构建；Windows 版当前为 v0.2.0</li>
-            <li>macOS 版语音转文字依赖的 <code>ffi-napi</code> 在 Apple Silicon 上暂无预编译产物，该功能会自动不可用，不影响其余功能</li>
+        <ol class="log-list">
+          <li>本次修复针对 macOS 版，尚未合入 Windows 构建；Windows 版当前为 v0.2.0。</li>
+          <li>macOS 版语音转文字依赖的 <code>ffi-napi</code> 在 Apple Silicon 上暂无预编译产物，该功能会自动不可用，不影响其余功能。</li>
         </ol>
-        </section>
+      </article>
 
-        <p class="update-date">v0.2.0 — 2026-10-04</p>
-
-        <section id="v0.2.0">
+      <article class="log-entry" id="v020">
+        <div class="log-meta"><span class="tag">FEATURE</span><span>v0.2.0</span><span>2026-10-04</span></div>
         <h2>v0.2.0 — macOS 版本发布 · 学习模式上线</h2>
 
         <h3>主要更新</h3>
-        <ol>
-            <li><strong>macOS 版本发布</strong> — 正式支持 Apple Silicon（M 系列）与 Intel 芯片，提供 <code>.dmg</code> 安装包，与 Windows 版功能完全一致</li>
-            <li><strong>学习模式</strong> — 全新的题库工作区：按文件夹组织题目，支持「会了 / 不会」练习、收藏与置顶、刷题统计与热力图；可以直接让右侧 AI 从资料里提取题目并一键保存到题库</li>
-            <li><strong>便携记录</strong> — 待办、语录、统计与热力图一体的记录面板，Agent 可以通过工具直接读写记录</li>
-            <li><strong>一键生成学习周报</strong> — 聚合学习时长与刷题记录生成 Markdown 周报，每项指标都与上一周对比，生成后自动归档到资料文件夹并在编辑器中打开</li>
-            <li><strong>交互式提问卡片</strong> — Agent 遇到需要确认的问题时会弹出选项卡片，作答后继续执行</li>
-            <li><strong>MCP 插件能力增强</strong> — 插件编辑器新增「启动 / 停止」按钮；修复插件工具被白名单过滤导致模型看不到的问题，修复 mcp-admin 停止后无法再启动的问题；新增内置示例插件 <code>demo</code>（echo / now）</li>
-            <li><strong>品牌与「关于」页</strong> — 应用名统一为 CodeDash，设置里新增「关于」页，显示版本号、GitHub 与官网入口</li>
-            <li><strong>Agent 引擎随包分发</strong> — agent-core 及其全部原生依赖（代码解析、向量检索、嵌入式数据库、终端）与内置插件一起打包，安装后开箱可用；macOS 版剔除与平台无关的预编译产物，安装包体积减少约 40%</li>
+        <ol class="log-list">
+          <li><strong>macOS 版本发布</strong> — 正式支持 Apple Silicon（M 系列）与 Intel 芯片，提供 <code>.dmg</code> 安装包，与 Windows 版功能完全一致。</li>
+          <li><strong>学习模式</strong> — 全新的题库工作区：按文件夹组织题目，支持「会了 / 不会」练习、收藏与置顶、刷题统计与热力图；可以直接让右侧 AI 从资料里提取题目并一键保存到题库。</li>
+          <li><strong>便携记录</strong> — 待办、语录、统计与热力图一体的记录面板，Agent 可以通过工具直接读写记录。</li>
+          <li><strong>一键生成学习周报</strong> — 聚合学习时长与刷题记录生成 Markdown 周报，每项指标都与上一周对比，生成后自动归档到资料文件夹并在编辑器中打开。</li>
+          <li><strong>交互式提问卡片</strong> — Agent 遇到需要确认的问题时会弹出选项卡片，作答后继续执行。</li>
+          <li><strong>MCP 插件能力增强</strong> — 插件编辑器新增「启动 / 停止」按钮；修复插件工具被白名单过滤导致模型看不到的问题，修复 mcp-admin 停止后无法再启动的问题；新增内置示例插件 <code>demo</code>（echo / now）。</li>
+          <li><strong>品牌与「关于」页</strong> — 应用名统一为 CodeDash，设置里新增「关于」页，显示版本号、GitHub 与官网入口。</li>
+          <li><strong>Agent 引擎随包分发</strong> — agent-core 及其全部原生依赖（代码解析、向量检索、嵌入式数据库、终端）与内置插件一起打包，安装后开箱可用；macOS 版剔除与平台无关的预编译产物，安装包体积减少约 40%。</li>
         </ol>
 
         <h3>说明</h3>
-        <ol>
-            <li>macOS 安装包未使用 Apple 开发者证书签名（ad-hoc 签名），首次打开需要在「系统设置 → 隐私与安全性」中点击「仍要打开」放行一次，详见 <a href="docs.html#qs-install-mac">文档 · macOS 首次打开</a></li>
-            <li>Windows 版同步更新到 v0.2.0，包含上述全部新功能；Agent 引擎通过系统 Node.js 启动，使用前需先安装 Node.js</li>
-            <li>macOS 版 Agent 引擎改用应用内置运行时启动，无需预装系统 Node.js</li>
-            <li>Windows 安装包未做代码签名，首次运行 SmartScreen 可能提示「未知发布者」，选择「仍要运行」即可</li>
-            <li>macOS 版语音转文字依赖的 <code>ffi-napi</code> 在 Apple Silicon 上暂无预编译产物，该功能会自动不可用，不影响其余功能</li>
+        <ol class="log-list">
+          <li>macOS 安装包未使用 Apple 开发者证书签名（ad-hoc 签名），首次打开需要在「系统设置 → 隐私与安全性」中点击「仍要打开」放行一次，详见 <a href="docs.html#qs-install-mac">文档 · macOS 首次打开</a>。</li>
+          <li>Windows 版同步更新到 v0.2.0，包含上述全部新功能；Agent 引擎通过系统 Node.js 启动，使用前需先安装 Node.js。</li>
+          <li>macOS 版 Agent 引擎改用应用内置运行时启动，无需预装系统 Node.js。</li>
+          <li>Windows 安装包未做代码签名，首次运行 SmartScreen 可能提示「未知发布者」，选择「仍要运行」即可。</li>
+          <li>macOS 版语音转文字依赖的 <code>ffi-napi</code> 在 Apple Silicon 上暂无预编译产物，该功能会自动不可用，不影响其余功能。</li>
         </ol>
-        </section>
+      </article>
 
-        <p class="update-date">v0.1.0 — 2026-07-27</p>
-
-        <section id="v0.1.0">
+      <article class="log-entry" id="v010">
+        <div class="log-meta"><span class="tag">FIRST RELEASE</span><span>v0.1.0</span><span>2026-07-27</span></div>
         <h2>v0.1.0 首次发布</h2>
 
         <h3>主要更新</h3>
-        <ol>
-            <li><strong>界面美化</strong> — 整体 UI 重新设计，亮色/暗色双模式，视觉风格更加现代统一</li>
-            <li><strong>语音识别</strong> — 集成 Vosk 离线语音引擎，支持离线语音转文字，无需云服务，保护隐私</li>
-            <li><strong>工具增强</strong> — 新增 Workflow 工作流引擎（支持并行/串行/Pipeline/Loop 四种执行模式）；引入工具权限系统 (RBAC)，精细控制 AI 可调用的工具范围</li>
-            <li><strong>ComputerUse 与浏览器工具</strong> — 基于 nut.js 的桌面自动化，AI 可直接控制鼠标键盘；内置 headless Chromium，支持 12+ 浏览器操作工具</li>
-            <li><strong>提示词增强与覆盖</strong> — 增强系统提示词效果，支持用户自定义提示词覆盖默认行为</li>
-            <li><strong>通知功能</strong> — 任务完成、异常等关键节点系统通知</li>
-            <li><strong>交互优化</strong> — 工具默认收缩与展开、历史提问小窗、会话页面移至右侧而非居中、历史提问分页</li>
-            <li><strong>Fork / Git 功能</strong> — 内置 Git 操作与项目 Fork 能力</li>
+        <ol class="log-list">
+          <li><strong>界面美化</strong> — 整体 UI 重新设计，亮色 / 暗色双模式，视觉风格更加现代统一。</li>
+          <li><strong>语音识别</strong> — 集成 Vosk 离线语音引擎，支持离线语音转文字，无需云服务，保护隐私。</li>
+          <li><strong>工具增强</strong> — 新增 Workflow 工作流引擎（支持并行 / 串行 / Pipeline / Loop 四种执行模式）；引入工具权限系统（RBAC），精细控制 AI 可调用的工具范围。</li>
+          <li><strong>ComputerUse 与浏览器工具</strong> — 基于 nut.js 的桌面自动化，AI 可直接控制鼠标键盘；内置 headless Chromium，支持 12+ 浏览器操作工具。</li>
+          <li><strong>提示词增强与覆盖</strong> — 增强系统提示词效果，支持用户自定义提示词覆盖默认行为。</li>
+          <li><strong>通知功能</strong> — 任务完成、异常等关键节点系统通知。</li>
+          <li><strong>交互优化</strong> — 工具默认收缩与展开、历史提问小窗、会话页面移至右侧而非居中、历史提问分页。</li>
+          <li><strong>Fork / Git 功能</strong> — 内置 Git 操作与项目 Fork 能力。</li>
         </ol>
 
         <h3>细节更新</h3>
-        <ol>
-            <li>左侧文件夹默认不打开，且增加记忆（记住用户折叠/展开偏好）</li>
-            <li>右键菜单"资源管理器/终端打开"位置上移，更方便触达</li>
-            <li>修复 EditFile 写长文本容易出错的问题</li>
-            <li>任意位置右键弹出对话处理窗口，快速发起 AI 交互</li>
-            <li>输入框内容复制优化；输出内容复制按钮位置优化；输入框退出后重新进入保留之前输入内容</li>
-            <li>文件夹内 Ctrl+F 搜索支持</li>
-            <li>工具调用默认不展开，减少视觉干扰</li>
-            <li>添加 CodeDash 品牌图标</li>
-            <li>实现并发能力，多任务可并行执行</li>
-            <li>添加插件模块，支持扩展自定义功能</li>
-            <li>针对 DeepSeek 优化缓存策略，提升响应速度</li>
-            <li>添加英语模式，界面国际化</li>
-            <li>添加 Debug 模式，便于开发者调试</li>
+        <ol class="log-list">
+          <li>左侧文件夹默认不打开，且增加记忆（记住用户折叠 / 展开偏好）。</li>
+          <li>右键菜单「资源管理器 / 终端打开」位置上移，更方便触达。</li>
+          <li>修复 EditFile 写长文本容易出错的问题。</li>
+          <li>任意位置右键弹出对话处理窗口，快速发起 AI 交互。</li>
+          <li>输入框内容复制优化；输出内容复制按钮位置优化；输入框退出后重新进入保留之前输入内容。</li>
+          <li>文件夹内 Ctrl+F 搜索支持。</li>
+          <li>工具调用默认不展开，减少视觉干扰。</li>
+          <li>添加 CodeDash 品牌图标。</li>
+          <li>实现并发能力，多任务可并行执行。</li>
+          <li>添加插件模块，支持扩展自定义功能。</li>
+          <li>针对 DeepSeek 优化缓存策略，提升响应速度。</li>
+          <li>添加英语模式，界面国际化。</li>
+          <li>添加 Debug 模式，便于开发者调试。</li>
         </ol>
-        </section>
-            </main>
-        </div>
+      </article>
     </div>
-    <footer class="footer">
-        <p>构建 · CodeDash v0.2.1 · 开源 · 免费 · AI 原生桌面 IDE</p>
-    </footer>
-    <script>
-        const t=document.getElementById('themeToggle'),e=document.documentElement;
-        const d=localStorage.getItem('theme')||(window.matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light');
-        e.setAttribute('data-theme',d);t.textContent=d==='dark'?'暗':'亮';
-        t.addEventListener('click',()=>{const n=e.getAttribute('data-theme')==='dark'?'light':'dark';e.setAttribute('data-theme',n);localStorage.setItem('theme',n);t.textContent=n==='dark'?'暗':'亮'});
-        const h=document.getElementById('hamburger'),n=document.getElementById('navLinks');
-        h.addEventListener('click',()=>{h.classList.toggle('active');n.classList.toggle('open')});
-        n.querySelectorAll('a').forEach(a=>{a.addEventListener('click',()=>{h.classList.remove('active');n.classList.remove('open')})});
-    </script>
+  </div>
+</main>
+
+<!-- ░░ FOOTER ░░ -->
+<footer class="site-footer">
+  <div class="container">
+    <div class="footer-grid">
+      <div>
+        <div class="footer-brand">
+          <svg viewBox="0 0 128 128" aria-hidden="true">
+            <rect width="128" height="128" rx="16" fill="#0d1117"/>
+            <rect width="48" height="26" fill="#f0f0f0"/>
+            <rect x="48" width="40" height="26" fill="#c0c0c0"/>
+            <rect x="88" width="40" height="26" fill="#808080"/>
+            <rect x="0" y="19" width="128" height="7" fill="#0d1117"/>
+            <text x="64" y="82" font-family="'Courier New',monospace" font-size="42" font-weight="bold" fill="#e6edf3" text-anchor="middle">cd</text>
+            <rect x="38" y="100" width="52" height="4" rx="2" fill="#8b949e"/>
+          </svg>
+          CodeDash
+        </div>
+        <p class="footer-tagline">AI 原生桌面 IDE — 自研 Agent 引擎，把「说一句」变成「跑通一整套」。</p>
+      </div>
+      <div class="footer-col">
+        <h4>产品</h4>
+        <div><a href="index.html#features">特性</a></div>
+        <div><a href="index.html#architecture">双进程架构</a></div>
+        <div><a href="index.html#videos">视频</a></div>
+        <div><a href="index.html#download">下载安装</a></div>
+      </div>
+      <div class="footer-col">
+        <h4>更多页面</h4>
+        <div><a href="features.html">功能清单</a></div>
+        <div><a href="docs.html">文档</a></div>
+        <div><a href="log.html" aria-current="page">更新日志</a></div>
+        <div><a href="articles.html">文章</a></div>
+      </div>
+      <div class="footer-col">
+        <h4>集市</h4>
+        <div><a href="../tools/index.html">工具</a></div>
+        <div><a href="../whiteboard/index.html">白板</a></div>
+        <div><a href="../recalltry.html">存档</a></div>
+        <div><a href="../../index.html">回首页</a></div>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>© 2026 CodeDash <span class="sep">·</span> 开源 · 免费 <span class="sep">·</span> v0.2.1</span>
+      <span>Built for developers <span class="sep">·</span> Windows / macOS</span>
+    </div>
+  </div>
+</footer>
+
+<script>
+(function () {
+  'use strict';
+
+  var html = document.documentElement;
+
+  /* ---------- 导航收缩 ---------- */
+  var nav = document.getElementById('nav');
+  var drawer = document.getElementById('drawer');
+  var menuBtn = document.getElementById('menuBtn');
+
+  function onScroll() {
+    if (!nav) return;
+    nav.classList.toggle('is-pinned', window.scrollY > 36);
+  }
+  window.addEventListener('scroll', onScroll, { passive: true });
+  onScroll();
+
+  if (menuBtn) {
+    menuBtn.addEventListener('click', function () {
+      var open = drawer.classList.toggle('open');
+      menuBtn.setAttribute('aria-expanded', open ? 'true' : 'false');
+    });
+    drawer.querySelectorAll('a').forEach(function (a) {
+      a.addEventListener('click', function () {
+        drawer.classList.remove('open');
+        menuBtn.setAttribute('aria-expanded', 'false');
+      });
+    });
+  }
+
+  /* ---------- 主题切换（与首页一致的圆形揭示） ---------- */
+  var toggle = document.getElementById('themeToggle');
+  function applyTheme(dark) {
+    html.classList.toggle('dark', dark);
+    var meta = document.querySelector('meta[name="theme-color"]');
+    if (meta) meta.setAttribute('content', dark ? '#0a0a0a' : '#ffffff');
+    try { localStorage.setItem('codedash-theme', dark ? 'dark' : 'light'); } catch (e) {}
+  }
+  if (toggle) {
+    toggle.addEventListener('click', function () {
+      var next = !html.classList.contains('dark');
+      if (!document.startViewTransition) { applyTheme(next); return; }
+      var r = toggle.getBoundingClientRect();
+      var x = r.left + r.width / 2, y = r.top + r.height / 2;
+      var end = Math.hypot(Math.max(x, window.innerWidth - x), Math.max(y, window.innerHeight - y));
+      var t = document.startViewTransition(function () { applyTheme(next); });
+      t.ready.then(function () {
+        html.animate(
+          { clipPath: ['circle(0px at ' + x + 'px ' + y + 'px)', 'circle(' + end + 'px at ' + x + 'px ' + y + 'px)'] },
+          { duration: 480, easing: 'cubic-bezier(.22,1,.36,1)', pseudoElement: '::view-transition-new(root)' }
+        );
+      });
+    });
+  }
+
+  /* ---------- 版本索引高亮 ---------- */
+  var entries = Array.prototype.slice.call(document.querySelectorAll('.log-entry'));
+  var links = Array.prototype.slice.call(document.querySelectorAll('.log-nav a'));
+
+  function setActive(id) {
+    links.forEach(function (a) {
+      a.classList.toggle('active', a.getAttribute('href') === '#' + id);
+    });
+  }
+
+  if (entries.length && 'IntersectionObserver' in window) {
+    var io = new IntersectionObserver(function (list) {
+      list.forEach(function (en) {
+        if (en.isIntersecting) setActive(en.target.id);
+      });
+    }, { rootMargin: '-30% 0px -55% 0px', threshold: 0 });
+    entries.forEach(function (el) { io.observe(el); });
+  }
+
+  links.forEach(function (a) {
+    a.addEventListener('click', function () {
+      setActive(a.getAttribute('href').slice(1));
+    });
+  });
+})();
+</script>
 </body>
 </html>

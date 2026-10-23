@@ -21,19 +21,22 @@ theme:
 
 extra_css:
   - assets/css/ueui-theme.css
+  - assets/css/ueui-home.css
 
 extra_javascript:
   - assets/js/mobile-toc.js
   - assets/js/prev-next.js
   - assets/js/water-grid.js
   - assets/js/theme-reveal.js
+  - assets/js/home-reveal.js
+  - assets/js/qa-scroll.js
 
 # 👇 左侧菜单栏（你可以自由增删）
 nav:
   - 首页: index.md
   - 关于: deploy-guide.md
   - 集市:
-      - 工具: market/tools/index.md
+      - 工具: market/tools/index.html
       - 官网: market/codedash/index.html
       - 存档: market/recalltry.md
       - 白板: market/whiteboard/index.html
