@@ -1,0 +1,435 @@
+:root {
+  color-scheme: dark;
+  font-family: "Segoe UI", "Microsoft YaHei", system-ui, sans-serif;
+  background: #9eb0aa;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#viewport {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  overflow: hidden;
+  background: #9eb0aa;
+}
+
+#viewport {
+  position: fixed;
+  inset: 0;
+}
+
+#viewport canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+  cursor: grab;
+  touch-action: none;
+}
+
+#viewport canvas:active {
+  cursor: grabbing;
+}
+
+body.first-person #viewport canvas {
+  cursor: crosshair;
+}
+
+.panel {
+  position: fixed;
+  z-index: 2;
+  color: #f3f0e8;
+  background: rgba(22, 28, 26, 0.86);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  box-shadow: 0 14px 40px rgba(0, 0, 0, 0.22);
+  backdrop-filter: blur(16px);
+}
+
+.settings-heading {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.settings-eyebrow {
+  color: #a9d4b4;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+}
+
+.subtitle {
+  margin: 0 0 12px;
+  color: #b9c2bd;
+  font-size: 12px;
+}
+
+.stats {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  margin: 0;
+}
+
+.stats div {
+  padding: 9px 10px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.07);
+}
+
+dt {
+  color: #aab5af;
+  font-size: 10px;
+}
+
+dd {
+  margin: 3px 0 0;
+  overflow: hidden;
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.panel-controls {
+  left: 20px;
+  bottom: 20px;
+  display: flex;
+  gap: 6px;
+  padding: 6px;
+  border-radius: 12px;
+}
+
+.panel-controls button {
+  padding: 9px 12px;
+  color: #eef4ef;
+  background: transparent;
+  border: 0;
+  border-radius: 8px;
+  font: inherit;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.panel-controls button:hover,
+.panel-controls button:focus-visible {
+  background: rgba(255, 255, 255, 0.12);
+  outline: none;
+}
+
+.help {
+  position: fixed;
+  right: 20px;
+  bottom: 22px;
+  z-index: 2;
+  margin: 0;
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 11px;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.6);
+}
+
+.loading,
+.error {
+  position: fixed;
+  left: 50%;
+  top: 50%;
+  z-index: 3;
+  transform: translate(-50%, -50%);
+  padding: 12px 18px;
+  color: #fff;
+  background: rgba(22, 28, 26, 0.9);
+  border-radius: 10px;
+  font-size: 13px;
+}
+
+.loading {
+  pointer-events: none;
+}
+
+.loading.hidden {
+  display: none;
+}
+
+.error {
+  max-width: min(520px, calc(100vw - 40px));
+  background: rgba(91, 31, 25, 0.94);
+  white-space: pre-wrap;
+}
+
+.settings-button {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 5;
+  padding: 9px 14px;
+  color: #eef4ef;
+  background: rgba(22, 28, 26, 0.86);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 10px;
+  font: inherit;
+  font-size: 12px;
+  cursor: pointer;
+  backdrop-filter: blur(16px);
+}
+
+.settings-panel {
+  position: fixed;
+  top: 66px;
+  right: 20px;
+  z-index: 6;
+  width: min(360px, calc(100vw - 40px));
+  padding: 16px;
+  color: #f3f0e8;
+  background: rgba(22, 28, 26, 0.94);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 14px;
+  box-shadow: 0 18px 48px rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(16px);
+}
+
+.settings-panel[hidden] {
+  display: none;
+}
+
+.settings-head,
+.setting-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.settings-head {
+  margin-bottom: 14px;
+  align-items: flex-start;
+}
+
+.settings-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.settings-head button,
+.settings-back {
+  padding: 4px 8px;
+  color: #b9c2bd;
+  background: transparent;
+  border: 0;
+  font: inherit;
+  font-size: 11px;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.settings-head button:hover,
+.settings-back:hover {
+  color: #f3f0e8;
+}
+
+.setting-row {
+  padding: 10px 0;
+  border-top: 1px solid rgba(255, 255, 255, 0.09);
+  font-size: 12px;
+}
+
+.toggle,
+.segmented button {
+  padding: 6px 10px;
+  color: #dfe7e1;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 8px;
+  font: inherit;
+  font-size: 11px;
+  cursor: pointer;
+}
+
+.toggle[aria-pressed="true"],
+.segmented button.active {
+  color: #102018;
+  background: #a9d4b4;
+  border-color: #a9d4b4;
+}
+
+.segmented {
+  display: flex;
+  gap: 4px;
+}
+
+.setting-note {
+  margin: 10px 0 0;
+  color: #aab5af;
+  font-size: 11px;
+  line-height: 1.6;
+}
+
+.mobile-controls {
+  position: fixed;
+  inset: 0;
+  z-index: 4;
+  pointer-events: none;
+}
+
+.mobile-controls[hidden] {
+  display: none;
+}
+
+.joystick,
+.mobile-actions {
+  position: absolute;
+  bottom: 24px;
+  pointer-events: auto;
+  touch-action: none;
+}
+
+.mobile-controls[data-side="left"] .joystick {
+  left: 24px;
+}
+
+.mobile-controls[data-side="left"] .mobile-actions {
+  right: 24px;
+}
+
+.mobile-controls[data-side="right"] .joystick {
+  right: 24px;
+}
+
+.mobile-controls[data-side="right"] .mobile-actions {
+  left: 24px;
+  align-items: flex-start;
+}
+
+.joystick {
+  width: 132px;
+  height: 132px;
+  border: 2px solid rgba(255, 255, 255, 0.36);
+  border-radius: 50%;
+  background: rgba(22, 28, 26, 0.34);
+  box-shadow: inset 0 0 24px rgba(0, 0, 0, 0.18);
+}
+
+.joystick-knob {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 58px;
+  height: 58px;
+  margin: -29px 0 0 -29px;
+  border: 2px solid rgba(255, 255, 255, 0.62);
+  border-radius: 50%;
+  background: rgba(169, 212, 180, 0.7);
+  box-shadow: 0 5px 18px rgba(0, 0, 0, 0.24);
+}
+
+.mobile-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 10px;
+}
+
+.vertical-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.vertical-buttons[hidden] {
+  display: none;
+}
+
+.jump-button,
+.vertical-buttons button {
+  color: #f3f7f3;
+  background: rgba(22, 28, 26, 0.62);
+  border: 2px solid rgba(255, 255, 255, 0.42);
+  border-radius: 50%;
+  font: inherit;
+  font-size: 12px;
+  touch-action: none;
+}
+
+.jump-button {
+  width: 76px;
+  height: 76px;
+}
+
+.vertical-buttons button {
+  width: 56px;
+  height: 56px;
+}
+
+.jump-button.pressed,
+.vertical-buttons button.pressed {
+  background: rgba(169, 212, 180, 0.58);
+  border-color: rgba(255, 255, 255, 0.72);
+}
+
+body.first-person .panel-controls {
+  display: none;
+}
+
+@media (max-width: 720px) {
+  .panel-controls {
+    left: 12px;
+    bottom: 12px;
+    right: 12px;
+    justify-content: space-between;
+  }
+
+  .panel-controls button {
+    flex: 1;
+    padding-inline: 6px;
+  }
+
+  .help {
+    display: none;
+  }
+
+  .settings-button {
+    top: 12px;
+    right: 12px;
+  }
+
+  .settings-panel {
+    top: 56px;
+    right: 12px;
+    width: calc(100vw - 24px);
+  }
+
+  .joystick {
+    width: 116px;
+    height: 116px;
+  }
+
+  .joystick-knob {
+    width: 52px;
+    height: 52px;
+    margin: -26px 0 0 -26px;
+  }
+
+  .mobile-controls[data-side="left"] .joystick,
+  .mobile-controls[data-side="left"] .mobile-actions,
+  .mobile-controls[data-side="right"] .joystick,
+  .mobile-controls[data-side="right"] .mobile-actions {
+    bottom: 14px;
+  }
+
+  .mobile-controls[data-side="left"] .joystick,
+  .mobile-controls[data-side="right"] .mobile-actions {
+    left: 14px;
+  }
+
+  .mobile-controls[data-side="left"] .mobile-actions,
+  .mobile-controls[data-side="right"] .joystick {
+    right: 14px;
+  }
+}

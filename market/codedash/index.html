@@ -1,2144 +1,1518 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CodeDash — AI 原生桌面 IDE</title>
-    <meta name="description" content="CodeDash 是一款 AI 原生桌面 IDE，自研 Agent 引擎、深度代码理解、浏览器自动化、计算机控制 — 全方位赋能开发者。">
-    <meta name="keywords" content="CodeDash, AI IDE, IDE, Agent引擎, 代码理解, 浏览器自动化">
-    <meta name="author" content="CodeDash Team">
-    <meta property="og:title" content="CodeDash — AI 原生桌面 IDE">
-    <meta property="og:description" content="自研 Agent 引擎、深度代码理解、浏览器自动化、计算机控制。">
-    <meta property="og:type" content="website">
-    <meta name="theme-color" content="#9ca3af">
-    <link rel="icon" href="icon-codedash.svg">
-    <!-- React 岛用到的 ESM 依赖提前预热，缩短 hero 背景与下载区骨架屏的等待时间 -->
-    <link rel="modulepreload" href="https://esm.sh/react@18.3.1">
-    <link rel="modulepreload" href="https://esm.sh/react-dom@18.3.1/client?deps=react@18.3.1">
-    <link rel="modulepreload" href="https://esm.sh/react-loading-skeleton@3.5.0?deps=react@18.3.1">
-    <link rel="modulepreload" href="https://esm.sh/htm@3.1.1">
-    <style>
-        :root, [data-theme="dark"] {
-            --primary: #9ca3af;
-            --primary-dark: #6b7280;
-            --primary-light: #d1d5db;
-            --bg: #0d1117;
-            --bg-light: #161b22;
-            --card-bg: rgba(22,27,34,0.7);
-            --card-border: rgba(255,255,255,0.1);
-            --text: #e6edf3;
-            --text-light: #8b949e;
-            --text-muted: #6e7681;
-            --border: rgba(255,255,255,0.08);
-            --success: #10b981;
-            --radius: 16px;
-            --radius-sm: 8px;
-            --shadow: 0 4px 20px rgba(0,0,0,0.3);
-            --shadow-lg: 0 15px 40px rgba(255,255,255,0.06);
-            --glow: 0 0 30px rgba(255,255,255,0.12);
-            --nav-bg: rgba(10, 10, 10, 0.85);
-            --nav-bg-scrolled: rgba(10, 10, 10, 0.96);
-            --nav-mobile-bg: rgba(10, 10, 10, 0.97);
-            --nav-shadow: 0 4px 30px rgba(0,0,0,0.4);
-            --nav-text: white;
-            --nav-link-hover: white;
-            --scrollbar-thumb: rgba(255,255,255,0.2);
-            --scrollbar-thumb-hover: rgba(255,255,255,0.35);
-            --surface-subtle: rgba(255,255,255,0.05);
-            --surface-subtle-hover: rgba(255,255,255,0.1);
-            --input-bg: rgba(255,255,255,0.05);
-            --input-text: white;
-            --hero-bg-start: #0a0a0a;
-            --hero-bg-end: #111111;
-            --stat-num: white;
-            --footer-bg: transparent;
-            /* Hero 的 Shader Gradient 背景：--hero-base 是 WebGL 就绪前的静态渐变兜底，
-               --hero-scrim 压在画布上，保证文字对比度；--sk-* 是骨架屏底色。 */
-            --hero-base: radial-gradient(120% 120% at 15% 0%, #1f2937 0%, #0d1117 58%, #000000 100%);
-            --hero-scrim: linear-gradient(180deg, rgba(13,17,23,0.30) 0%, rgba(13,17,23,0.78) 100%);
-            --sk-base: rgba(255,255,255,0.07);
-            --sk-hl: rgba(255,255,255,0.16);
-        }
-        [data-theme="light"] {
-            --primary: #9ca3af;
-            --primary-dark: #6b7280;
-            --primary-light: #d1d5db;
-            --bg: #eaecf0;
-            --bg-light: #e0e2e6;
-            --card-bg: rgba(255, 255, 255, 0.96);
-            --card-border: rgba(0,0,0,0.1);
-            --text: #1a1a1a;
-            --text-light: #444444;
-            --text-muted: #888888;
-            --border: rgba(0,0,0,0.08);
-            --success: #10b981;
-            --radius: 16px;
-            --radius-sm: 8px;
-            --shadow: 0 4px 20px rgba(0,0,0,0.08);
-            --shadow-lg: 0 15px 40px rgba(0,0,0,0.08);
-            --glow: 0 0 30px rgba(200,200,200,0.2);
-            --nav-bg: rgba(255,255,255,0.92);
-            --nav-bg-scrolled: rgba(255,255,255,0.98);
-            --nav-mobile-bg: rgba(255,255,255,0.98);
-            --nav-shadow: 0 4px 30px rgba(0,0,0,0.08);
-            --nav-text: #333333;
-            --nav-link-hover: #000000;
-            --scrollbar-thumb: rgba(0,0,0,0.18);
-            --scrollbar-thumb-hover: rgba(0,0,0,0.3);
-            --surface-subtle: rgba(0,0,0,0.04);
-            --surface-subtle-hover: rgba(0,0,0,0.08);
-            --input-bg: rgba(255,255,255,0.9);
-            --input-text: #1a1a1a;
-            --hero-bg-start: #f0f0f2;
-            --hero-bg-end: #e8e8ea;
-            --stat-num: #1a1a1a;
-            --footer-bg: transparent;
-            /* 浅色主题下的 hero 兜底渐变、压暗层与骨架屏底色 */
-            --hero-base: radial-gradient(120% 120% at 15% 0%, #e5e7eb 0%, #f4f5f7 58%, #ffffff 100%);
-            --hero-scrim: linear-gradient(180deg, rgba(255,255,255,0.02) 0%, rgba(255,255,255,0.16) 55%, rgba(255,255,255,0.46) 100%);
-            --sk-base: rgba(0,0,0,0.06);
-            --sk-hl: rgba(0,0,0,0.13);
-        }
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        html { scroll-behavior: smooth; }
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
-            background: var(--bg);
-            color: var(--text);
-            min-height: 100vh;
-            line-height: 1.7;
-            overflow-x: hidden;
-        }
-        .content-overlay { position: relative; z-index: 1; }
-        ::-webkit-scrollbar { width: 6px; }
-        ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: var(--scrollbar-thumb); border-radius: 3px; }
-        ::-webkit-scrollbar-thumb:hover { background: var(--scrollbar-thumb-hover); }
-        .navbar {
-            position: sticky; top: 0; z-index: 1000;
-            background: var(--nav-bg);
-            backdrop-filter: blur(20px);
-            border-bottom: 1px solid var(--border);
-            padding: 0 3rem;
-            height: 72px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            transition: background 0.3s, box-shadow 0.3s;
-        }
-        .navbar.scrolled {
-            background: var(--nav-bg-scrolled);
-            box-shadow: var(--nav-shadow);
-        }
-        .navbar .logo {
-            display: flex; align-items: center; gap: 0.6rem;
-            font-size: 1.4rem; font-weight: 800;
-            color: var(--nav-text); letter-spacing: -0.5px;
-        }
-        .navbar .logo .logo-icon {
-            width: 36px; height: 36px;
-            background: linear-gradient(135deg, var(--primary), #9ca3af);
-            border-radius: 10px;
-            display: flex; align-items: center; justify-content: center;
-            font-size: 1.1rem; font-weight: 700; color: var(--nav-text);
-        }
-        .navbar .nav-links {
-            display: flex; gap: 2.5rem;
-            list-style: none; align-items: center;
-        }
-        .navbar .nav-links a {
-            text-decoration: none; color: var(--text-light);
-            font-weight: 500; font-size: 0.9rem;
-            transition: color 0.2s; position: relative;
-        }
-        .navbar .nav-links a::after {
-            content: ''; position: absolute;
-            bottom: -4px; left: 0; width: 0; height: 2px;
-            background: var(--primary); transition: width 0.3s;
-        }
-        .navbar .nav-links a:hover { color: var(--nav-link-hover); }
-        .navbar .nav-links a:hover::after { width: 100%; }
-        .navbar .hamburger {
-            display: none; flex-direction: column; gap: 5px;
-            background: none; border: none; cursor: pointer;
-            padding: 4px;
-        }
-        .navbar .hamburger span {
-            width: 24px; height: 2px;
-            background: var(--nav-text); border-radius: 2px;
-            transition: all 0.3s;
-        }
-        .navbar .hamburger.active span:nth-child(1) { transform: rotate(45deg) translate(5px, 5px); }
-        .navbar .hamburger.active span:nth-child(2) { opacity: 0; }
-        .navbar .hamburger.active span:nth-child(3) { transform: rotate(-45deg) translate(5px, -5px); }
-        .navbar .nav-links .gh-btn {
-            background: var(--surface-subtle);
-            border: 1px solid var(--border);
-            color: var(--text-light);
-            padding: 0.4rem 1rem; border-radius: 20px;
-            font-size: 0.85rem; font-weight: 600;
-            transition: all 0.2s;
-        }
-        .navbar .nav-links .gh-btn:hover {
-            background: var(--surface-subtle-hover);
-            border-color: var(--primary); color: var(--nav-link-hover);
-        }
-        .navbar .nav-links .gh-btn::after { display: none; }
-        .theme-toggle {
-            background: none; border: none;
-            font-size: 1.3rem; cursor: pointer;
-            padding: 0.3rem; line-height: 1;
-            border-radius: 50%; width: 36px; height: 36px;
-            display: flex; align-items: center; justify-content: center;
-            transition: all 0.3s; color: var(--text-light);
-        }
-        .theme-toggle:hover {
-            background: var(--surface-subtle);
-            color: var(--nav-link-hover);
-        }
-        @media (max-width: 900px) {
-            .navbar { padding: 0 1.5rem; }
-            .navbar .nav-links {
-                position: fixed; top: 72px; left: 0; right: 0;
-                flex-direction: column; gap: 0;
-                background: var(--nav-mobile-bg);
-                backdrop-filter: blur(20px);
-                border-bottom: 1px solid var(--border);
-                padding: 1rem 0;
-                transform: translateY(-110%);
-                transition: transform 0.3s ease;
-                overflow: hidden;
-            }
-            .navbar .nav-links.open { transform: translateY(0); }
-            .navbar .nav-links li { width: 100%; text-align: center; padding: 0.8rem 0; }
-            .navbar .hamburger { display: flex; }
-        }
-        .container { max-width: 1100px; margin: 0 auto; padding: 3rem 2rem; }
-        .section-title {
-            text-align: center; font-size: 2.2rem; font-weight: 800;
-            margin-bottom: 0.8rem; letter-spacing: -0.5px;
-            background: linear-gradient(135deg, #9ca3af 0%, #6b7280 100%);
-            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-        [data-theme="light"] .section-title {
-            /* 同 hero 标题：浅色模式下改用近黑色，否则 #9ca3af 在浅底上几乎看不清 */
-            background: linear-gradient(135deg, #1f2937 0%, #0b0f14 100%);
-            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-        .section-subtitle {
-            text-align: center; color: var(--text-muted);
-            font-size: 1.05rem; max-width: 600px;
-            margin: 0 auto 2.5rem;
-        }
-        .section-divider {
-            width: 40px; height: 2px;
-            background: var(--text-muted);
-            opacity: 0.4;
-            border-radius: 2px; margin: 0.9rem auto 1.2rem;
-        }
-        .hero {
-            text-align: center; padding: 2rem 0 0;
-            position: relative;
-        }
-        .hero::before {
-            content: '';
-            position: absolute;
-            top: -20%;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 600px;
-            height: 400px;
-            background: radial-gradient(ellipse, rgba(255,255,255,0.08) 0%, transparent 70%);
-            pointer-events: none;
-        }
-        .hero .badge {
-            display: inline-block;
-            background: rgba(255,255,255,0.15);
-            border: 1px solid rgba(255,255,255,0.3);
-            color: var(--primary-light); font-size: 0.75rem;
-            font-weight: 700; padding: 0.35rem 1rem;
-            border-radius: 20px; letter-spacing: 1px;
-            margin-bottom: 1.5rem; text-transform: none;
-        }
-        [data-theme="light"] .hero .badge {
-            background: rgba(0,0,0,0.05);
-            border-color: rgba(0,0,0,0.14);
-            color: #374151;
-        }
-        .hero h1 {
-            font-size: 4rem; font-weight: 900;
-            letter-spacing: -2px; margin-bottom: 1rem; line-height: 1.1;
-            background: linear-gradient(135deg, #9ca3af 0%, #d1d5db 50%, #6b7280 100%);
-            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-            background-clip: text;
-            filter: drop-shadow(0 0 30px rgba(255,255,255,0.08));
-        }
-        [data-theme="light"] .hero h1 {
-            /* 浅色模式下标题必须是近黑色，灰渐变在浅底上会显得发灰、没有重量 */
-            background: none;
-            -webkit-background-clip: border-box;
-            -webkit-text-fill-color: currentColor;
-            color: #0b0f14;
-            filter: none;
-        }
-        .hero .subtitle {
-            font-size: 1.2rem; color: var(--text-light);
-            max-width: 650px; margin: 0 auto 2rem; line-height: 1.8;
-        }
-        .hero .stats-row {
-            display: flex; justify-content: center;
-            margin-top: 2.25rem; flex-wrap: wrap;
-        }        .hero .stat-item {
-            text-align: center; padding: 0 2.1rem;
-            border-left: 1px solid var(--border);
-        }
-        .hero .stat-item:first-child { border-left: none; }
-        .hero .stat-item .num {
-            font-size: 1.6rem; font-weight: 700; color: var(--stat-num);
-            display: block; font-variant-numeric: tabular-nums;
-            letter-spacing: -0.5px; line-height: 1.2;
-        }
-        .hero .stat-item .label {
-            font-size: 0.72rem; color: var(--text-muted);
-            letter-spacing: 0.4px;
-            margin-top: 0.2rem;
-        }
-        .hero .cta-buttons {
-            display: flex; gap: 1rem;
-            justify-content: center; flex-wrap: wrap;
-        }
-        .hero .cta-primary {
-            display: inline-block; padding: 0.9rem 2.4rem;
-            background: linear-gradient(135deg, #ffffff, #ccd2d9);
-            color: #0d1117; border: none; border-radius: 50px;
-            font-size: 1rem; font-weight: 700; cursor: pointer;
-            text-decoration: none; transition: all 0.3s;
-            box-shadow: 0 6px 26px rgba(255,255,255,0.18);
-            position: relative;
-        }
-        .hero .cta-primary::after {
-            content: '';
-            position: absolute;
-            inset: -2px;
-            border-radius: 52px;
-            background: linear-gradient(135deg, #ffffff, #d1d5db);
-            z-index: -1;
-            opacity: 0;
-            transition: opacity 0.3s;
-            filter: blur(10px);
-        }
-        .hero .cta-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 40px rgba(255,255,255,0.3), 0 0 60px rgba(255,255,255,0.12);
-        }
-        .hero .cta-primary:hover::after {
-            opacity: 0.5;
-        }
-        [data-theme="light"] .hero .cta-primary {
-            background: linear-gradient(135deg, #4b5563, #1f2937);
-            color: #ffffff;
-            box-shadow: 0 8px 24px rgba(15,23,42,0.22);
-        }
-        [data-theme="light"] .hero .cta-primary::after {
-            background: linear-gradient(135deg, #4b5563, #1f2937);
-        }
-        [data-theme="light"] .hero .cta-primary:hover {
-            box-shadow: 0 12px 34px rgba(15,23,42,0.3);
-        }
-        .hero .cta-secondary {
-            display: inline-block; padding: 0.9rem 2.2rem;
-            background: rgba(255,255,255,0.04); color: var(--text-light);
-            border: 1px solid var(--border); border-radius: 50px;
-            font-size: 0.95rem; font-weight: 600; cursor: pointer;
-            text-decoration: none; transition: all 0.25s;
-        }
-        .hero .cta-secondary:hover {
-            background: var(--surface-subtle-hover); color: var(--text);
-            border-color: rgba(255,255,255,0.2);
-        }
-        [data-theme="light"] .hero .cta-secondary {
-            background: #ffffff;
-            border-color: rgba(0,0,0,0.12);
-            color: #374151;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-        }
-        [data-theme="light"] .hero .cta-secondary:hover {
-            background: #ffffff;
-            border-color: rgba(0,0,0,0.24);
-            color: #111827;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-        }
-        .hero .cta-note {
-            margin-top: 1.1rem; font-size: 0.82rem; color: var(--text-muted);
-            letter-spacing: 0.3px;
-        }
-        .cta-tag {
-            display: inline-block; margin-left: 0.5rem; padding: 0.12rem 0.48rem;
-            border-radius: 20px; background: #10b981; color: #04231a;
-            font-size: 0.7rem; font-weight: 800; letter-spacing: 0;
-            vertical-align: 1px; line-height: 1.45;
-        }
-        /* === Download Section === */
-        .download-section { margin: 4.5rem auto 0; max-width: 900px; }
-        .download-grid {
-            display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-top: 2.5rem;
-        }
-        .download-card {
-            background: var(--card-bg); border: 1px solid var(--card-border);
-            border-radius: var(--radius); padding: 1.8rem;
-            box-shadow: var(--shadow); text-align: left;
-            display: flex; flex-direction: column;
-        }
-        .download-card.featured {
-            border-color: rgba(16,185,129,0.45);
-            box-shadow: 0 0 0 1px rgba(16,185,129,0.18), var(--shadow-lg);
-        }
-        .download-head { display: flex; align-items: center; gap: 0.9rem; margin-bottom: 0.9rem; }
-        .download-head h3 { font-size: 1.25rem; font-weight: 800; color: var(--text); margin: 0; }
-        .platform-icon {
-            font-size: 1.9rem; line-height: 1;
-            display: flex; align-items: center; justify-content: center;
-            color: var(--text);
-        }
-        .version-pill {
-            display: inline-block; margin-top: 0.35rem; padding: 0.12rem 0.6rem;
-            border-radius: 20px; font-size: 0.7rem; font-weight: 700;
-            background: rgba(255,255,255,0.12); color: var(--text-light);
-            border: 1px solid var(--border);
-        }
-        [data-theme="light"] .version-pill { background: rgba(0,0,0,0.05); }
-        .download-card.featured .version-pill {
-            background: rgba(16,185,129,0.18); color: #10b981;
-            border-color: rgba(16,185,129,0.35);
-        }
-        .download-desc { font-size: 0.88rem; color: var(--text-light); line-height: 1.75; margin: 0 0 1.2rem; }
-        .download-actions { display: flex; flex-direction: column; gap: 0.6rem; }
-        .dl-btn {
-            display: block; text-align: center; padding: 0.75rem 1rem;
-            border-radius: var(--radius-sm); text-decoration: none;
-            font-size: 0.88rem; font-weight: 600; color: var(--text-light);
-            background: var(--surface-subtle); border: 1px solid var(--border);
-            transition: all 0.25s;
-        }
-        .dl-btn:hover { background: var(--surface-subtle-hover); color: var(--text); }
-        .dl-btn.primary {
-            background: linear-gradient(135deg, #f0f2f4, #cbd2d9); color: #0d1117;
-            border-color: transparent; font-weight: 700;
-        }
-        .dl-btn.primary:hover {
-            color: #0d1117; transform: translateY(-1px);
-            box-shadow: 0 6px 24px rgba(255,255,255,0.22);
-        }
-        [data-theme="light"] .dl-btn.primary {
-            background: linear-gradient(135deg, #4b5563, #1f2937);
-            color: #ffffff;
-        }
-        [data-theme="light"] .dl-btn.primary:hover {
-            color: #ffffff;
-            box-shadow: 0 6px 20px rgba(15,23,42,0.25);
-        }
-        .download-note {
-            margin: 0; padding-top: 1.25rem;
-            font-size: 0.8rem; color: var(--text-muted); line-height: 1.7;
-        }
-        .download-note code.cmd {
-            display: block; margin-top: 0.55rem; padding: 0.5rem 0.65rem;
-            background: var(--surface-subtle); border: 1px solid var(--border);
-            border-radius: var(--radius-sm);
-            font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-            font-size: 0.7rem; line-height: 1.6; color: var(--text-light);
-            word-break: normal; overflow-wrap: break-word;
-        }
-        @media (max-width: 768px) {
-            .download-grid { grid-template-columns: 1fr; }
-        }
-        /* === Video Carousel ===
-           滚动驱动的横向轮播：向下滚动时下一个视频从右侧滑入，接管上一个的位置。
-           视频列表完全由脚本里的 VIDEOS 数组驱动，新增视频只需追加一项。 */
-        .video-carousel {
-            position: relative;
-            margin: 4rem auto;
-            /* 宽度同时受视口高度约束，保证 16:9 的画面在矮屏上也放得下 */
-            max-width: min(900px, calc((100vh - 220px) * 16 / 9));
-            /* 高度由 JS 按视频数量计算，用于决定吸附滚动的距离 */
-        }
-        .video-carousel__inner {
-            position: sticky;
-            height: calc(100vh - 88px);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-        }
-        .video-label {
-            font-size: 0.75rem;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            color: var(--text-muted);
-            font-weight: 700;
-            margin-bottom: 1rem;
-            min-height: 1.5em;
-        }
-        .video-stage {
-            position: relative;
-            width: 100%;
-            aspect-ratio: 16 / 9;
-            border-radius: var(--radius);
-            overflow: hidden;
-            background: rgba(0,0,0,0.4);
-            border: 1px solid var(--border);
-            box-shadow: var(--shadow-lg);
-            transition: box-shadow 0.3s, border-color 0.3s;
-        }
-        .video-stage:hover {
-            border-color: rgba(255,255,255,0.3);
-            box-shadow: var(--shadow-lg), 0 0 60px rgba(255,255,255,0.06);
-        }
-        .video-slide {
-            position: absolute;
-            inset: 0;
-        }
-        .video-slide .video-player {
-            position: relative;
-            width: 100%;
-            height: 100%;
-            cursor: pointer;
-        }
-        .video-dots {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            margin-top: 1.1rem;
-        }
-        .video-dots button {
-            width: 8px; height: 8px; padding: 0;
-            border: none; border-radius: 4px; cursor: pointer;
-            background: var(--text-muted); opacity: 0.35;
-            transition: width 0.25s, opacity 0.25s;
-        }
-        .video-dots button:hover { opacity: 0.65; }
-        .video-dots button.active { width: 24px; opacity: 1; }
-        /* 浅色模式下视频占位块不能是纯黑盒子，否则在浅色页面里像两个黑洞 */
-        [data-theme="light"] .video-stage {
-            background: linear-gradient(135deg, #f5f6f8, #e6e9ee);
-            border-color: rgba(0,0,0,0.08);
-            box-shadow: 0 10px 30px rgba(0,0,0,0.06);
-        }
-        [data-theme="light"] .video-stage:hover {
-            border-color: rgba(0,0,0,0.18);
-            box-shadow: 0 12px 36px rgba(0,0,0,0.1);
-        }
-        [data-theme="light"] .video-player .video-overlay {
-            background: rgba(255,255,255,0.5);
-        }
-        [data-theme="light"] .video-player .video-overlay .play-icon-circle {
-            border-color: rgba(0,0,0,0.18);
-            background: rgba(0,0,0,0.04);
-            color: #374151;
-        }
-        [data-theme="light"] .video-player .video-overlay:hover .play-icon-circle {
-            border-color: rgba(0,0,0,0.35);
-            background: rgba(0,0,0,0.07);
-            box-shadow: 0 0 40px rgba(0,0,0,0.08);
-        }
-        [data-theme="light"] .video-player .video-overlay .overlay-icon {
-            filter: none;
-        }
-        [data-theme="light"] .video-player .video-overlay .overlay-text {
-            color: #4b5563;
-        }
-        .video-player .video-overlay {
-            position: absolute;
-            inset: 0;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            background: rgba(0,0,0,0.55);
-            backdrop-filter: blur(4px);
-            z-index: 2;
-            transition: opacity 0.4s ease;
-            gap: 1rem;
-        }
-        .video-player .video-overlay.hidden {
-            opacity: 0;
-            pointer-events: none;
-        }
-        .video-player .video-overlay .play-icon-circle {
-            width: 80px;
-            height: 80px;
-            border-radius: 50%;
-            border: 2px solid rgba(255,255,255,0.3);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 2rem;
-            color: white;
-            transition: all 0.3s;
-            background: rgba(255,255,255,0.08);
-        }
-        .video-player .video-overlay:hover .play-icon-circle {
-            transform: scale(1.1);
-            border-color: rgba(255,255,255,0.6);
-            background: rgba(255,255,255,0.15);
-            box-shadow: 0 0 60px rgba(255,255,255,0.3), 0 0 120px rgba(255,255,255,0.1);
-        }
-        .video-player .video-overlay .overlay-icon {
-            width: 80px;
-            height: 80px;
-            opacity: 0.9;
-            filter: drop-shadow(0 0 30px rgba(255,255,255,0.25)) brightness(1.2);
-            transition: all 0.3s;
-        }
-        .video-player .video-overlay:hover .overlay-icon {
-            filter: drop-shadow(0 0 50px rgba(255,255,255,0.4)) brightness(1.4);
-            transform: scale(1.05);
-        }
-        .video-player .video-overlay .overlay-text {
-            color: rgba(255,255,255,0.7);
-            font-size: 0.88rem;
-            font-weight: 500;
-            letter-spacing: 0.5px;
-        }
-        .video-player iframe {
-            width: 100%;
-            height: 100%;
-            border: none;
-        }
-        /* 移动端 / 用户开启「减少动效」时：退回纵向堆叠，不做吸附与横向位移 */
-        .video-carousel--stacked { height: auto !important; max-width: 800px; }
-        .video-carousel--stacked .video-carousel__inner {
-            position: static; height: auto;
-        }
-        .video-carousel--stacked .video-label,
-        .video-carousel--stacked .video-dots { display: none; }
-        .video-carousel--stacked .video-stage {
-            aspect-ratio: auto; overflow: visible;
-            background: none; border: none; box-shadow: none; border-radius: 0;
-            display: flex; flex-direction: column; gap: 2.5rem;
-        }
-        .video-carousel--stacked .video-stage:hover { border: none; box-shadow: none; }
-        .video-carousel--stacked .video-slide {
-            position: static; transform: none !important;
-            display: flex; flex-direction: column;
-            background: none; border: none; box-shadow: none; border-radius: 0;
-        }
-        .video-carousel--stacked .video-slide__label {
-            display: block;
-        }
-        .video-carousel--stacked .video-slide .video-player {
-            aspect-ratio: 16 / 9;
-            border-radius: var(--radius); overflow: hidden;
-            background: rgba(0,0,0,0.4);
-            border: 1px solid var(--border);
-            box-shadow: var(--shadow-lg);
-        }
-        [data-theme="light"] .video-carousel--stacked .video-slide .video-player {
-            background: linear-gradient(135deg, #f5f6f8, #e6e9ee);
-            border-color: rgba(0,0,0,0.08);
-        }
-        /* 堆叠模式下每个视频各自的标题 */
-        .video-slide__label {
-            display: none;
-            text-align: center;
-            font-size: 0.75rem;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            color: var(--text-muted);
-            font-weight: 700;
-            margin-bottom: 0.9rem;
-        }
-        .features-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 1.5rem; margin: 3rem 0;
-        }
-        .feature-card {
-            background: var(--card-bg);
-            border: 1px solid var(--card-border);
-            border-radius: var(--radius); padding: 2rem;
-            backdrop-filter: blur(10px);
-            transition: all 0.3s ease; cursor: default;
-            position: relative; overflow: hidden;
-        }
-        .feature-card::before {
-            content: ''; position: absolute;
-            top: 0; left: 0; right: 0; height: 2px;
-            background: linear-gradient(90deg, transparent, var(--primary), transparent);
-            opacity: 0; transition: opacity 0.3s;
-        }
-        .feature-card:hover::before { opacity: 1; }
-        .feature-card:hover {
-            transform: translateY(-5px);
-            border-color: rgba(255,255,255,0.4);
-            box-shadow: 0 10px 40px rgba(255,255,255,0.1), 0 0 60px rgba(255,255,255,0.05);
-        }
-        .feature-card .icon {
-            width: 48px; height: 48px; border-radius: 12px;
-            display: flex; align-items: center; justify-content: center;
-            font-size: 1.4rem; margin-bottom: 1rem;
-            background: rgba(255,255,255,0.1);
-        }
-        .feature-card h3 { font-size: 1.15rem; margin-bottom: 0.6rem; color: var(--text); font-weight: 700; }
-        .feature-card p { color: var(--text-light); font-size: 0.9rem; line-height: 1.7; }
-        .feature-card .tag {
-            display: inline-block; font-size: 0.7rem; font-weight: 600;
-            padding: 0.15rem 0.6rem; border-radius: 12px;
-            margin-top: 0.8rem; background: rgba(255,255,255,0.1);
-            color: var(--primary-light); border: 1px solid rgba(255,255,255,0.2);
-        }
-        .arch-section {
-            margin: 4rem 0; padding: 3rem;
-            background: var(--card-bg);
-            border: 1px solid var(--card-border);
-            border-radius: var(--radius);
-            backdrop-filter: blur(10px);
-        }
-        .arch-flow {
-            display: flex; align-items: center;
-            justify-content: center; gap: 1rem;
-            flex-wrap: wrap; margin: 2rem 0;
-        }
-        .arch-box {
-            background: rgba(255,255,255,0.1);
-            border: 1px solid rgba(255,255,255,0.25);
-            border-radius: 12px; padding: 1.2rem 1.5rem;
-            text-align: center; min-width: 150px;
-            transition: all 0.3s;
-        }
-        .arch-box:hover {
-            background: rgba(255,255,255,0.15);
-            border-color: rgba(255,255,255,0.4);
-            transform: translateY(-2px);
-        }
-        .arch-box .arch-icon { font-size: 1.5rem; margin-bottom: 0.5rem; }
-        .arch-box .arch-name { font-size: 0.85rem; font-weight: 700; color: var(--text); }
-        .arch-box .arch-desc { font-size: 0.75rem; color: var(--text-muted); margin-top: 0.3rem; }
-        .arch-arrow { color: var(--text-muted); font-size: 1.2rem; font-weight: 300; }
-        .modes-grid {
-            display: grid; grid-template-columns: repeat(3, 1fr);
-            gap: 1.5rem; margin: 2rem 0;
-        }
-        @media (max-width: 900px) { .modes-grid { grid-template-columns: 1fr; } }
-        .mode-card {
-            background: var(--card-bg);
-            border: 1px solid var(--card-border);
-            border-radius: var(--radius); padding: 2rem;
-            backdrop-filter: blur(10px); text-align: center;
-            transition: all 0.3s;
-        }
-        .mode-card:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 10px 40px rgba(255,255,255,0.15);
-        }
-        .mode-card .mode-icon { font-size: 2.5rem; margin-bottom: 1rem; }
-        .mode-card h3 { color: var(--text); font-size: 1.2rem; margin-bottom: 0.5rem; }
-        .mode-card p { color: var(--text-light); font-size: 0.85rem; line-height: 1.7; }
-        .mode-card .mode-badge {
-            display: inline-block; margin-top: 1rem;
-            padding: 0.3rem 1rem; border-radius: 20px;
-            font-size: 0.75rem; font-weight: 700;
-        }
-        .mode-card .mode-badge.agent { background: rgba(16,185,129,0.15); color: #10b981; border: 1px solid rgba(16,185,129,0.3); }
-        .mode-card .mode-badge.plan { background: rgba(255,255,255,0.15); color: var(--primary-light); border: 1px solid rgba(255,255,255,0.3); }
-        .mode-card .mode-badge.chain { background: rgba(244,114,182,0.15); color: #d1d5db; border: 1px solid rgba(244,114,182,0.3); }
-        .tech-stack {
-            overflow: hidden;
-            margin: 2rem 0;
-            -webkit-mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
-            mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
-        }
-        .tech-stack-track {
-            display: flex;
-            gap: 0.8rem;
-            width: max-content;
-            animation: tech-scroll 30s linear infinite;
-        }
-        .tech-stack-track:hover {
-            animation-play-state: paused;
-        }
-        @keyframes tech-scroll {
-            0% { transform: translateX(0); }
-            100% { transform: translateX(-50%); }
-        }
-        .tech-item {
-            background: rgba(255,255,255,0.04);
-            border: 1px solid var(--border);
-            border-radius: 20px; padding: 0.5rem 1.2rem;
-            font-size: 0.85rem; color: var(--text-light);
-            white-space: nowrap;
-            transition: all 0.3s;
-        }
-        .tech-item:hover {
-            background: rgba(255,255,255,0.1);
-            border-color: rgba(255,255,255,0.3);
-            color: var(--text);
-        }
-        }
-        .todo-section {
-            background: var(--card-bg);
-            border: 1px solid var(--card-border);
-            border-radius: var(--radius); padding: 2.5rem;
-            backdrop-filter: blur(10px);
-            margin-bottom: 3rem; transition: all 0.3s;
-        }
-        .todo-section:hover { border-color: rgba(255,255,255,0.3); }
-        .todo-section h2 {
-            font-size: 1.3rem; margin-bottom: 0.5rem;
-            display: flex; align-items: center; gap: 0.5rem; color: white;
-        }
-        .todo-section .todo-desc { color: var(--text-muted); font-size: 0.85rem; margin-bottom: 1.5rem; }
-        .todo-section .todo-empty {
-            text-align: center; padding: 2rem; color: var(--text-muted);
-            font-size: 0.9rem;
-        }
-        .todo-section .todo-empty .empty-icon { font-size: 3rem; margin-bottom: 1rem; display: block; }
-        .input-group {
-            display: flex; gap: 0.5rem; margin-bottom: 1.2rem;
-        }
-        .input-group input {
-            flex: 1; padding: 0.8rem 1.2rem;
-            background: rgba(255,255,255,0.05);
-            border: 1px solid var(--border);
-            border-radius: var(--radius-sm); font-size: 0.95rem;
-            outline: none; color: var(--input-text); transition: all 0.2s;
-        }
-        .input-group input::placeholder { color: var(--text-muted); }
-        .input-group input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(255,255,255,0.15); }
-        .input-group button {
-            padding: 0.8rem 1.8rem;
-            background: linear-gradient(135deg, var(--primary), #6b7280);
-            color: white; border: none;
-            border-radius: var(--radius-sm); font-size: 0.95rem;
-            font-weight: 600; cursor: pointer; transition: all 0.2s;
-        }
-        .input-group button:hover {
-            transform: translateY(-1px);
-            box-shadow: 0 4px 15px rgba(255,255,255,0.4);
-        }
-        .input-group button:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
-        .todo-list { list-style: none; }
-        .todo-list li {
-            display: flex; align-items: center;
-            justify-content: space-between; padding: 0.75rem 1rem;
-            border-radius: var(--radius-sm); transition: background 0.15s;
-            gap: 0.8rem;
-            border-bottom: 1px solid rgba(255,255,255,0.05);
-        }
-        .todo-list li:last-child { border-bottom: none; }
-        .todo-list li:hover { background: rgba(255,255,255,0.03); }
-        .todo-list li.done span { text-decoration: line-through; color: var(--text-muted); }
-        .todo-list li span { flex: 1; cursor: pointer; color: var(--text); }
-        .todo-list li .del-btn {
-            background: none; border: none; color: #ef4444;
-            cursor: pointer; font-size: 1rem; padding: 0.2rem 0.5rem;
-            border-radius: 6px; opacity: 0.6; transition: all 0.15s;
-        }
-        .todo-list li .del-btn:hover { opacity: 1; background: rgba(239,68,68,0.1); }
-        .todo-list li .check-btn {
-            background: none; border: 1px solid var(--border);
-            width: 22px; height: 22px; border-radius: 50%;
-            cursor: pointer; display: flex; align-items: center;
-            justify-content: center; color: transparent;
-            transition: all 0.2s; flex-shrink: 0; font-size: 0.7rem;
-        }
-        .todo-list li.done .check-btn {
-            background: var(--success); border-color: var(--success); color: white;
-        }
-        .todo-list li .check-btn:hover { border-color: var(--primary); }
-        .counter {
-            font-size: 0.85rem; color: var(--text-muted);
-            margin-top: 1rem; display: flex;
-            justify-content: space-between; align-items: center;
-        }
-        .counter .clear-btn {
-            background: none; border: none; color: var(--text-muted);
-            font-size: 0.8rem; cursor: pointer; padding: 0.3rem 0.8rem;
-            border-radius: 6px; transition: all 0.2s;
-        }
-        .counter .clear-btn:hover { background: rgba(239,68,68,0.1); color: #ef4444; }
-        .todo-loading {
-            text-align: center; padding: 2rem; color: var(--text-muted);
-        }
-        .loading-dots {
-            display: inline-flex; gap: 4px;
-        }
-        .loading-dots span {
-            width: 6px; height: 6px; background: var(--primary);
-            border-radius: 50%; animation: dotPulse 1.4s infinite;
-        }
-        .loading-dots span:nth-child(2) { animation-delay: 0.2s; }
-        .loading-dots span:nth-child(3) { animation-delay: 0.4s; }
-        @keyframes dotPulse {
-            0%, 80%, 100% { opacity: 0.3; transform: scale(0.8); }
-            40% { opacity: 1; transform: scale(1); }
-        }
-        .footer {
-            text-align: center; padding: 3rem 2rem;
-            color: var(--text-muted); font-size: 0.85rem;
-            border-top: 1px solid var(--border); margin-top: 3rem;
-        }
-        .footer .heart { color: #9ca3af; }
-        .footer .footer-links {
-            display: flex; justify-content: center;
-            gap: 2rem; margin-bottom: 1rem;
-        }
-        .footer .footer-links a {
-            color: var(--text-muted); text-decoration: none;
-            font-size: 0.8rem; transition: color 0.2s;
-        }
-        .footer .footer-links a:hover { color: var(--primary-light); }
-        .fade-in {
-            opacity: 0; transform: translateY(30px);
-            transition: opacity 0.8s ease, transform 0.8s ease;
-        }
-        .fade-in.visible { opacity: 1; transform: translateY(0); }
-        .api-status {
-            display: inline-flex; align-items: center; gap: 0.4rem;
-            font-size: 0.75rem; color: var(--text-muted);
-        }
-        .api-status .dot {
-            width: 8px; height: 8px; border-radius: 50%;
-            background: #ef4444;
-        }
-        .api-status .dot.online {
-            background: #10b981;
-            box-shadow: 0 0 8px rgba(16,185,129,0.5);
-        }
-        .back-to-top {
-            position: fixed; bottom: 2rem; right: 2rem;
-            width: 44px; height: 44px; border-radius: 50%;
-            background: linear-gradient(135deg, var(--primary), #6b7280);
-            color: white; border: none; font-size: 1.2rem;
-            cursor: pointer; z-index: 999;
-            box-shadow: 0 4px 15px rgba(255,255,255,0.3);
-            transition: all 0.3s; opacity: 0; transform: translateY(20px);
-            pointer-events: none;
-        }
-        .back-to-top.show {
-            opacity: 1; transform: translateY(0);
-            pointer-events: auto;
-        }
-        .back-to-top:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 6px 25px rgba(255,255,255,0.5);
-        }
-        @media (max-width: 768px) {
-            .hero h1 { font-size: 2.5rem; }
-            .hero .stats-row { gap: 1.5rem; }
-            .hero .stat-item .num { font-size: 1.5rem; }
-            .container { padding: 2rem 1.2rem; }
-            .section-title { font-size: 1.8rem; }
-            .arch-flow { flex-direction: column; }
-            .arch-arrow { transform: rotate(90deg); }
-            .features-grid { grid-template-columns: 1fr; }
-        }
-        @media (max-width: 480px) {
-            .hero h1 { font-size: 2rem; }
-            .hero .subtitle { font-size: 1rem; }
-            .container { padding: 1.5rem 1rem; }
-        }
-        /* === 移动端与整体细节增强 === */
-        html { -webkit-text-size-adjust: 100%; }
-        img { max-width: 100%; height: auto; }
-        section { scroll-margin-top: 90px; }
-        button, a { -webkit-tap-highlight-color: transparent; }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CodeDash — AI 原生桌面 IDE</title>
+<meta name="description" content="CodeDash 是一款 AI 原生桌面 IDE：自研 Agent 引擎、深度代码理解、浏览器自动化、计算机控制。">
+<meta name="keywords" content="CodeDash, AI IDE, Agent 引擎, 代码理解, 浏览器自动化">
+<meta name="author" content="CodeDash Team">
+<meta property="og:title" content="CodeDash — AI 原生桌面 IDE">
+<meta property="og:description" content="自研 Agent 引擎、深度代码理解、浏览器自动化、计算机控制。">
+<meta property="og:type" content="website">
+<meta name="theme-color" content="#ffffff">
+<link rel="icon" href="icon-codedash.svg">
+<script>
+  /* 主题初始化：首载跟随系统，之后记 localStorage；html 加 .js 才启用滚动显现 */
+  (function () {
+    document.documentElement.classList.add('js');
+    var s = null;
+    try { s = localStorage.getItem('codedash-theme'); } catch (e) {}
+    var dark = s ? s === 'dark'
+                 : (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
+    if (dark) document.documentElement.classList.add('dark');
+  })();
+</script>
+<style>
+  /* ==========================================================
+     CodeDash 官网 — 单色设计系统
+     标题：衬线大字（Songti / Noto Serif / Georgia）
+     正文：系统无衬线 · 标注：等宽 · 分隔：1px 细线
+     ========================================================== */
 
-        @media (max-width: 900px) {
-            .navbar { height: 64px; padding: 0 1rem; }
-            .navbar .nav-links { top: 64px; padding: 0.8rem 1rem 1.2rem; max-height: calc(100vh - 64px); overflow-y: auto; }
-            .navbar .nav-links li { padding: 0.7rem 0; }
-            .navbar .nav-links { align-items: stretch; }
-            .navbar .nav-links li { text-align: left; padding: 0.25rem 0; }
-            .navbar .nav-links a,
-            .navbar .nav-links .theme-toggle {
-                display: flex;
-                align-items: center;
-                justify-content: flex-start;
-                width: 100%;
-                padding: 0.8rem 1rem;
-                border-radius: 8px;
-                font-size: 0.95rem;
-            }
-            .navbar .nav-links a.active {
-                background: var(--surface-subtle);
-                color: var(--nav-link-hover);
-            }
-            .navbar .nav-links .theme-toggle { height: auto; }
-            .navbar .nav-links .gh-btn {
-                justify-content: center;
-                margin: 0.25rem 0 0.5rem;
-                padding: 0.7rem 1rem;
-                border-radius: 8px;
-            }
+  :root {
+    --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC",
+            "Hiragino Sans GB", "Microsoft YaHei", ui-sans-serif, system-ui, sans-serif;
+    --serif: "Songti SC", "STSong", "Noto Serif SC", "Source Han Serif SC",
+             "Noto Serif CJK SC", "SimSun", Georgia, serif;
+    --mono: ui-monospace, "Cascadia Mono", "JetBrains Mono", "SF Mono",
+            Consolas, "Liberation Mono", monospace;
 
-            .navbar .logo { font-size: 1.2rem; }
-            .navbar .logo .logo-icon { width: 32px; height: 32px; }
-            .hero { padding: 4rem 0 2.5rem; }
-            .hero h1 { font-size: 2.4rem; letter-spacing: -1px; }
-            .hero .subtitle { font-size: 1.05rem; }
-            .section-title { font-size: 1.8rem; }
-            .section-subtitle { font-size: 0.95rem; margin-bottom: 2rem; }
-            .container { padding: 2rem 1.2rem; }
-            .features-grid { grid-template-columns: 1fr; gap: 1rem; }
-            .feature-card { padding: 1.5rem; }
-            .arch-section { padding: 2rem 1.2rem; margin: 3rem 0; }
-            .modes-grid { grid-template-columns: 1fr; gap: 1rem; }
-            .mode-card { padding: 1.5rem; }
-            .todo-section { padding: 1.5rem; }
-            .input-group { flex-direction: column; }
-            .input-group button { width: 100%; }
-            .footer-links { flex-wrap: wrap; gap: 1rem 1.5rem; }
-            .back-to-top { right: 1rem; bottom: 1rem; width: 40px; height: 40px; }
-        }
+    --bg: #ffffff;
+    --muted: #f5f5f5;
+    --card: #ffffff;
+    --border: #e8e8e8;
+    --border-strong: #d4d4d4;
+    --fg: #0a0a0a;
+    --text-2: #525252;
+    --muted-fg: #858585;
+    --primary: #121212;
+    --primary-fg: #fafafa;
+    --ring: #0d0d0d;
+    --glass-bg: rgba(255, 255, 255, .72);
+    --term-bg: #0a0a0a;
+    --term-fg: #e5e5e5;
+    --term-dim: #7d7d7d;
+    --term-line: #232323;
+    --term-ok: #6ee7a8;
+    --term-key: #a3a3a3;
 
-        @media (max-width: 480px) {
-            .navbar { padding: 0 0.75rem; }
-            .navbar .logo { font-size: 1.05rem; }
-            .hero { padding: 3rem 0 2rem; }
-            .hero h1 { font-size: 1.9rem; }
-            .hero .subtitle { font-size: 0.95rem; }
-            .hero .cta-buttons { flex-direction: column; align-items: stretch; }
-            .hero .cta-primary,
-            .hero .cta-secondary { text-align: center; }
-            .hero .stats-row { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.2rem; }
-            .hero .stat-item .num { font-size: 1.4rem; }
-            .hero .stat-item .label { font-size: 0.7rem; }
-            .section-title { font-size: 1.5rem; }
-            .section-subtitle { font-size: 0.88rem; }
-            .container { padding: 1.25rem 0.9rem; }
-            .arch-arrow { margin: 0.25rem 0; }
-            .footer { padding: 2rem 1rem; }
-        }
+    --radius: 8px;
+    --radius-lg: 12px;
+    --nav-h: 64px;
+    --maxw: 1120px;
+    --ease: cubic-bezier(.22, 1, .36, 1);
+    --shadow-shot: 0 1px 2px rgba(0, 0, 0, .05), 0 16px 40px -20px rgba(0, 0, 0, .16);
+    color-scheme: light;
+  }
 
-        @media (prefers-reduced-motion: reduce) {
-            * {
-                animation-duration: 0.01ms !important;
-                animation-iteration-count: 1 !important;
-                transition-duration: 0.01ms !important;
-                scroll-behavior: auto !important;
-            }
-        }
+  html.dark {
+    --bg: #0a0a0a;
+    --muted: #171717;
+    --card: #171717;
+    --border: #282828;
+    --border-strong: #404040;
+    --fg: #fafafa;
+    --text-2: #a1a1a1;
+    --muted-fg: #737373;
+    --primary: #e5e5e5;
+    --primary-fg: #171717;
+    --ring: #737373;
+    --glass-bg: rgba(10, 10, 10, .64);
+    --term-bg: #050505;
+    --term-line: #1f1f1f;
+    --shadow-shot: 0 0 0 1px rgba(255, 255, 255, .06), 0 20px 48px -20px rgba(0, 0, 0, .6);
+    color-scheme: dark;
+  }
 
-        /* === Hero 的 Shader Gradient 背景层 ===
-           hero 变成一张卡片：.shader-layer 铺满整块，React 把 WebGL canvas 挂到 #shaderMount。
-           data-shader 有四种状态：loading 显示占位骨架，ready 画布淡入，
-           fallback 保留纯 CSS 渐变（无 WebGL / 减少动效 / CDN 不可用时）。 */
-        .hero {
-            position: relative;
-            padding: 3.5rem 2rem 2.5rem;
-            border: 1px solid var(--card-border);
-            border-radius: 28px;
-            background: var(--hero-base);
-            box-shadow: var(--shadow);
-            overflow: hidden;
-            isolation: isolate;
-        }
-        .hero-inner { position: relative; z-index: 4; }
-        .shader-layer { position: absolute; inset: 0; z-index: 0; pointer-events: none; }
-        .shader-base { position: absolute; inset: 0; z-index: 0; background: var(--hero-base); }
-        .shader-mount { position: absolute; inset: 0; z-index: 2; }
-        .shader-probe,
-        .shader-canvas { position: absolute; inset: 0; }
-        .shader-canvas { opacity: 0; transition: opacity 0.9s ease; }
-        .shader-layer[data-shader="ready"] .shader-canvas { opacity: 1; }
-        .shader-canvas canvas { display: block; width: 100% !important; height: 100% !important; }
-        .shader-layer::after {
-            content: '';
-            position: absolute; inset: 0; z-index: 3;
-            background: var(--hero-scrim);
-        }
-        .shader-placeholder {
-            display: none;
-            position: absolute; inset: 0; z-index: 1;
-            flex-direction: column; align-items: center; justify-content: center;
-            gap: 0.9rem; background: var(--hero-base);
-        }
-        .shader-layer[data-shader="loading"] .shader-placeholder { display: flex; }
-        .shader-placeholder__bar {
-            position: relative; overflow: hidden;
-            width: min(420px, 68%); height: 10px; border-radius: 6px;
-            background: var(--sk-base);
-        }
-        .shader-placeholder__bar::after {
-            content: '';
-            position: absolute; inset: 0;
-            background: linear-gradient(90deg, transparent, var(--sk-hl), transparent);
-            transform: translateX(-100%);
-            animation: hero-shimmer 1.5s ease-in-out infinite;
-        }
-        @keyframes hero-shimmer { 100% { transform: translateX(100%); } }
-        .shader-placeholder__text { font-size: 0.78rem; color: var(--text-muted); letter-spacing: 0.4px; }
-        .shader-status {
-            position: absolute; top: 0.85rem; right: 1rem; z-index: 5;
-            max-width: min(78%, 420px); text-align: right;
-        }
-        .shader-status__pill {
-            display: inline-block; padding: 0.3rem 0.7rem; border-radius: 20px;
-            font-size: 0.7rem; line-height: 1.5; color: var(--text-muted);
-            background: var(--surface-subtle); border: 1px solid var(--border);
-            backdrop-filter: blur(8px);
-        }
-        /* 浅色主题下渐变文字压在浅色画布上会糊，改为实色 */
-        [data-theme="light"] .hero h1 {
-            background: none;
-            -webkit-background-clip: border-box;
-            -webkit-text-fill-color: currentColor;
-            color: #0b0f14;
-            filter: none;
-        }
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
 
-        /* === 下载区：真实 GitHub Releases 数据 + 骨架屏 === */
-        .release-meta {
-            display: flex; align-items: center; justify-content: center;
-            flex-wrap: wrap; gap: 0.4rem 0.9rem;
-            margin: -1.6rem auto 0; min-height: 34px;
-            font-size: 0.78rem; color: var(--text-muted);
-        }
-        .release-meta__pill {
-            display: inline-block; padding: 0.2rem 0.7rem; border-radius: 20px;
-            font-size: 0.75rem; font-weight: 700;
-            background: rgba(16,185,129,0.18); color: #10b981;
-            border: 1px solid rgba(16,185,129,0.35);
-        }
-        [data-theme="light"] .release-meta__pill { color: #047857; }
-        .sk-card .sk-head { display: flex; align-items: center; gap: 0.9rem; margin-bottom: 1rem; }
-        .sk-card .sk-head > div { flex: 1; min-width: 0; }
-        .dl-btn__count {
-            display: block; margin-top: 0.15rem;
-            font-size: 0.68rem; font-weight: 500; opacity: 0.72;
-        }
+  html {
+    -webkit-text-size-adjust: 100%;
+    scroll-behavior: smooth;
+    overflow-x: hidden;
+  }
+  html.dark body { background: var(--bg); }
 
-        /* react-loading-skeleton@3.5.0 的 dist/skeleton.css 内联版，
-           只额外把 --base-color / --highlight-color 映射到站点主题变量。 */
-        @keyframes react-loading-skeleton { 100% { transform: translateX(100%); } }
-        .react-loading-skeleton {
-            --base-color: var(--sk-base);
-            --highlight-color: var(--sk-hl);
-            --animation-duration: 1.5s;
-            --animation-direction: normal;
-            --pseudo-element-display: block;
-            background-color: var(--base-color);
-            width: 100%; border-radius: 0.25rem;
-            display: inline-flex; line-height: 1; position: relative;
-            user-select: none; overflow: hidden;
-        }
-        .react-loading-skeleton::after {
-            content: ' ';
-            display: var(--pseudo-element-display);
-            position: absolute; top: 0; left: 0; right: 0; height: 100%;
-            background-repeat: no-repeat;
-            background-image: var(--custom-highlight-background, linear-gradient(90deg, var(--base-color) 0%, var(--highlight-color) 50%, var(--base-color) 100%));
-            transform: translateX(-100%);
-            animation-name: react-loading-skeleton;
-            animation-direction: var(--animation-direction);
-            animation-duration: var(--animation-duration);
-            animation-timing-function: ease-in-out;
-            animation-iteration-count: infinite;
-        }
-        @media (prefers-reduced-motion: reduce) {
-            .react-loading-skeleton { --pseudo-element-display: none; }
-            .shader-placeholder__bar::after { animation: none; }
-        }
+  body {
+    font-family: var(--sans);
+    background: var(--bg);
+    color: var(--fg);
+    font-size: 15.5px;
+    line-height: 1.75;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    overflow-x: hidden;
+    padding-top: var(--nav-h);
+    transition: background-color .3s ease, color .3s ease;
+  }
 
-        @media (max-width: 900px) {
-            .hero { padding: 2.75rem 1.4rem 2.25rem; border-radius: 22px; }
-            .shader-status { display: none; }
-        }
-        @media (max-width: 480px) {
-            .hero { padding: 2.25rem 1.1rem 1.9rem; border-radius: 18px; }
-        }
+  a { color: inherit; text-decoration: none; }
+  button { font-family: inherit; cursor: pointer; border: none; background: none; color: inherit; }
+  img { max-width: 100%; display: block; }
+  ul { list-style: none; }
 
-    </style>
+  ::selection { background: var(--primary); color: var(--primary-fg); }
+  :focus-visible { outline: 2px solid var(--ring); outline-offset: 2px; border-radius: 4px; }
+
+  ::-webkit-scrollbar { width: 10px; height: 10px; }
+  ::-webkit-scrollbar-thumb {
+    background: var(--border-strong); border-radius: 10px; border: 2px solid var(--bg);
+  }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+
+  .container { width: 100%; max-width: var(--maxw); margin: 0 auto; padding: 0 24px; }
+  .section-pad { padding: clamp(64px, 9vw, 112px) 0; }
+  section { border-top: 1px solid var(--border); scroll-margin-top: calc(var(--nav-h) + 20px); }
+
+  /* ---------- 导航 ---------- */
+  .nav {
+    position: fixed; top: 0; left: 0; right: 0; margin: 0 auto;
+    width: 100%; height: var(--nav-h); z-index: 200;
+    background: var(--bg);
+    transition: width .42s var(--ease), height .42s var(--ease),
+                top .42s var(--ease), border-radius .42s var(--ease),
+                background-color .3s ease;
+  }
+  .nav.is-pinned {
+    top: 12px;
+    width: min(760px, calc(100% - 16px));
+    height: 52px;
+    border-radius: 16px;
+    background: var(--glass-bg);
+    -webkit-backdrop-filter: blur(20px) saturate(160%);
+    backdrop-filter: blur(20px) saturate(160%);
+    box-shadow: 0 1px 0 0 var(--border), 0 12px 32px -20px rgba(0, 0, 0, .25);
+  }
+  .nav-inner {
+    height: 100%; padding: 0 20px;
+    display: grid; grid-template-columns: 1fr auto 1fr;
+    align-items: center; gap: 12px;
+    transition: padding .42s var(--ease), gap .42s ease;
+  }
+  .nav-brand {
+    justify-self: start; display: flex; align-items: center; gap: 9px;
+    font-weight: 700; font-size: 15px; letter-spacing: -.01em;
+  }
+  .nav-brand svg { width: 26px; height: 26px; border-radius: 6px; transition: width .42s var(--ease), height .42s var(--ease); }
+  .nav-links { justify-self: center; display: flex; align-items: center; gap: 2px; white-space: nowrap; }
+  .nav-links a {
+    display: inline-flex; align-items: center; gap: 5px;
+    padding: 8px 12px; font-size: 14px; color: var(--text-2);
+    border-radius: var(--radius);
+    transition: color .2s ease, background .2s ease;
+  }
+  .nav-links a:hover { color: var(--fg); background: var(--muted); }
+  .nav-links a svg { width: 13px; height: 13px; opacity: .7; }
+  .nav-right { justify-self: end; display: flex; align-items: center; gap: 8px; }
+  .icon-btn {
+    width: 38px; height: 38px; display: inline-flex; align-items: center; justify-content: center;
+    color: var(--text-2); border: 1px solid var(--border); border-radius: var(--radius);
+    transition: color .2s, border-color .2s, background .2s, width .42s var(--ease), height .42s var(--ease);
+  }
+  .icon-btn:hover { color: var(--fg); border-color: var(--border-strong); background: var(--muted); }
+  .icon-btn svg { width: 18px; height: 18px; }
+  .theme-toggle .icon-sun { display: block; }
+  .theme-toggle .icon-moon { display: none; }
+  html.dark .theme-toggle .icon-sun { display: none; }
+  html.dark .theme-toggle .icon-moon { display: block; }
+  .nav-menu-btn { display: none; }
+  .nav-menu-btn svg { width: 20px; height: 20px; }
+
+  .nav.is-pinned .nav-inner { padding: 0 14px; gap: 8px; }
+  .nav.is-pinned .nav-brand svg { width: 22px; height: 22px; }
+  .nav.is-pinned .nav-links a { padding: 7px 9px; font-size: 13px; }
+  .nav.is-pinned .icon-btn { width: 34px; height: 34px; }
+  .nav.is-pinned .btn { height: 34px; padding: 0 13px; font-size: 13px; }
+
+  .nav-drawer {
+    position: fixed; top: var(--nav-h); left: 0; right: 0; z-index: 199;
+    background: var(--bg); max-height: 0; overflow: hidden; visibility: hidden;
+    transition: max-height .3s ease, visibility .3s ease;
+  }
+  .nav-drawer.open { max-height: 320px; visibility: visible; border-bottom: 1px solid var(--border); }
+  .nav.is-pinned ~ .nav-drawer {
+    top: 64px; width: min(760px, calc(100% - 16px)); margin: 0 auto;
+    border-radius: 0 0 16px 16px; background: var(--glass-bg);
+    -webkit-backdrop-filter: blur(20px) saturate(160%);
+    backdrop-filter: blur(20px) saturate(160%);
+  }
+  .nav-drawer-links { padding: 10px 22px 18px; }
+  .nav-drawer-links a {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 13px 2px; font-size: 15px; color: var(--text-2);
+    border-bottom: 1px solid var(--border);
+  }
+  .nav-drawer-links li:last-child a { border-bottom: none; }
+
+  /* ---------- 按钮 ---------- */
+  .btn {
+    display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+    height: 38px; padding: 0 16px;
+    font-size: 14px; font-weight: 600;
+    border-radius: var(--radius); border: 1px solid transparent;
+    white-space: nowrap;
+    transition: background .16s ease, color .16s ease, border-color .16s ease;
+  }
+  .btn svg { width: 16px; height: 16px; flex: none; }
+  .btn-primary { background: var(--primary); color: var(--primary-fg); }
+  .btn-primary:hover { opacity: .88; }
+  .btn-ghost { border-color: var(--border-strong); color: var(--fg); }
+  .btn-ghost:hover { background: var(--muted); border-color: var(--fg); }
+  .btn-lg { height: 46px; padding: 0 22px; font-size: 15px; border-radius: 10px; }
+  .btn-lg svg { width: 18px; height: 18px; }
+  .btn-white { background: var(--primary-fg); color: var(--primary); }
+  .btn-white:hover { opacity: .88; }
+  .btn-ghost-light { border-color: color-mix(in srgb, var(--primary-fg) 45%, transparent); color: var(--primary-fg); }
+  .btn-ghost-light:hover { background: color-mix(in srgb, var(--primary-fg) 12%, transparent); border-color: var(--primary-fg); }
+
+  /* ---------- HERO ---------- */
+  .hero { position: relative; padding: clamp(56px, 8vw, 96px) 0 clamp(48px, 6vw, 72px); overflow: hidden; border-top: none; }
+  .glyph {
+    position: absolute; font-family: var(--mono); font-weight: 800;
+    color: var(--fg); opacity: .04; line-height: 1;
+    user-select: none; pointer-events: none;
+  }
+  .hero .g1 { font-size: clamp(160px, 24vw, 320px); top: -.12em; right: -.04em; }
+  .hero .g2 { font-size: clamp(120px, 18vw, 240px); bottom: 4%; left: -.05em; }
+
+  .hero-copy { position: relative; max-width: 720px; }
+  .hero-chip {
+    display: inline-flex; align-items: center; gap: 8px;
+    font-family: var(--mono); font-size: 12px; letter-spacing: .06em;
+    color: var(--text-2); padding: 6px 13px;
+    border: 1px solid var(--border); border-radius: 100px;
+    margin-bottom: 26px; background: var(--card);
+  }
+  .hero-chip .dot {
+    width: 7px; height: 7px; border-radius: 50%; background: var(--fg);
+    animation: pulse 2.4s ease infinite;
+  }
+  @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: .3; } }
+
+  .hero-title {
+    font-family: var(--serif); font-weight: 900;
+    font-size: clamp(40px, 6.6vw, 74px);
+    line-height: 1.16; letter-spacing: -.01em;
+    margin-bottom: 22px;
+  }
+  .hero-title em {
+    font-style: normal;
+    background: linear-gradient(transparent 66%, color-mix(in srgb, var(--fg) 13%, transparent) 66%);
+  }
+  .hero-sub {
+    font-size: 17px; color: var(--text-2);
+    max-width: 36em; line-height: 1.85; margin-bottom: 32px;
+  }
+  .hero-actions { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; }
+  .hero-note {
+    margin-top: 20px; font-family: var(--mono);
+    font-size: 12px; color: var(--muted-fg); letter-spacing: .02em;
+  }
+
+  /* 终端模拟 */
+  .hero-shot { margin-top: clamp(44px, 6vw, 68px); position: relative; }
+  .term {
+    border: 1px solid var(--border); border-radius: 12px;
+    overflow: hidden; background: var(--term-bg); color: var(--term-fg);
+    box-shadow: var(--shadow-shot);
+  }
+  .term-bar {
+    display: flex; align-items: center; gap: 7px;
+    padding: 11px 14px; border-bottom: 1px solid var(--term-line);
+  }
+  .term-bar .dot { width: 10px; height: 10px; border-radius: 50%; background: #303030; }
+  .term-title { margin-left: 8px; font-family: var(--mono); font-size: 11.5px; color: var(--term-dim); }
+  .term-mode {
+    margin-left: auto; font-family: var(--mono); font-size: 10px; letter-spacing: .14em;
+    color: var(--term-fg); border: 1px solid #333; border-radius: 100px; padding: 3px 9px;
+  }
+  .term-body { padding: 20px 18px 22px; font-family: var(--mono); font-size: 12.8px; line-height: 2.05; }
+  .term-body .line { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .term-body .prompt { color: var(--term-dim); margin-right: 6px; }
+  .term-body .u { color: #fff; }
+  .term-body .k {
+    display: inline-block; min-width: 52px; color: var(--term-key);
+    letter-spacing: .04em;
+  }
+  .term-body .m { color: #bdbdbd; padding-left: 18px; }
+  .term-body .dim { color: var(--term-dim); }
+  .term-body .ok { color: var(--term-ok); }
+  .term-body .cursor {
+    display: inline-block; width: 7px; height: 14px; background: #d4d4d4;
+    vertical-align: -2px; animation: blink 1.1s steps(2) infinite;
+  }
+  @keyframes blink { 50% { opacity: 0; } }
+  .shot-cap {
+    margin-top: 14px; text-align: center;
+    font-family: var(--mono); font-size: 12px; color: var(--muted-fg);
+  }
+  .shot-cap .path { color: var(--text-2); }
+
+  .scroll-hint {
+    position: absolute; left: 50%; bottom: 10px; transform: translateX(-50%);
+    display: inline-flex; flex-direction: column; align-items: center; gap: 2px;
+    color: var(--muted-fg); font-size: 11px; font-family: var(--mono);
+  }
+  .scroll-hint svg { width: 15px; height: 15px; animation: dip 1.8s ease infinite; }
+  @keyframes dip { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(4px); } }
+
+  /* ---------- 区块标题 ---------- */
+  .sec-head { max-width: 660px; margin-bottom: clamp(34px, 5vw, 52px); }
+  .sec-head.center { margin-left: auto; margin-right: auto; text-align: center; }
+  .sec-eyebrow {
+    font-family: var(--mono); font-size: 12.5px; letter-spacing: .06em;
+    color: var(--muted-fg); margin-bottom: 14px;
+  }
+  .sec-eyebrow .h { color: var(--fg); opacity: .4; margin-right: 8px; font-weight: 700; }
+  .sec-title {
+    font-family: var(--serif); font-weight: 700;
+    font-size: clamp(28px, 4vw, 42px); line-height: 1.28; letter-spacing: -.005em;
+  }
+  .sec-desc {
+    font-size: 15.5px; color: var(--text-2);
+    max-width: 42em; line-height: 1.85; margin-top: 14px;
+  }
+
+  /* ---------- 数据带 ---------- */
+  .stats-band { background: var(--muted); }
+  .stats-band .container { padding-top: 0; padding-bottom: 0; }
+  .stat-grid {
+    display: grid; grid-template-columns: repeat(4, 1fr);
+    gap: 1px; background: var(--border);
+    border-left: 1px solid var(--border); border-right: 1px solid var(--border);
+  }
+  .stat { background: var(--muted); padding: 30px 22px; }
+  .stat-num {
+    font-family: var(--serif); font-weight: 900;
+    font-size: clamp(26px, 3vw, 34px); line-height: 1.1;
+    font-variant-numeric: tabular-nums;
+  }
+  .stat-label {
+    margin-top: 6px; font-family: var(--mono);
+    font-size: 11.5px; letter-spacing: .08em; color: var(--muted-fg);
+  }
+
+  /* ---------- 特性网格 ---------- */
+  .feat-grid {
+    display: grid; grid-template-columns: repeat(3, 1fr);
+    border-top: 1px solid var(--border); border-left: 1px solid var(--border);
+    border-radius: 10px; overflow: hidden;
+  }
+  .feat-cell {
+    background: var(--bg); padding: 26px 24px;
+    border-right: 1px solid var(--border); border-bottom: 1px solid var(--border);
+    transition: background .2s ease;
+  }
+  .feat-cell:hover { background: var(--muted); }
+  .feat-icon {
+    width: 38px; height: 38px; border-radius: 9px;
+    display: grid; place-items: center;
+    background: var(--muted); color: var(--fg);
+    margin-bottom: 16px; transition: background .2s ease;
+  }
+  .feat-cell:hover .feat-icon { background: var(--bg); }
+  .feat-icon svg { width: 19px; height: 19px; }
+  .feat-name { font-size: 15.5px; font-weight: 600; margin-bottom: 6px; }
+  .feat-desc { font-size: 13.5px; color: var(--text-2); line-height: 1.7; }
+  .feat-desc code {
+    font-family: var(--mono); font-size: 12px;
+    padding: 1px 5px; border-radius: 5px;
+    background: var(--muted); border: 1px solid var(--border);
+  }
+  .feat-cell:hover .feat-desc code { background: var(--bg); }
+
+  /* ---------- 图文分栏 ---------- */
+  .split {
+    display: grid; grid-template-columns: 1fr 1.08fr;
+    gap: clamp(32px, 5vw, 64px); align-items: center;
+  }
+  .split--flip .split-visual { order: -1; }
+  .feat-list { margin-top: 22px; display: grid; gap: 11px; }
+  .feat-item { display: flex; gap: 10px; font-size: 14.5px; color: var(--text-2); line-height: 1.7; }
+  .feat-item::before { content: '—'; color: var(--muted-fg); flex: none; }
+  .feat-item b { color: var(--fg); font-weight: 600; }
+
+  /* 流程面板 */
+  .flow-panel {
+    border: 1px solid var(--border); border-radius: 12px;
+    background: var(--card); padding: 22px;
+    box-shadow: var(--shadow-shot);
+  }
+  .flow-head {
+    display: flex; align-items: center; justify-content: space-between;
+    font-family: var(--mono); font-size: 11px; letter-spacing: .12em;
+    color: var(--muted-fg); text-transform: uppercase;
+    padding-bottom: 14px; border-bottom: 1px solid var(--border); margin-bottom: 18px;
+  }
+  .flow-head .live { display: inline-flex; align-items: center; gap: 6px; color: var(--text-2); letter-spacing: .06em; }
+  .flow-head .live::before {
+    content: ''; width: 6px; height: 6px; border-radius: 50%;
+    background: #10b981; box-shadow: 0 0 0 3px rgba(16, 185, 129, .16);
+  }
+  .flow-node {
+    display: grid; grid-template-columns: 34px 1fr auto;
+    gap: 12px; align-items: center;
+    border: 1px solid var(--border); border-radius: 9px;
+    padding: 13px 15px; background: var(--bg);
+    transition: border-color .2s ease, transform .2s ease;
+  }
+  .flow-node:hover { border-color: var(--border-strong); transform: translateX(2px); }
+  .flow-node .num { font-family: var(--mono); font-size: 11px; color: var(--muted-fg); }
+  .flow-node .name { font-size: 14.5px; font-weight: 600; }
+  .flow-node .sub { font-size: 12.5px; color: var(--muted-fg); }
+  .flow-node .mono-tag {
+    font-family: var(--mono); font-size: 10.5px; letter-spacing: .06em;
+    color: var(--text-2); border: 1px solid var(--border);
+    border-radius: 100px; padding: 3px 9px; background: var(--muted);
+    white-space: nowrap;
+  }
+  .flow-link { display: grid; place-items: center; padding: 5px 0; color: var(--muted-fg); }
+  .flow-link svg { width: 14px; height: 14px; }
+  .flow-foot {
+    margin-top: 16px; padding-top: 14px; border-top: 1px solid var(--border);
+    font-family: var(--mono); font-size: 11.5px; color: var(--muted-fg); line-height: 1.9;
+  }
+  .flow-foot .k { color: var(--text-2); }
+
+  /* ---------- 模式 ---------- */
+  .mode-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+  .mode-card {
+    border: 1px solid var(--border); border-radius: 10px;
+    background: var(--bg); padding: 26px 24px;
+    transition: border-color .2s ease, transform .25s var(--ease);
+  }
+  .mode-card:hover { border-color: var(--border-strong); transform: translateY(-3px); }
+  .mode-label {
+    display: flex; align-items: center; gap: 8px;
+    font-family: var(--mono); font-size: 11px; letter-spacing: .12em;
+    color: var(--muted-fg); margin-bottom: 16px;
+  }
+  .mode-label::before { content: ''; width: 7px; height: 7px; border-radius: 2px; background: var(--fg); opacity: .8; }
+  .mode-name { font-family: var(--serif); font-size: 24px; font-weight: 700; margin-bottom: 10px; }
+  .mode-card p { font-size: 14px; color: var(--text-2); line-height: 1.8; }
+  .mode-card .mode-meta {
+    display: inline-block; margin-top: 16px;
+    font-family: var(--mono); font-size: 11px; letter-spacing: .06em;
+    color: var(--text-2); border: 1px solid var(--border);
+    border-radius: 100px; padding: 4px 11px; background: var(--muted);
+  }
+
+  /* ---------- 影片（参考 workflow 影片卡） ---------- */
+  .film { position: relative; }
+  .film-media {
+    position: relative; display: block; width: 100%;
+    overflow: hidden; border-radius: var(--radius-lg);
+    background: var(--term-bg); border: 1px solid var(--border);
+    padding: 0; text-align: left;
+  }
+  .film-poster {
+    aspect-ratio: 16 / 9; width: 100%;
+    display: flex; flex-direction: column; justify-content: flex-end;
+    gap: 4px; padding: clamp(18px, 3vw, 30px);
+    background:
+      radial-gradient(120% 130% at 78% 0%, rgba(255, 255, 255, .16), transparent 58%),
+      linear-gradient(160deg, #1c1c1c 0%, #0a0a0a 62%, #050505 100%);
+    color: #f5f5f5; position: relative; overflow: hidden;
+  }
+  .film-poster::after {
+    content: ''; position: absolute; inset: 0;
+    background-image: linear-gradient(rgba(255, 255, 255, .045) 1px, transparent 1px),
+                      linear-gradient(90deg, rgba(255, 255, 255, .045) 1px, transparent 1px);
+    background-size: 44px 44px;
+    mask-image: radial-gradient(70% 80% at 70% 20%, #000 0%, transparent 78%);
+    -webkit-mask-image: radial-gradient(70% 80% at 70% 20%, #000 0%, transparent 78%);
+    pointer-events: none;
+  }
+  .poster-idx {
+    position: absolute; top: clamp(14px, 2.6vw, 24px); left: clamp(18px, 3vw, 30px);
+    font-family: var(--mono); font-size: 11.5px; letter-spacing: .16em;
+    color: rgba(255, 255, 255, .55);
+  }
+  .poster-title {
+    font-family: var(--serif); font-weight: 700;
+    font-size: clamp(20px, 2.6vw, 28px); line-height: 1.3;
+    position: relative; z-index: 1;
+  }
+  .poster-meta {
+    font-family: var(--mono); font-size: 10.5px; letter-spacing: .18em;
+    color: rgba(255, 255, 255, .42); position: relative; z-index: 1;
+  }
+  .film-play {
+    position: absolute; left: 50%; top: 50%;
+    width: 78px; height: 78px; margin: -39px 0 0 -39px;
+    border-radius: 50%; display: grid; place-items: center;
+    border: 1px solid rgba(255, 255, 255, .4);
+    background: rgba(10, 10, 10, .35);
+    -webkit-backdrop-filter: blur(10px);
+    backdrop-filter: blur(10px);
+    z-index: 2;
+    transition: transform .35s var(--ease), background .3s;
+  }
+  .film-play svg { width: 26px; height: 26px; fill: #fff; margin-left: 4px; }
+  .film-play::before {
+    content: ''; position: absolute; inset: -10px; border-radius: 50%;
+    border: 1px solid rgba(255, 255, 255, .18);
+    animation: ring 2.6s var(--ease) infinite;
+  }
+  @keyframes ring {
+    0% { transform: scale(.92); opacity: .8; }
+    70% { transform: scale(1.12); opacity: 0; }
+    100% { transform: scale(1.12); opacity: 0; }
+  }
+  .film-media:hover .film-play { transform: scale(1.08); background: rgba(255, 255, 255, .18); }
+  .film-media iframe { display: block; width: 100%; aspect-ratio: 16 / 9; border: 0; }
+  .film-media.is-playing { background: #000; }
+  .film-media.is-playing .film-play,
+  .film-media.is-playing .film-poster { display: none; }
+
+  .film-copy { padding: 18px 2px 0; }
+  .film-copy .tagline {
+    font-family: var(--mono); font-size: 11.5px; letter-spacing: .1em;
+    color: var(--muted-fg); margin-bottom: 10px;
+  }
+  .film-copy h3 {
+    font-family: var(--serif); font-size: clamp(21px, 2.4vw, 28px);
+    font-weight: 700; line-height: 1.35; margin-bottom: 10px;
+  }
+  .film-copy p { font-size: 14.5px; color: var(--text-2); line-height: 1.8; }
+  .film-link {
+    display: inline-flex; align-items: center; gap: 5px;
+    margin-top: 14px; font-size: 13.5px; font-weight: 600;
+    color: var(--fg); border-bottom: 1px solid transparent;
+    transition: border-color .2s;
+  }
+  .film-link:hover { border-bottom-color: var(--fg); }
+  .film-link svg { width: 13px; height: 13px; opacity: .6; }
+
+  .film-split {
+    display: grid; grid-template-columns: 1.4fr 1fr;
+    gap: clamp(24px, 4vw, 52px); align-items: center;
+    margin-bottom: clamp(30px, 5vw, 52px);
+  }
+  .film-split .film-copy { padding: 0; }
+  .film-split .film-copy h3 { font-size: clamp(26px, 3.2vw, 40px); }
+  .film-split .film-play { width: 88px; height: 88px; margin: -44px 0 0 -44px; }
+  .film-duo { display: grid; grid-template-columns: 1fr 1fr; gap: clamp(20px, 3vw, 36px); }
+  .film-duo .film-copy h3 { font-size: clamp(19px, 2vw, 24px); }
+
+  /* ---------- 下载 ---------- */
+  .dl-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .dl-card {
+    border: 1px solid var(--border); border-radius: 10px;
+    background: var(--card); padding: 26px 24px;
+    display: flex; flex-direction: column;
+    transition: border-color .2s ease;
+  }
+  .dl-card:hover { border-color: var(--border-strong); }
+  .dl-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+  .dl-label {
+    display: flex; align-items: center; gap: 8px;
+    font-family: var(--mono); font-size: 11px; letter-spacing: .12em;
+    color: var(--muted-fg); margin-bottom: 14px; text-transform: uppercase;
+  }
+  .dl-label::before { content: ''; width: 7px; height: 7px; border-radius: 2px; background: var(--fg); opacity: .8; }
+  .dl-badge {
+    display: none; align-items: center;
+    margin-left: 2px; padding: 2px 8px;
+    border-radius: 100px; background: var(--primary); color: var(--primary-fg);
+    font-family: var(--mono); font-size: 9.5px; letter-spacing: .1em;
+  }
+  .dl-card.is-detected { border-color: var(--border-strong); }
+  .dl-card.is-detected .dl-badge { display: inline-flex; }
+  .dl-name { font-size: 20px; font-weight: 700; letter-spacing: -.01em; display: flex; align-items: center; gap: 9px; }
+  .dl-name svg { width: 20px; height: 20px; opacity: .8; }
+  .dl-ver {
+    font-family: var(--mono); font-size: 11px; color: var(--text-2);
+    border: 1px solid var(--border); border-radius: 100px;
+    padding: 3px 10px; background: var(--muted); white-space: nowrap;
+  }
+  .dl-desc { font-size: 14px; color: var(--text-2); line-height: 1.8; margin: 14px 0 18px; flex: 1; }
+  .dl-actions { display: grid; gap: 8px; }
+  .dl-btn {
+    display: flex; align-items: center; justify-content: space-between; gap: 8px;
+    border: 1px solid var(--border-strong); border-radius: var(--radius);
+    padding: 11px 14px; font-size: 13.5px; font-weight: 600; color: var(--fg);
+    transition: background .16s, border-color .16s, color .16s;
+  }
+  .dl-btn:hover { background: var(--muted); border-color: var(--fg); }
+  .dl-btn.primary { background: var(--primary); border-color: var(--primary); color: var(--primary-fg); }
+  .dl-btn.primary:hover { opacity: .88; }
+  .dl-btn .hint { font-family: var(--mono); font-size: 11px; opacity: .6; font-weight: 400; }
+  .dl-note {
+    margin-top: 18px; padding-top: 16px; border-top: 1px solid var(--border);
+    font-size: 12.5px; color: var(--muted-fg); line-height: 1.85;
+  }
+  .dl-note code {
+    display: block; margin-top: 8px; padding: 8px 10px;
+    background: var(--muted); border: 1px solid var(--border); border-radius: 6px;
+    font-family: var(--mono); font-size: 11.5px; color: var(--text-2);
+    overflow-wrap: break-word;
+  }
+
+  /* ---------- 技术栈 ---------- */
+  .tech-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+  .tech-card {
+    border: 1px solid var(--border); border-radius: 10px;
+    background: var(--bg); padding: 24px; transition: border-color .2s ease;
+  }
+  .tech-card:hover { border-color: var(--border-strong); }
+  .tech-label {
+    display: flex; align-items: center; gap: 8px;
+    font-family: var(--mono); font-size: 11px; letter-spacing: .12em;
+    text-transform: uppercase; color: var(--muted-fg); margin-bottom: 16px;
+  }
+  .tech-label::before { content: ''; width: 7px; height: 7px; border-radius: 2px; background: var(--fg); opacity: .8; }
+  .tech-name { font-size: 16.5px; font-weight: 600; margin-bottom: 14px; }
+  .chip-wrap { display: flex; flex-wrap: wrap; gap: 8px; }
+  .chip {
+    display: inline-flex; align-items: center;
+    padding: 5px 12px; border-radius: 100px;
+    border: 1px solid var(--border); background: var(--muted);
+    font-family: var(--mono); font-size: 12.5px; color: var(--text-2);
+    transition: border-color .2s, color .2s;
+  }
+  .chip:hover { border-color: var(--border-strong); color: var(--fg); }
+  .tech-note {
+    margin-top: 22px; font-family: var(--mono); font-size: 12.5px;
+    color: var(--muted-fg); line-height: 1.9;
+  }
+  .tech-note .path { color: var(--text-2); }
+
+  /* ---------- CTA 反色带 ---------- */
+  .band-invert {
+    position: relative; overflow: hidden;
+    background: var(--primary); color: var(--primary-fg);
+    border-radius: var(--radius-lg); padding: clamp(40px, 6vw, 66px);
+  }
+  .band-invert .g1 {
+    position: absolute; right: -.03em; top: -.18em;
+    font-family: var(--mono); font-weight: 800;
+    font-size: clamp(150px, 22vw, 300px); line-height: 1;
+    color: var(--primary-fg); opacity: .07;
+    user-select: none; pointer-events: none;
+  }
+  .band-chip {
+    display: inline-flex; align-items: center; gap: 8px;
+    font-family: var(--mono); font-size: 12px; letter-spacing: .1em;
+    border: 1px solid color-mix(in srgb, var(--primary-fg) 40%, transparent);
+    padding: 6px 13px; border-radius: 100px; margin-bottom: 22px;
+  }
+  .band-title {
+    font-family: var(--serif); font-weight: 900;
+    font-size: clamp(26px, 4.2vw, 44px); line-height: 1.22;
+    letter-spacing: -.005em; margin-bottom: 12px;
+  }
+  .band-desc {
+    font-size: 15.5px; opacity: .68; line-height: 1.85;
+    margin-bottom: 28px; max-width: 34em;
+  }
+
+  /* ---------- 页脚 ---------- */
+  .site-footer { border-top: 1px solid var(--border); padding: clamp(44px, 7vw, 64px) 0 30px; }
+  .footer-grid {
+    display: grid; grid-template-columns: 1.6fr 1fr 1fr 1fr;
+    gap: 32px; margin-bottom: 40px;
+  }
+  .footer-brand { display: flex; align-items: center; gap: 9px; font-weight: 700; font-size: 15px; }
+  .footer-brand svg { width: 26px; height: 26px; border-radius: 6px; }
+  .footer-tagline { margin-top: 14px; font-size: 13.5px; color: var(--text-2); max-width: 26em; line-height: 1.8; }
+  .footer-col h4 {
+    font-family: var(--mono); font-size: 11px; letter-spacing: .12em;
+    text-transform: uppercase; color: var(--muted-fg);
+    margin-bottom: 14px; font-weight: 600;
+  }
+  .footer-col a {
+    display: flex; align-items: center; gap: 5px;
+    padding: 5px 0; font-size: 14px; color: var(--text-2);
+    transition: color .2s;
+  }
+  .footer-col a:hover { color: var(--fg); }
+  .footer-col a svg { width: 12px; height: 12px; opacity: .55; }
+  .footer-bottom {
+    border-top: 1px solid var(--border); padding-top: 22px;
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 12px; flex-wrap: wrap; font-size: 12.5px; color: var(--muted-fg);
+  }
+  .footer-bottom .sep { opacity: .5; }
+
+  /* ---------- 滚动显现 ---------- */
+  html.js .reveal {
+    opacity: 0; transform: translateY(16px);
+    transition: opacity .6s ease, transform .6s ease;
+  }
+  html.js .reveal.in { opacity: 1; transform: translateY(0); }
+
+  /* ---------- 响应式 ---------- */
+  @media (max-width: 1024px) {
+    .split { grid-template-columns: 1fr; gap: 32px; }
+    .split--flip .split-visual { order: 0; }
+    .film-split { grid-template-columns: 1fr; }
+    .tech-grid { grid-template-columns: 1fr; }
+    .mode-grid { grid-template-columns: 1fr; }
+    .footer-grid { grid-template-columns: 1fr 1fr; }
+  }
+
+  @media (max-width: 900px) {
+    .stat-grid { grid-template-columns: repeat(2, 1fr); }
+    .dl-grid { grid-template-columns: 1fr; }
+    .feat-grid { grid-template-columns: 1fr; }
+  }
+
+  @media (max-width: 768px) {
+    .nav-links, .nav-right .btn { display: none; }
+    .nav-menu-btn { display: inline-flex; }
+    .nav-inner { grid-template-columns: 1fr auto; }
+    .nav.is-pinned { width: calc(100% - 16px); }
+    .nav.is-pinned ~ .nav-drawer { width: calc(100% - 16px); }
+    .scroll-hint { display: none; }
+    .footer-grid { grid-template-columns: 1fr; gap: 24px; }
+    .film-duo { grid-template-columns: 1fr; }
+    .hero-note { font-size: 11px; }
+  }
+
+  @media (max-width: 560px) {
+    .container { padding: 0 18px; }
+    .feat-grid { grid-template-columns: 1fr; }
+    .hero-actions .btn { flex: 1 1 auto; }
+    .band-invert { padding: 34px 22px; }
+    .term-body { font-size: 11.5px; }
+    .stat { padding: 24px 16px; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: .001ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: .001ms !important;
+    }
+    html { scroll-behavior: auto; }
+    html.js .reveal { opacity: 1; transform: none; }
+    .hero-chip .dot, .scroll-hint svg, .film-play::before, .term-body .cursor { animation: none !important; }
+  }
+
+  /* 主题切换的圆形揭示（View Transitions 可用时） */
+  ::view-transition-old(root), ::view-transition-new(root) { animation: none; mix-blend-mode: normal; }
+</style>
 </head>
-<body>
-    <nav class="navbar" id="navbar">
-        <div class="logo">
-            <span class="logo-icon"><svg width="36" height="36" viewBox="0 0 128 128"><rect x="0" y="0" width="128" height="128" rx="16" fill="#0d1117"/><rect x="0" y="0" width="48" height="28" fill="#f0f0f0"/><rect x="48" y="0" width="40" height="28" fill="#c0c0c0"/><rect x="88" y="0" width="40" height="28" fill="#808080"/><rect x="0" y="20" width="128" height="8" fill="#0d1117"/><text x="64" y="82" font-family="'Courier New',monospace" font-size="44" font-weight="bold" fill="#e6edf3" text-anchor="middle">cd</text><rect x="38" y="102" width="52" height="4" rx="2" fill="#8b949e"/></svg></span>
-            CodeDash
-        </div>
-        <button class="hamburger" id="hamburger" aria-label="菜单">
-            <span></span><span></span><span></span>
-        </button>
-        <ul class="nav-links" id="navLinks">
-            <li><a href="./index.html" class="active">首页</a></li>
-            <li><a href="features.html">功能</a></li>
-            <li><a href="docs.html">文档</a></li>
-            <li><a href="log.html">日志</a></li>
-            <li><button class="theme-toggle" id="themeToggle" aria-label="切换主题">暗</button></li>
-            <li><a href="https://github.com/ueuiuiuu" target="_blank" class="gh-btn">GitHub</a></li>
-        </ul>
-    </nav>
-    <div class="content-overlay">
-    <div class="container">
-        <section class="hero" id="hero">
-            <!-- Shader Gradient 背景层：静态渐变先顶上，React 岛就绪后 WebGL 画布淡入接管。
-                 默认 fallback（无 JS 时也是静态渐变），脚本接管后先切到 loading 显示占位骨架。 -->
-            <div class="shader-layer" id="shaderLayer" data-shader="fallback" aria-hidden="true">
-                <div class="shader-base"></div>
-                <div class="shader-mount" id="shaderMount"></div>
-                <div class="shader-placeholder">
-                    <span class="shader-placeholder__bar"></span>
-                    <span class="shader-placeholder__text">正在加载 WebGL 着色器背景…</span>
-                </div>
-            </div>
-            <div class="hero-inner">
-                <span class="badge">v0.2.1 — macOS 修复版 · Windows / macOS 双平台</span>
-                <h1>重新定义 AI 编码体验</h1>
-                <p class="subtitle">
-                    CodeDash 是一款 <strong>AI 原生桌面 IDE</strong>，自研 Agent 引擎、深度代码理解、
-                    浏览器自动化、计算机控制 — 全方位赋能开发者。
-                </p>
-                <div class="cta-buttons">
-                    <a href="https://github.com/ueuiuiuu/ueui/releases/tag/v0.2.1" class="cta-primary" target="_blank" rel="noopener">下载 macOS</a>
-                    <a href="https://github.com/ueuiuiuu/ueui/releases/tag/v0.2.0" class="cta-secondary" target="_blank" rel="noopener">下载 Windows</a>
-                </div>
-                <p class="cta-note">macOS：支持 Apple Silicon (M 系列) 与 Intel 芯片 · Windows：10 / 11</p>
-                <div class="stats-row" id="statsRow">
-                    <div class="stat-item">
-                        <span class="num" id="statFiles" data-target="128">0</span>
-                        <span class="label">Agent 核心文件</span>
-                    </div>
-                    <div class="stat-item">
-                        <span class="num" id="statLines" data-target="28500">0</span>
-                        <span class="label">代码行数</span>
-                    </div>
-                    <div class="stat-item">
-                        <span class="num" id="statTools" data-target="15">0</span>
-                        <span class="label">内置工具</span>
-                    </div>
-                    <div class="stat-item">
-                        <span class="num" id="statComponents" data-target="42">0</span>
-                        <span class="label">UI 组件</span>
-                    </div>
-                </div>
-            </div>
-            <div class="shader-status" id="shaderStatusSlot"></div>
-        </section>
-        <!-- === Download === -->
-        <section id="download" class="download-section">
-            <h2 class="section-title">下载安装</h2>
-            <div class="section-divider"></div>
-            <p class="section-subtitle">macOS 版已更新到 v0.2.1 修复版，Windows 版当前为 v0.2.0，两个平台功能保持一致。</p>
-            <!-- 版本信息条：由 React 岛读取 GitHub Releases API 的真实数据后填充 -->
-            <div class="release-meta" id="releaseMetaSlot"></div>
-            <!-- 下面两张静态卡片是 React 岛不可用（脚本被拦 / CDN 不通）时的兜底内容 -->
-            <div class="download-grid" id="downloadGrid">
-                <div class="download-card featured fade-in">
-                    <div class="download-head">
-                        <span class="platform-icon"><svg width="30" height="30" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M17.05 12.53c-.02-2.2 1.8-3.26 1.88-3.31-1.02-1.5-2.62-1.7-3.19-1.72-1.36-.14-2.65.8-3.34.8-.69 0-1.75-.78-2.87-.76-1.48.02-2.84.86-3.6 2.18-1.53 2.66-.39 6.6 1.1 8.76.73 1.06 1.6 2.25 2.74 2.2 1.1-.04 1.51-.71 2.84-.71 1.32 0 1.7.71 2.86.69 1.18-.02 1.94-1.08 2.66-2.14.84-1.23 1.18-2.42 1.2-2.48-.03-.01-2.3-.88-2.32-3.5zM14.9 6.02c.6-.73 1.01-1.75.9-2.76-.87.04-1.93.58-2.55 1.3-.56.65-1.05 1.68-.92 2.67.97.08 1.96-.49 2.57-1.21z"/></svg></span>
-                        <div>
-                            <h3>macOS</h3>
-                            <span class="version-pill">v0.2.1 · 修复版</span>
-                        </div>
-                    </div>
-                    <p class="download-desc">
-                        原生支持 Apple Silicon 与 Intel 芯片，内置完整 Agent 引擎、终端与代码检索能力。
-                    </p>
-                    <div class="download-actions">
-                        <a href="https://github.com/ueuiuiuu/ueui/releases/download/v0.2.1/CodeDash-0.2.1-arm64.dmg" class="dl-btn primary" target="_blank" rel="noopener">Apple Silicon（M 系列）· .dmg</a>
-                        <a href="https://github.com/ueuiuiuu/ueui/releases/download/v0.2.1/CodeDash-0.2.1-x64.dmg" class="dl-btn" target="_blank" rel="noopener">Intel 芯片 · .dmg</a>
-                    </div>
-                    <p class="download-note">
-                        首次打开会被 macOS 拦截（未使用 Apple 开发者证书签名）。
-                        在「系统设置 → 隐私与安全性」点「仍要打开」，或执行：
-                        <code class="cmd">xattr -dr com.apple.quarantine <wbr>/Applications/CodeDash.app</code>
-                    </p>
-                </div>
-                <div class="download-card fade-in">
-                    <div class="download-head">
-                        <span class="platform-icon"><svg width="26" height="26" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M3 5.5l7.2-1v7.1H3V5.5zm8.2-1.15L21 3v8.6h-9.8V4.35zM3 12.6h7.2v7.1L3 18.6v-6zm8.2 0H21V21l-9.8-1.35V12.6z"/></svg></span>
-                        <div>
-                            <h3>Windows</h3>
-                            <span class="version-pill">v0.2.0 · 新版本</span>
-                        </div>
-                    </div>
-                    <p class="download-desc">
-                        支持 Windows 10 / 11，提供图形化安装程序，安装过程可选择安装目录。
-                    </p>
-                    <div class="download-actions">
-                        <a href="https://github.com/ueuiuiuu/ueui/releases/download/v0.2.0/CodeDash.Setup.0.2.0.exe" class="dl-btn primary" target="_blank" rel="noopener">Windows 安装程序 · .exe</a>
-                        <a href="https://github.com/ueuiuiuu/ueui/releases" class="dl-btn" target="_blank" rel="noopener">查看全部版本 · Releases</a>
-                    </div>
-                    <p class="download-note">
-                        安装包未做代码签名，首次运行可能被 SmartScreen 拦截，选择「仍要运行」即可。
-                        Agent 引擎通过系统 Node.js 启动，请先确认机器上已安装 Node.js。
-                        历史版本、源码与更新日志都在 GitHub Releases。
-                    </p>
-                </div>
-            </div>
-        </section>
-        <!-- === Video Carousel ===
-             容器留空，视频卡片由脚本里的 VIDEOS 数组生成。
-             新增视频：往 VIDEOS 里追加一项即可，DOM、圆点、滚动距离都会自动跟着变。 -->
-        <section class="video-carousel" id="videoCarousel">
-            <div class="video-carousel__inner" id="videoCarouselInner">
-                <div class="video-label" id="videoLabel"></div>
-                <div class="video-stage" id="videoStage"></div>
-                <div class="video-dots" id="videoDots"></div>
-            </div>
-        </section>
+<body id="top">
 
-        <section id="features">
-            <h2 class="section-title">核心功能</h2>
-            <div class="section-divider"></div>
-            <p class="section-subtitle">CodeDash 提供全方位 AI 编码能力，从代码编辑到浏览器自动化，一应俱全。</p>
-            <div class="features-grid">
-                <div class="feature-card fade-in">
-                    <h3>自研 Agent 引擎</h3>
-                    <p>零框架依赖，完全自研的 agent-core 引擎。支持 think→act→stream 循环，<strong>Plan</strong>、<strong>Agent</strong>、<strong>Chain</strong> 三种工作模式。</p>
-                    <span class="tag">agent-core</span>
-                </div>
-                <div class="feature-card fade-in">
-                    <h3>深度代码理解</h3>
-                    <p>基于 <strong>tree-sitter</strong> 的代码解析、<strong>bge-small-zh</strong> 语义嵌入、BM25 + 向量搜索双层召回。支持本地离线语义索引，无需联网。</p>
-                    <span class="tag">code-search</span>
-                </div>
-                <div class="feature-card fade-in">
-                    <h3>浏览器自动化</h3>
-                    <p>内置 headless Chromium 控制器，支持 <strong>12+</strong> 浏览器操作工具：导航、点击、输入、滚动、截图、文件上传等，AI 可像人类一样操作网页。</p>
-                    <span class="tag">12+ 工具</span>
-                </div>
-                <div class="feature-card fade-in">
-                    <h3>计算机控制</h3>
-                    <p>基于 <strong>@nut-tree/nut-js</strong>，AI 可直接控制鼠标、键盘、屏幕截图。实现真正的桌面自动化操作。</p>
-                    <span class="tag">computer-use</span>
-                </div>
-                <div class="feature-card fade-in">
-                    <h3>双进程架构</h3>
-                    <p><strong>Electron</strong> 前端 + <strong>agent-core</strong> 后端通过 JSON-RPC 2.0 over stdio 双向通信，一方崩溃不影响另一方，架构优雅解耦。</p>
-                    <span class="tag">架构设计</span>
-                </div>
-                <div class="feature-card fade-in">
-                    <h3>三层记忆系统</h3>
-                    <p>TaskLayer（任务摘要）+ TurnLayer（轮次向量索引）+ Recall（BM25+向量RRF融合排序），AI 可记住长期上下文。</p>
-                    <span class="tag">memory</span>
-                </div>
-                <div class="feature-card fade-in">
-                    <h3>自动化调度</h3>
-                    <p>4 种触发模式：<strong>一次性</strong>、<strong>每日</strong>、<strong>每周</strong>、<strong>自定义间隔</strong>。定时执行 AI 任务。</p>
-                    <span class="tag">automation</span>
-                </div>
-                <div class="feature-card fade-in">
-                    <h3>离线语音识别</h3>
-                    <p>集成 <strong>Vosk</strong> 引擎，支持离线语音转文字。无需云服务，保护隐私。</p>
-                    <span class="tag">speech</span>
-                </div>
-                <div class="feature-card fade-in">
-                    <h3>工作流编排</h3>
-                    <p>内置 Workflow 引擎，支持 <strong>并行</strong>、<strong>串行</strong>、<strong>Pipeline</strong>、<strong>Loop</strong> 四种执行模式，复杂任务一键编排。</p>
-                    <span class="tag">workflow</span>
-                </div>
-            </div>
-        </section>
-        <section class="arch-section fade-in" id="architecture">
-            <h2 class="section-title">双进程架构</h2>
-            <div class="section-divider"></div>
-            <p style="text-align:center;color:var(--text-muted);font-size:0.9rem;margin-bottom:2rem;">
-                Electron 前端与 Agent 后端通过 JSON-RPC 2.0 over stdio 双向通信，独立进程互不影响
-            </p>
-            <div class="arch-flow">
-                <div class="arch-box">
-                    <div class="arch-icon"></div>
-                    <div class="arch-name">Electron Shell</div>
-                    <div class="arch-desc">React + Vite UI</div>
-                </div>
-                <div class="arch-arrow">&#11012;</div>
-                <div class="arch-box" style="border-color:rgba(255,255,255,0.3);background:rgba(255,255,255,0.08);">
-                    <div class="arch-icon"></div>
-                    <div class="arch-name">JSON-RPC 2.0</div>
-                    <div class="arch-desc">stdio 双向通信</div>
-                </div>
-                <div class="arch-arrow">&#11012;</div>
-                <div class="arch-box" style="border-color:rgba(16,185,129,0.3);background:rgba(16,185,129,0.08);">
-                    <div class="arch-icon"></div>
-                    <div class="arch-name">Agent Core</div>
-                    <div class="arch-desc">自研 Agent 引擎</div>
-                </div>
-            </div>
-        </section>
-        <section id="modes">
-            <h2 class="section-title">三种工作模式</h2>
-            <div class="section-divider"></div>
-            <p class="section-subtitle">根据任务需求灵活选择，从安全只读到全权执行，再到自动化队列。</p>
-            <div class="modes-grid">
-                <div class="mode-card fade-in">
-                    <div class="mode-icon"></div>
-                    <h3>Plan 模式</h3>
-                    <p>AI 仅使用只读工具探索，生成详细的 <code>.plan.md</code> 文件。用户确认后再切换 Agent 执行。</p>
-                    <span class="mode-badge plan">只读安全</span>
-                </div>
-                <div class="mode-card fade-in">
-                    <div class="mode-icon"></div>
-                    <h3>Agent 模式</h3>
-                    <p>AI 拥有完整权限，可读写文件、执行 Shell 命令、控制浏览器和计算机。</p>
-                    <span class="mode-badge agent">全权限</span>
-                </div>
-                <div class="mode-card fade-in">
-                    <div class="mode-icon"></div>
-                    <h3>Chain 模式</h3>
-                    <p>多任务自动队列。Plan → Agent → Plan → Agent 自动循环，直到队列清空。</p>
-                    <span class="mode-badge chain">自动队列</span>
-                </div>
-            </div>
-        </section>
-        <section id="tech">
-            <h2 class="section-title">技术栈</h2>
-            <div class="section-divider"></div>
-            <p class="section-subtitle">从桌面壳到 AI 引擎，全栈自研，零 Agent 框架依赖。</p>
-            <div class="tech-stack">
-                <div class="tech-stack-track">
-                <span class="tech-item">Electron 32</span>
-                <span class="tech-item">React 18</span>
-                <span class="tech-item">TypeScript</span>
-                <span class="tech-item">Vite 5</span>
-                <span class="tech-item">Monaco Editor</span>
-                <span class="tech-item">Tree-sitter</span>
-                <span class="tech-item">Xenova Transformers</span>
-                <span class="tech-item">MiniSearch</span>
-                <span class="tech-item">JSON-RPC 2.0</span>
-                <span class="tech-item">nut.js</span>
-                <span class="tech-item">Vosk</span>
-                <span class="tech-item">KaTeX</span>
-                <span class="tech-item">Xterm.js</span>
-                <span class="tech-item">Node-PTY</span>
-                <span class="tech-item">Simple-Git</span>
-                <span class="tech-item">Three.js</span>
-                <span class="tech-item">Electron 32</span>
-                <span class="tech-item">React 18</span>
-                <span class="tech-item">TypeScript</span>
-                <span class="tech-item">Vite 5</span>
-                <span class="tech-item">Monaco Editor</span>
-                <span class="tech-item">Tree-sitter</span>
-                <span class="tech-item">Xenova Transformers</span>
-                <span class="tech-item">MiniSearch</span>
-                <span class="tech-item">JSON-RPC 2.0</span>
-                <span class="tech-item">nut.js</span>
-                <span class="tech-item">Vosk</span>
-                <span class="tech-item">KaTeX</span>
-                <span class="tech-item">Xterm.js</span>
-                <span class="tech-item">Node-PTY</span>
-                <span class="tech-item">Simple-Git</span>
-                <span class="tech-item">Three.js</span>
-                </div>
-            </div>
-        </section>
+<!-- ░░ NAV ░░ -->
+<nav class="nav" id="nav">
+  <div class="container nav-inner">
+    <a class="nav-brand" href="#top" aria-label="CodeDash 首页">
+      <svg viewBox="0 0 128 128" aria-hidden="true">
+        <rect width="128" height="128" rx="16" fill="#0d1117"/>
+        <rect width="48" height="26" fill="#f0f0f0"/>
+        <rect x="48" width="40" height="26" fill="#c0c0c0"/>
+        <rect x="88" width="40" height="26" fill="#808080"/>
+        <rect x="0" y="19" width="128" height="7" fill="#0d1117"/>
+        <text x="64" y="82" font-family="'Courier New',monospace" font-size="42" font-weight="bold" fill="#e6edf3" text-anchor="middle">cd</text>
+        <rect x="38" y="100" width="52" height="4" rx="2" fill="#8b949e"/>
+      </svg>
+      CodeDash
+    </a>
+    <ul class="nav-links">
+      <li><a href="#features">特性</a></li>
+      <li><a href="#architecture">架构</a></li>
+      <li><a href="#videos">视频</a></li>
+      <li><a href="#download">下载</a></li>
+      <li><a href="#tech">技术栈</a></li>
+      <li><a href="log.html">更新日志</a></li>
+    </ul>
+    <div class="nav-right">
+      <a class="icon-btn" href="https://github.com/ueuiuiuu" target="_blank" rel="noopener noreferrer" aria-label="GitHub">
+        <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 .5C5.65.5.5 5.65.5 12c0 5.08 3.29 9.39 7.86 10.91.58.1.79-.25.79-.55 0-.27-.01-1.17-.02-2.12-3.2.7-3.87-1.36-3.87-1.36-.52-1.33-1.28-1.68-1.28-1.68-1.04-.71.08-.7.08-.7 1.15.08 1.76 1.18 1.76 1.18 1.03 1.76 2.69 1.25 3.35.96.1-.75.4-1.25.72-1.54-2.55-.29-5.23-1.28-5.23-5.68 0-1.26.45-2.28 1.18-3.09-.12-.29-.51-1.46.11-3.05 0 0 .96-.31 3.15 1.18a10.9 10.9 0 0 1 5.74 0c2.19-1.49 3.15-1.18 3.15-1.18.62 1.59.23 2.76.11 3.05.73.81 1.18 1.83 1.18 3.09 0 4.41-2.69 5.38-5.25 5.66.41.35.77 1.05.77 2.12 0 1.53-.01 2.76-.01 3.14 0 .3.2.66.8.55A11.51 11.51 0 0 0 23.5 12C23.5 5.65 18.35.5 12 .5z"/></svg>
+      </a>
+      <button class="icon-btn theme-toggle" id="themeToggle" aria-label="切换亮暗主题">
+        <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
+        <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+      </button>
+      <a class="btn btn-primary" id="navDl" href="#download">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+        下载
+      </a>
+      <button class="icon-btn nav-menu-btn" id="menuBtn" aria-label="打开菜单" aria-expanded="false">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><line x1="3" y1="7" x2="21" y2="7"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="17" x2="21" y2="17"/></svg>
+      </button>
     </div>
-    <footer class="footer">
-        <div class="footer-links">
-            <a href="./index.html">首页</a>
-            <a href="features.html">功能</a>
-            <a href="docs.html">文档</a>
-            <a href="log.html">日志</a>
-            <a href="#features">功能特性</a>
-            <a href="#modes">工作模式</a>
-            <a href="#tech">技术栈</a>
+  </div>
+</nav>
+<div class="nav-drawer" id="drawer">
+  <ul class="nav-drawer-links">
+    <li><a href="#features">特性</a></li>
+    <li><a href="#architecture">双进程架构</a></li>
+    <li><a href="#videos">视频</a></li>
+    <li><a href="#download">下载安装</a></li>
+    <li><a href="#tech">技术栈</a></li>
+    <li><a href="log.html">更新日志</a></li>
+    <li><a href="../tools/index.html">集市 · 工具</a></li>
+  </ul>
+</div>
+
+<!-- ░░ HERO ░░ -->
+<section class="hero">
+  <span class="glyph g1" aria-hidden="true">#</span>
+  <span class="glyph g2" aria-hidden="true">&gt;</span>
+  <div class="container">
+    <div class="hero-copy">
+      <div class="hero-chip reveal"><span class="dot"></span>v0.2.1 · Windows / macOS 双平台</div>
+      <h1 class="hero-title reveal">重新定义<br><em>AI 编码</em>体验</h1>
+      <p class="hero-sub reveal">
+        CodeDash 是一款 AI 原生桌面 IDE：自研 Agent 引擎、深度代码理解、浏览器自动化与计算机控制，
+        把「说一句」变成「跑通一整套」。
+      </p>
+      <div class="hero-actions reveal">
+        <a class="btn btn-primary btn-lg" id="heroDl" href="#download">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+          <span id="heroDlText">下载</span>
+        </a>
+        <a class="btn btn-ghost btn-lg" href="#videos">看演示</a>
+      </div>
+      <p class="hero-note reveal" id="heroNote">Apple Silicon / Intel · Windows 10 / 11 · 开源 · 免费</p>
+    </div>
+  </div>
+  <div class="container hero-shot reveal">
+    <div class="term">
+      <div class="term-bar">
+        <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+        <span class="term-title">CodeDash — agent-core</span>
+        <span class="term-mode">AGENT</span>
+      </div>
+      <div class="term-body">
+        <div class="line"><span class="prompt">❯</span> <span class="u">重构 user 服务的缓存层，别动对外接口</span></div>
+        <div class="line m"><span class="k">think</span> 定位 3 个热点文件…</div>
+        <div class="line m"><span class="k">read</span> src/service/user.ts</div>
+        <div class="line m"><span class="k">edit</span> src/cache/ttl.ts <span class="dim">+42 −17</span></div>
+        <div class="line m"><span class="k">run</span> npm test <span class="ok">✓ 38 passed</span></div>
+        <div class="line m"><span class="k">plan</span> 写入 .plan.md <span class="dim">3 steps</span></div>
+        <div class="line"><span class="prompt">❯</span> <span class="cursor"></span></div>
+      </div>
+    </div>
+    <p class="shot-cap"><span class="path">~/project</span> — Agent 会话 · 双进程架构</p>
+  </div>
+  <a class="scroll-hint" href="#features" aria-label="向下滚动查看特性">
+    <span>SCROLL</span>
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
+  </a>
+</section>
+
+<!-- ░░ 数据带 ░░ -->
+<section class="stats-band" id="stats">
+  <div class="container">
+    <div class="stat-grid">
+      <div class="stat"><div class="stat-num" data-count="128" data-suffix="">0</div><div class="stat-label">AGENT 核心文件</div></div>
+      <div class="stat"><div class="stat-num" data-count="28.5" data-suffix="k" data-decimals="1">0</div><div class="stat-label">代码行数</div></div>
+      <div class="stat"><div class="stat-num" data-count="15" data-suffix="">0</div><div class="stat-label">内置工具</div></div>
+      <div class="stat"><div class="stat-num" data-count="42" data-suffix="">0</div><div class="stat-label">UI 组件</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ░░ 特性 ░░ -->
+<section id="features">
+  <div class="container section-pad">
+    <div class="sec-head reveal">
+      <div class="sec-eyebrow"><span class="h">##</span>Features</div>
+      <h2 class="sec-title">九项能力，都指向同一件事</h2>
+      <p class="sec-desc">从读代码、改代码到跑测试、控浏览器，Agent 需要的能力都做进同一个进程里。</p>
+    </div>
+    <div class="feat-grid">
+      <div class="feat-cell reveal">
+        <div class="feat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a3 3 0 0 1 3 3v1a3 3 0 0 1 3 3v1a3 3 0 0 1 0 6v1a3 3 0 0 1-3 3v1a3 3 0 0 1-6 0v-1a3 3 0 0 1-3-3v-1a3 3 0 0 1 0-6V9a3 3 0 0 1 3-3V5a3 3 0 0 1 3-3z"/><circle cx="12" cy="12" r="2.5"/></svg></div>
+        <div class="feat-name">自研 Agent 引擎</div>
+        <div class="feat-desc">零框架依赖的 <code>agent-core</code>，think → act → stream 循环；Plan、Agent、Chain 三种模式共用一套工具协议。</div>
+      </div>
+      <div class="feat-cell reveal">
+        <div class="feat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M8 6L2 12l6 6M16 6l6 6-6 6"/></svg></div>
+        <div class="feat-name">深度代码理解</div>
+        <div class="feat-desc">tree-sitter 解析 + bge-small-zh 语义嵌入，BM25 与向量双层召回，索引可完全离线。</div>
+      </div>
+      <div class="feat-cell reveal">
+        <div class="feat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg></div>
+        <div class="feat-name">浏览器自动化</div>
+        <div class="feat-desc">内置 Chromium 控制器，导航、点击、输入、滚动、截图等 12+ 操作，AI 像人一样用网页。</div>
+      </div>
+      <div class="feat-cell reveal">
+        <div class="feat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg></div>
+        <div class="feat-name">计算机控制</div>
+        <div class="feat-desc">基于 <code>@nut-tree/nut-js</code> 驱动鼠标、键盘与屏幕，桌面也被 Agent 接管。</div>
+      </div>
+      <div class="feat-cell reveal">
+        <div class="feat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="8" rx="2"/><rect x="2" y="14" width="20" height="8" rx="2"/><line x1="6" y1="6" x2="6.01" y2="6"/><line x1="6" y1="18" x2="6.01" y2="18"/></svg></div>
+        <div class="feat-name">双进程架构</div>
+        <div class="feat-desc">Electron 前端与 Agent 后端以 JSON-RPC 2.0 over stdio 通信，一方崩溃不影响另一方。</div>
+      </div>
+      <div class="feat-cell reveal">
+        <div class="feat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg></div>
+        <div class="feat-name">三层记忆</div>
+        <div class="feat-desc">任务摘要 + 轮次向量索引 + RRF 融合召回，长会话不丢上下文。</div>
+      </div>
+      <div class="feat-cell reveal">
+        <div class="feat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15.5 14"/></svg></div>
+        <div class="feat-name">自动化调度</div>
+        <div class="feat-desc">一次性、每日、每周、自定义间隔四种触发，定时执行 AI 任务。</div>
+      </div>
+      <div class="feat-cell reveal">
+        <div class="feat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a3 3 0 0 0-3 3v6a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z"/><path d="M19 10v1a7 7 0 0 1-14 0v-1M12 18v4"/></svg></div>
+        <div class="feat-name">离线语音</div>
+        <div class="feat-desc">集成 Vosk 引擎，语音转文字在本机完成，不上传云端。</div>
+      </div>
+      <div class="feat-cell reveal">
+        <div class="feat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="5" cy="6" r="2.5"/><circle cx="19" cy="6" r="2.5"/><circle cx="12" cy="18" r="2.5"/><path d="M7.5 6h9M6.2 8.2l4.4 7.4M17.8 8.2l-4.4 7.4"/></svg></div>
+        <div class="feat-name">工作流编排</div>
+        <div class="feat-desc">并行、串行、Pipeline、Loop 四种执行模式，复杂任务一键编排。</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ░░ 架构 ░░ -->
+<section id="architecture">
+  <div class="container section-pad">
+    <div class="split">
+      <div class="split-text reveal">
+        <div class="sec-eyebrow"><span class="h">##</span>Architecture</div>
+        <h2 class="sec-title">前端与引擎，各自独立</h2>
+        <p class="sec-desc">界面是界面，引擎是引擎。两者只通过一条 JSON-RPC 2.0 管道说话，所以引擎可以单独升级、单独调试，也可以被别的客户端复用。</p>
+        <ul class="feat-list">
+          <li class="feat-item"><b>stdio 双向通信</b>，没有本地端口，也不暴露网络面</li>
+          <li class="feat-item"><b>崩溃隔离</b>：引擎挂了界面还能给出错误，反之亦然</li>
+          <li class="feat-item"><b>可替换前端</b>：同一套 agent-core 可以接 CLI 或别的壳</li>
+        </ul>
+      </div>
+      <div class="split-visual reveal">
+        <div class="flow-panel">
+          <div class="flow-head">
+            <span>PROCESS / 通信链路</span>
+            <span class="live">RUNNING</span>
+          </div>
+          <div class="flow-node">
+            <span class="num">01</span>
+            <span>
+              <span class="name">Electron Shell</span><br>
+              <span class="sub">React + Vite · Monaco · Xterm</span>
+            </span>
+            <span class="mono-tag">UI</span>
+          </div>
+          <div class="flow-link" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="4" x2="12" y2="20"/><polyline points="6 14 12 20 18 14"/><polyline points="6 10 12 4 18 10"/></svg>
+          </div>
+          <div class="flow-node">
+            <span class="num">02</span>
+            <span>
+              <span class="name">JSON-RPC 2.0</span><br>
+              <span class="sub">over stdio · 请求 / 流式事件</span>
+            </span>
+            <span class="mono-tag">stdio</span>
+          </div>
+          <div class="flow-link" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="4" x2="12" y2="20"/><polyline points="6 14 12 20 18 14"/><polyline points="6 10 12 4 18 10"/></svg>
+          </div>
+          <div class="flow-node">
+            <span class="num">03</span>
+            <span>
+              <span class="name">agent-core</span><br>
+              <span class="sub">think → act → stream 循环</span>
+            </span>
+            <span class="mono-tag">ENGINE</span>
+          </div>
+          <div class="flow-foot">
+            <span class="k">$</span> agent-core pid 独立于 UI · 工具调用 15 个 · 记忆三层
+          </div>
         </div>
-        <p>用 <span class="heart">❤</span> 构建 · CodeDash v0.2.1 · 开源 · 免费 · AI 原生桌面 IDE</p>
-    </footer>
-    <button class="back-to-top" id="backToTop" title="回到顶部">&#8593;</button>
-    <script>
-        // === DOM refs ===
-        const backToTop = document.getElementById('backToTop');
-        const hamburger = document.getElementById('hamburger');
-        const navLinks = document.getElementById('navLinks');
-        // === 主题切换 ===
-        const themeToggle = document.getElementById('themeToggle');
-        const htmlEl = document.documentElement;
-        const savedTheme = localStorage.getItem('theme');
-        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-        if (savedTheme) {
-            htmlEl.setAttribute('data-theme', savedTheme);
-        } else {
-            htmlEl.setAttribute('data-theme', prefersDark ? 'dark' : 'light');
-        }
-        themeToggle.textContent = htmlEl.getAttribute('data-theme') === 'dark' ? '暗' : '亮';
-        if (themeToggle) {
-            themeToggle.addEventListener('click', () => {
-                const current = htmlEl.getAttribute('data-theme');
-                const next = current === 'dark' ? 'light' : 'dark';
-                htmlEl.setAttribute('data-theme', next);
-                localStorage.setItem('theme', next);
-                themeToggle.textContent = next === 'dark' ? '暗' : '亮';
-            });
-        }
-
-        // === 数字递增动画 ===
-        function animateNumbers() {
-            document.querySelectorAll('.stat-item .num[data-target]').forEach(el => {
-                const target = parseInt(el.getAttribute('data-target'));
-                const duration = 2000;
-                const start = performance.now();
-                function update(now) {
-                    const elapsed = now - start;
-                    const progress = Math.min(elapsed / duration, 1);
-                    const eased = 1 - Math.pow(1 - progress, 3);
-                    const current = Math.round(eased * target);
-                    el.textContent = target >= 1000 ? (current >= 1000 ? (current/1000).toFixed(1) + 'k' : current) : current;
-                    if (progress < 1) requestAnimationFrame(update);
-                }
-                requestAnimationFrame(update);
-            });
-        }
-        const statsObserver = new IntersectionObserver((entries) => {
-            entries.forEach(entry => { if (entry.isIntersecting) { animateNumbers(); statsObserver.disconnect(); } });
-        }, { threshold: 0.5 });
-        const statsRow = document.getElementById('statsRow');
-        if (statsRow) statsObserver.observe(statsRow);
-        // === 滚动渐入 ===
-        const fadeObserver = new IntersectionObserver((entries) => {
-            entries.forEach(entry => { if (entry.isIntersecting) entry.target.classList.add('visible'); });
-        }, { threshold: 0.1, rootMargin: '0px 0px -50px 0px' });
-        document.querySelectorAll('.fade-in').forEach(el => fadeObserver.observe(el));
-        // === Navbar 滚动效果 ===
-        const navbar = document.getElementById('navbar');
-        window.addEventListener('scroll', () => {
-            navbar.classList.toggle('scrolled', window.scrollY > 50);
-            backToTop.classList.toggle('show', window.scrollY > 300);
-        });
-        // === 回到顶部 ===
-        backToTop.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
-        // === 移动端菜单 ===
-        hamburger.addEventListener('click', () => {
-            hamburger.classList.toggle('active');
-            navLinks.classList.toggle('open');
-        });
-        document.querySelectorAll('.nav-links a').forEach(a => {
-            a.addEventListener('click', () => {
-                hamburger.classList.remove('active');
-                navLinks.classList.remove('open');
-            });
-        });
-        // === 平滑滚动 ===
-        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-            anchor.addEventListener('click', function(e) {
-                e.preventDefault();
-                const target = document.querySelector(this.getAttribute('href'));
-                if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
-            });
-        });
-
-        // === Video Carousel ===
-        // 新增视频：往这个数组追加一项即可，卡片、圆点、滚动距离都会自动生成。
-        const VIDEOS = [
-            { label: '产品演示', bvid: 'BV1tjJp6bEvZ' },
-            { label: '更多演示', bvid: 'BV1CP3m6NEM9' },
-            { label: '学习模式更新', bvid: 'BV1NuH762E9k' }
-        ];
-
-        const STICK_TOP = 88;      // 吸附时距视口顶部的距离（导航栏 72px + 16px）
-        const STEP_RATIO = 0.6;    // 切换一个视频需要滚动的距离（相对视口高度）
-        const TAIL_RATIO = 0.15;   // 最后一个视频额外停留的滚动距离
-
-        function initVideoCarousel() {
-            const root = document.getElementById('videoCarousel');
-            const inner = document.getElementById('videoCarouselInner');
-            const stage = document.getElementById('videoStage');
-            const dots = document.getElementById('videoDots');
-            const label = document.getElementById('videoLabel');
-            if (!root || !inner || !stage || !dots || !label || VIDEOS.length === 0) return;
-
-            // ---- 按 VIDEOS 生成卡片 ----
-            const slides = VIDEOS.map((video, i) => {
-                const slide = document.createElement('div');
-                slide.className = 'video-slide';
-
-                // 堆叠布局（窄屏 / 减少动效）下每个视频显示自己的标题
-                const slideLabel = document.createElement('div');
-                slideLabel.className = 'video-slide__label';
-                slideLabel.textContent = video.label;
-
-                const player = document.createElement('div');
-                player.className = 'video-player';
-
-                const overlay = document.createElement('div');
-                overlay.className = 'video-overlay';
-                overlay.innerHTML =
-                    '<img src="icon-codedash.svg" alt="" class="overlay-icon">' +
-                    '<div class="play-icon-circle">&#9654;</div>' +
-                    '<div class="overlay-text">点击播放视频介绍</div>';
-
-                const holder = document.createElement('div');
-                holder.style.cssText = 'width:100%;height:100%;display:none;';
-
-                player.appendChild(overlay);
-                player.appendChild(holder);
-                slide.appendChild(slideLabel);
-                slide.appendChild(player);
-                stage.appendChild(slide);
-
-                const dot = document.createElement('button');
-                dot.type = 'button';
-                dot.setAttribute('aria-label', '切换到第 ' + (i + 1) + ' 个视频');
-                dots.appendChild(dot);
-
-                const state = { slide, overlay, holder, dot, loaded: false };
-
-                player.addEventListener('click', () => {
-                    if (state.loaded) return;
-                    state.loaded = true;
-                    const iframe = document.createElement('iframe');
-                    iframe.src = 'https://player.bilibili.com/player.html?bvid=' + video.bvid + '&autoplay=1&high_quality=1';
-                    iframe.allow = 'autoplay; fullscreen';
-                    iframe.allowFullscreen = true;
-                    holder.appendChild(iframe);
-                    holder.style.display = '';
-                    overlay.classList.add('hidden');
-                });
-
-                dot.addEventListener('click', () => {
-                    window.scrollTo({ top: stickStart + i * step, behavior: 'smooth' });
-                });
-
-                return state;
-            });
-
-            // ---- 布局与滚动驱动 ----
-            const reduced = window.matchMedia('(prefers-reduced-motion: reduce)');
-            const narrow = window.matchMedia('(max-width: 768px)');
-            const N = slides.length;
-            let step = 0;
-            let stickStart = 0;
-            let active = -1;
-            let ticking = false;
-
-            const isStacked = () => narrow.matches || reduced.matches;
-
-            function layout() {
-                root.classList.toggle('video-carousel--stacked', isStacked());
-
-                if (isStacked()) {
-                    // 纵向堆叠：清掉吸附与位移，全部卡片依次排列
-                    root.style.height = '';
-                    inner.style.top = '';
-                    slides.forEach((s) => { s.slide.style.transform = ''; });
-                    setActive(0, true);
-                    return;
-                }
-
-                inner.style.top = STICK_TOP + 'px';
-                step = Math.round(window.innerHeight * STEP_RATIO);
-                const tail = Math.round(window.innerHeight * TAIL_RATIO);
-                root.style.height = (inner.offsetHeight + (N - 1) * step + tail) + 'px';
-                stickStart = root.getBoundingClientRect().top + window.scrollY - STICK_TOP;
-
-                if (N < 2) {
-                    slides.forEach((s) => { s.slide.style.transform = ''; });
-                    setActive(0, true);
-                    return;
-                }
-                update();
-            }
-
-            function update() {
-                if (isStacked() || N < 2) return;
-                const t = Math.max(0, Math.min(1, (window.scrollY - stickStart) / ((N - 1) * step)));
-                slides.forEach((s, i) => {
-                    s.slide.style.transform = 'translateX(' + ((i - t * (N - 1)) * 100).toFixed(3) + '%)';
-                });
-                setActive(Math.round(t * (N - 1)));
-            }
-
-            function setActive(idx, force) {
-                if (!force && idx === active) return;
-                active = idx;
-                slides.forEach((s, i) => {
-                    s.dot.classList.toggle('active', i === idx);
-                    s.slide.style.zIndex = i === idx ? '2' : '1';
-                    // 划走的视频销毁 iframe，避免在屏幕外继续播放
-                    if (i !== idx && s.loaded) {
-                        s.loaded = false;
-                        s.holder.innerHTML = '';
-                        s.holder.style.display = 'none';
-                        s.overlay.classList.remove('hidden');
-                    }
-                });
-                label.textContent = VIDEOS[idx] ? VIDEOS[idx].label : '';
-            }
-
-            function onScroll() {
-                if (ticking) return;
-                ticking = true;
-                requestAnimationFrame(() => { ticking = false; update(); });
-            }
-
-            window.addEventListener('scroll', onScroll, { passive: true });
-            window.addEventListener('resize', layout);
-            layout();
-        }
-
-        initVideoCarousel();
-
-        // === Shader Gradient hero 背景：模块脚本接管前的兜底 ===
-        // 立即切到 loading 显示占位骨架；若 8 秒内 React 岛仍没把画布挂上
-        // （CDN 不通、import 报错等），退回静态渐变，避免骨架一直转下去。
-        const shaderLayerEl = document.getElementById('shaderLayer');
-        if (shaderLayerEl) {
-            shaderLayerEl.dataset.shader = 'loading';
-            window.setTimeout(() => {
-                if (shaderLayerEl.dataset.shader === 'loading') {
-                    shaderLayerEl.dataset.shader = 'fallback';
-                }
-            }, 8000);
-        }
-
-        console.log('CodeDash website loaded!');
-    </script>
-    <!-- ============================================================
-         React 岛：hero 的 Shader Gradient 背景 + 下载区的 Loading Skeleton。
-         页面没有构建步骤，依赖全部走 esm.sh 的 ESM 产物。
-         所有 esm.sh 地址统一用 ?deps=react@18.3.1 钉住 React：
-         esm.sh 默认把 react 解析到 19，而 @react-three/fiber 8 只支持 18；
-         钉死之后 react / react-dom / react-loading-skeleton 内部的 import
-         都指向同一个 /react@18.3.1/es2022/react.mjs，页面里只有一个 React 实例，
-         因此不需要 import map。three 与 fiber 也一并钉版本，避免重复下载。
-         ============================================================ -->
-    <script type="module">
-        import React, { useState, useEffect, useMemo, useRef } from 'https://esm.sh/react@18.3.1';
-        import { createRoot } from 'https://esm.sh/react-dom@18.3.1/client?deps=react@18.3.1';
-        import Skeleton from 'https://esm.sh/react-loading-skeleton@3.5.0?deps=react@18.3.1';
-        import htm from 'https://esm.sh/htm@3.1.1';
-
-        // 没有 JSX 编译步骤，用 htm 的标签模板代替
-        const html = htm.bind(React.createElement);
-
-        const SHADER_GRADIENT_URL =
-            'https://esm.sh/@shadergradient/react@2.4.20' +
-            '?deps=react@18.3.1,react-dom@18.3.1,three@0.169.0,@react-three/fiber@8.17.10';
-        const RELEASES_API = 'https://api.github.com/repos/ueuiuiuu/ueui/releases?per_page=30';
-        const MIN_SKELETON_MS = 1000;
-
-        /* ------------------------------------------------------------ 工具 */
-
-        const prefersReducedMotion = () =>
-            window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-
-        function hasWebGL() {
-            try {
-                const canvas = document.createElement('canvas');
-                return !!(canvas.getContext('webgl2') || canvas.getContext('webgl'));
-            } catch (err) {
-                return false;
-            }
-        }
-
-        const formatDate = value => {
-            if (!value) return '';
-            const date = new Date(value);
-            if (Number.isNaN(date.getTime())) return String(value);
-            return date.getFullYear() + '-' +
-                String(date.getMonth() + 1).padStart(2, '0') + '-' +
-                String(date.getDate()).padStart(2, '0');
-        };
-
-        // 站点主题是 data-theme 属性驱动的，跟着它走
-        function useTheme() {
-            const [theme, setTheme] = useState(
-                () => document.documentElement.getAttribute('data-theme') || 'dark'
-            );
-            useEffect(() => {
-                const observer = new MutationObserver(() => {
-                    setTheme(document.documentElement.getAttribute('data-theme') || 'dark');
-                });
-                observer.observe(document.documentElement, {
-                    attributes: true,
-                    attributeFilter: ['data-theme']
-                });
-                return () => observer.disconnect();
-            }, []);
-            return theme;
-        }
-
-        function useInView(ref, rootMargin) {
-            const [inView, setInView] = useState(false);
-            useEffect(() => {
-                const node = ref.current;
-                if (!node || typeof IntersectionObserver === 'undefined') {
-                    setInView(true);
-                    return;
-                }
-                const observer = new IntersectionObserver(entries => {
-                    if (entries.some(entry => entry.isIntersecting)) setInView(true);
-                }, { rootMargin });
-                observer.observe(node);
-                return () => observer.disconnect();
-            }, []);
-            return inView;
-        }
-
-        // three + fiber 体积不小，只有真的要渲染时才去拉
-        let shaderModulePromise = null;
-        function loadShaderGradient() {
-            if (!shaderModulePromise) shaderModulePromise = import(SHADER_GRADIENT_URL);
-            return shaderModulePromise;
-        }
-
-        /* ------------------------------------------------- Hero 背景着色器 */
-
-        const HERO_SHADER_PROPS = {
-            control: 'props',
-            type: 'plane',
-            animate: 'on',
-            uSpeed: 0.3,
-            uStrength: 1.2,
-            uDensity: 1.1,
-            uFrequency: 5.5,
-            uAmplitude: 1.1,
-            reflection: 0.1,
-            color1: '#9ca3af',
-            color2: '#4b5563',
-            color3: '#d1d5db',
-            positionX: -1.4,
-            positionY: 0,
-            positionZ: 0,
-            rotationX: 0,
-            rotationY: 10,
-            rotationZ: 50,
-            cAzimuthAngle: 180,
-            cPolarAngle: 90,
-            cDistance: 3.6,
-            cameraZoom: 1,
-            lightType: '3d',
-            brightness: 1.2,
-            envPreset: 'city',
-            grain: 'on',
-            wireframe: false
-        };
-
-        // 浅色主题单独一套参数：暗色那套灰阶压在浅底上会糊成一片白，
-        // 所以把三个颜色的明暗差拉开、起伏调明显，并关掉会显脏的噪点。
-        const LIGHT_HERO_SHADER_PROPS = {
-            ...HERO_SHADER_PROPS,
-            color1: '#a3aebd',
-            color2: '#d7dde5',
-            color3: '#ffffff',
-            brightness: 1.15,
-            uDensity: 1.35,
-            uStrength: 1.5,
-            grain: 'off'
-        };
-
-        function ShaderBackground({ onState }) {
-            const hostRef = useRef(null);
-            const inView = useInView(hostRef, '200px');
-            const [module, setModule] = useState(null);
-            const decided = useRef(false);
-            const theme = useTheme();
-
-            useEffect(() => {
-                if (!inView || decided.current) return;
-                decided.current = true;
-
-                if (prefersReducedMotion()) {
-                    onState('fallback', '已按系统「减少动效」设置跳过 WebGL，使用静态渐变背景');
-                    return;
-                }
-                if (!hasWebGL()) {
-                    onState('fallback', '当前浏览器未启用 WebGL，使用静态渐变背景');
-                    return;
-                }
-
-                let alive = true;
-                loadShaderGradient()
-                    .then(mod => {
-                        if (!alive) return;
-                        setModule(mod);
-                    })
-                    .catch(err => {
-                        if (!alive) return;
-                        console.warn('[codedash] 着色器模块加载失败，回退静态渐变：', err);
-                        onState('fallback', 'WebGL 着色器加载失败，已回退静态渐变背景');
-                    });
-                return () => { alive = false; };
-            }, [inView]);
-
-            // 画布挂上 DOM 之后再切 ready，这样 .shader-canvas 才有淡入过渡
-            useEffect(() => {
-                if (!module) return;
-                const raf = requestAnimationFrame(() => onState('ready'));
-                return () => cancelAnimationFrame(raf);
-            }, [module]);
-
-            const props = useMemo(() => (theme === 'light'
-                ? LIGHT_HERO_SHADER_PROPS
-                : HERO_SHADER_PROPS), [theme]);
-
-            if (!module) return html`<div ref=${hostRef} class="shader-probe"></div>`;
-
-            const ShaderGradientCanvas = module.ShaderGradientCanvas;
-            const ShaderGradient = module.ShaderGradient;
-
-            return html`
-                <div ref=${hostRef} class="shader-canvas">
-                    <${ShaderGradientCanvas}
-                        style=${{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%' }}
-                        pixelDensity=${1}
-                        pointerEvents="none"
-                        fov=${45}
-                    >
-                        <${ShaderGradient} control="props" ...${props} />
-                    <//>
-                </div>
-            `;
-        }
-
-        /* --------------------------------------------- 下载区：Releases 数据 */
-
-        // hero 与下载区共用同一次请求，也共用同一个"骨架屏最少停留时间"
-        let releasesPromise = null;
-        function loadReleases() {
-            if (!releasesPromise) {
-                releasesPromise = (async () => {
-                    const started = Date.now();
-                    let releases = [];
-                    try {
-                        const response = await fetch(RELEASES_API, {
-                            headers: { Accept: 'application/vnd.github+json' }
-                        });
-                        if (!response.ok) throw new Error('HTTP ' + response.status);
-                        const payload = await response.json();
-                        if (Array.isArray(payload)) releases = payload;
-                    } catch (err) {
-                        console.warn('[codedash] GitHub Releases 拉取失败，下载区回落到内置版本信息：', err);
-                    }
-                    // 数据回来太快的话骨架屏会"闪一下"，这里保证至少显示 MIN_SKELETON_MS
-                    const rest = MIN_SKELETON_MS - (Date.now() - started);
-                    if (rest > 0) await new Promise(resolve => window.setTimeout(resolve, rest));
-                    return releases;
-                })();
-            }
-            return releasesPromise;
-        }
-
-        function useReleases() {
-            const [releases, setReleases] = useState(null);
-            useEffect(() => {
-                let alive = true;
-                loadReleases().then(value => { if (alive) setReleases(value); });
-                return () => { alive = false; };
-            }, []);
-            return releases; // null 表示还在加载
-        }
-
-        const MacosIcon = () => html`
-            <svg width="30" height="30" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-                <path d="M17.05 12.53c-.02-2.2 1.8-3.26 1.88-3.31-1.02-1.5-2.62-1.7-3.19-1.72-1.36-.14-2.65.8-3.34.8-.69 0-1.75-.78-2.87-.76-1.48.02-2.84.86-3.6 2.18-1.53 2.66-.39 6.6 1.1 8.76.73 1.06 1.6 2.25 2.74 2.2 1.1-.04 1.51-.71 2.84-.71 1.32 0 1.7.71 2.86.69 1.18-.02 1.94-1.08 2.66-2.14.84-1.23 1.18-2.42 1.2-2.48-.03-.01-2.3-.88-2.32-3.5zM14.9 6.02c.6-.73 1.01-1.75.9-2.76-.87.04-1.93.58-2.55 1.3-.56.65-1.05 1.68-.92 2.67.97.08 1.96-.49 2.57-1.21z"/>
-            </svg>
-        `;
-
-        const WindowsIcon = () => html`
-            <svg width="26" height="26" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-                <path d="M3 5.5l7.2-1v7.1H3V5.5zm8.2-1.15L21 3v8.6h-9.8V4.35zM3 12.6h7.2v7.1L3 18.6v-6zm8.2 0H21V21l-9.8-1.35V12.6z"/>
-            </svg>
-        `;
-
-        const RELEASES_PAGE = 'https://github.com/ueuiuiuu/ueui/releases';
-
-        // 每个平台的文案、图标、资产匹配规则与接口不可用时的兜底按钮。
-        // 兜底按钮与页面里的静态卡片保持一致，接口不通时视觉上完全等价。
-        const PLATFORMS = [
-            {
-                id: 'macos',
-                name: 'macOS',
-                icon: MacosIcon,
-                featured: true,
-                desc: '原生支持 Apple Silicon 与 Intel 芯片，内置完整 Agent 引擎、终端与代码检索能力。',
-                note: '首次打开会被 macOS 拦截（未使用 Apple 开发者证书签名）。在「系统设置 → 隐私与安全性」点「仍要打开」，或执行：',
-                cmd: 'xattr -dr com.apple.quarantine /Applications/CodeDash.app',
-                fallbackPill: 'v0.2.1 · 修复版',
-                pillSuffix: '修复版',
-                match: asset => /\.dmg$/i.test(asset.name),
-                label: asset => /arm64|aarch64/i.test(asset.name)
-                    ? 'Apple Silicon（M 系列）· .dmg'
-                    : /x64|x86_64|intel|universal/i.test(asset.name)
-                        ? 'Intel 芯片 · .dmg'
-                        : asset.name,
-                fallbackButtons: [
-                    {
-                        label: 'Apple Silicon（M 系列）· .dmg',
-                        url: 'https://github.com/ueuiuiuu/ueui/releases/download/v0.2.1/CodeDash-0.2.1-arm64.dmg',
-                        primary: true
-                    },
-                    {
-                        label: 'Intel 芯片 · .dmg',
-                        url: 'https://github.com/ueuiuiuu/ueui/releases/download/v0.2.1/CodeDash-0.2.1-x64.dmg',
-                        primary: false
-                    }
-                ]
-            },
-            {
-                id: 'windows',
-                name: 'Windows',
-                icon: WindowsIcon,
-                featured: false,
-                desc: '支持 Windows 10 / 11，提供图形化安装程序，安装过程可选择安装目录。',
-                note: '安装包未做代码签名，首次运行可能被 SmartScreen 拦截，选择「仍要运行」即可。Agent 引擎通过系统 Node.js 启动，请先确认机器上已安装 Node.js。历史版本、源码与更新日志都在 GitHub Releases。',
-                cmd: '',
-                fallbackPill: 'v0.2.0 · 新版本',
-                pillSuffix: '新版本',
-                match: asset => /\.(exe|msi)$/i.test(asset.name),
-                label: asset => /\.msi$/i.test(asset.name) ? asset.name : 'Windows 安装程序 · .exe',
-                fallbackButtons: [
-                    {
-                        label: 'Windows 安装程序 · .exe',
-                        url: 'https://github.com/ueuiuiuu/ueui/releases/download/v0.2.0/CodeDash.Setup.0.2.0.exe',
-                        primary: true
-                    }
-                ],
-                extraButtons: [
-                    { label: '查看全部版本 · Releases', url: RELEASES_PAGE, primary: false }
-                ]
-            }
-        ];
-
-        function ReleaseMeta() {
-            const releases = useReleases();
-
-            if (!releases) {
-                return html`
-                    <${React.Fragment}>
-                        <${Skeleton} width=${84} height=${24} borderRadius=${20} />
-                        <${Skeleton} width=${220} height=${14} />
-                        <${Skeleton} width=${104} height=${14} />
-                    <//>
-                `;
-            }
-
-            const latest = releases[0];
-            if (!latest) {
-                return html`<span>未能读取 GitHub Releases 接口，下载区显示页面内置的版本信息。</span>`;
-            }
-
-            const downloads = releases.reduce((total, release) =>
-                total + (release.assets || [])
-                    .reduce((inner, asset) => inner + (asset.download_count || 0), 0), 0);
-
-            return html`
-                <${React.Fragment}>
-                    <span class="release-meta__pill">${latest.tag_name}</span>
-                    <span>GitHub Releases 最新版本 · 发布于 ${formatDate(latest.published_at)}</span>
-                    <span>累计下载 ${downloads} 次</span>
-                <//>
-            `;
-        }
-
-        function CardSkeleton() {
-            return html`
-                <div class="download-card sk-card" aria-hidden="true">
-                    <div class="sk-head">
-                        <${Skeleton} circle=${true} width=${44} height=${44} />
-                        <div>
-                            <${Skeleton} width=${104} height=${22} />
-                            <${Skeleton} width=${146} height=${12} style=${{ marginTop: '0.5rem' }} />
-                        </div>
-                    </div>
-                    <${Skeleton} count=${2} height=${12} style=${{ marginBottom: '0.5rem' }} />
-                    <div style=${{ marginTop: '1.4rem' }}>
-                        <${Skeleton} height=${42} borderRadius=${8} style=${{ marginBottom: '0.6rem' }} />
-                        <${Skeleton} height=${42} borderRadius=${8} />
-                    </div>
-                    <${Skeleton} count=${2} height=${11} style=${{ marginTop: '1.5rem', marginBottom: '0.45rem' }} />
-                </div>
-            `;
-        }
-
-        function PlatformCard({ platform, releases }) {
-            // 最新 release 里没有该平台的安装包时（比如只发了 macOS），
-            // 往前找最近一个带匹配资产的版本，Windows 卡就不会被连累成空的。
-            const release = releases.find(item =>
-                (item.assets || []).some(platform.match)) || null;
-            const assets = release ? (release.assets || []).filter(platform.match) : [];
-
-            const buttons = assets.length
-                ? assets.map((asset, index) => ({
-                    label: platform.label(asset),
-                    url: asset.browser_download_url,
-                    primary: index === 0,
-                    count: asset.download_count || 0
-                })).concat(platform.extraButtons || [])
-                : platform.fallbackButtons;
-
-            return html`
-                <div class=${'download-card' + (platform.featured ? ' featured' : '')}>
-                    <div class="download-head">
-                        <span class="platform-icon"><${platform.icon} /></span>
-                        <div>
-                            <h3>${platform.name}</h3>
-                            <span class="version-pill">
-                                ${release ? release.tag_name + ' · ' + platform.pillSuffix : platform.fallbackPill}
-                            </span>
-                        </div>
-                    </div>
-                    <p class="download-desc">${platform.desc}</p>
-                    <div class="download-actions">
-                        ${buttons.map((button, index) => html`
-                            <a key=${index}
-                               class=${'dl-btn' + (button.primary ? ' primary' : '')}
-                               href=${button.url}
-                               target="_blank"
-                               rel="noopener">
-                                ${button.label}
-                                ${button.count ? html`<span class="dl-btn__count">已下载 ${button.count} 次</span>` : null}
-                            </a>
-                        `)}
-                    </div>
-                    <p class="download-note">
-                        ${platform.note}
-                        ${platform.cmd ? html`<code class="cmd">${platform.cmd}</code>` : null}
-                    </p>
-                </div>
-            `;
-        }
-
-        function DownloadCards() {
-            const releases = useReleases();
-
-            if (!releases) {
-                return html`
-                    <${React.Fragment}>
-                        <${CardSkeleton} key="a" />
-                        <${CardSkeleton} key="b" />
-                    <//>
-                `;
-            }
-
-            return html`
-                <${React.Fragment}>
-                    ${PLATFORMS.map(platform => html`
-                        <${PlatformCard} key=${platform.id} platform=${platform} releases=${releases} />
-                    `)}
-                <//>
-            `;
-        }
-
-        /* -------------------------------------------------------------- 挂载 */
-
-        const layerNode = document.getElementById('shaderLayer');
-        const statusNode = document.getElementById('shaderStatusSlot');
-        const shaderMount = document.getElementById('shaderMount');
-        const metaSlot = document.getElementById('releaseMetaSlot');
-        const gridSlot = document.getElementById('downloadGrid');
-
-        function setShaderState(status, message) {
-            if (layerNode) layerNode.dataset.shader = status;
-            if (!statusNode) return;
-            statusNode.innerHTML = (status === 'fallback' && message)
-                ? '<span class="shader-status__pill">' + message + '</span>'
-                : '';
-        }
-
-        try {
-            if (shaderMount) {
-                createRoot(shaderMount).render(html`<${ShaderBackground} onState=${setShaderState} />`);
-            }
-            if (metaSlot) createRoot(metaSlot).render(html`<${ReleaseMeta} />`);
-            if (gridSlot) createRoot(gridSlot).render(html`<${DownloadCards} />`);
-        } catch (err) {
-            console.warn('[codedash] React 岛挂载失败，页面保留静态内容：', err);
-            setShaderState('fallback', '');
-        }
-    </script>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ░░ 模式 ░░ -->
+<section id="modes">
+  <div class="container section-pad">
+    <div class="sec-head center reveal">
+      <div class="sec-eyebrow"><span class="h">##</span>Modes</div>
+      <h2 class="sec-title">三种工作模式</h2>
+      <p class="sec-desc">从安全只读，到全权执行，再到自动队列——按任务的危险程度选。</p>
+    </div>
+    <div class="mode-grid">
+      <article class="mode-card reveal">
+        <div class="mode-label">PLAN</div>
+        <h3 class="mode-name">只读探路</h3>
+        <p>AI 只用只读工具探索仓库，把结论写进 <code>.plan.md</code>。你确认之后，再切到 Agent 执行。</p>
+        <span class="mode-meta">只读安全</span>
+      </article>
+      <article class="mode-card reveal">
+        <div class="mode-label">AGENT</div>
+        <h3 class="mode-name">全权执行</h3>
+        <p>可读写文件、执行 Shell、控制浏览器和计算机。适合已经想清楚、只等落地的任务。</p>
+        <span class="mode-meta">完整权限</span>
+      </article>
+      <article class="mode-card reveal">
+        <div class="mode-label">CHAIN</div>
+        <h3 class="mode-name">自动队列</h3>
+        <p>Plan → Agent → Plan → Agent 自动循环，直到队列清空。适合一次交代一串活儿。</p>
+        <span class="mode-meta">无人值守</span>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- ░░ 视频（影片卡片布局参考 workflow 站点） ░░ -->
+<section id="videos">
+  <div class="container section-pad">
+    <div class="sec-head reveal">
+      <div class="sec-eyebrow"><span class="h">##</span>Videos</div>
+      <h2 class="sec-title">先看一遍，再动手</h2>
+      <p class="sec-desc">三段真实录屏。点画面直接在页内播放，完整版与弹幕在 B 站。</p>
+    </div>
+
+    <div class="films">
+      <article class="film film-split reveal">
+        <button class="film-media" type="button" data-bvid="BV1tjJp6bEvZ" aria-label="播放影片：产品演示">
+          <div class="film-poster">
+            <span class="poster-idx">01 / FEATURED</span>
+            <span class="poster-title">产品演示</span>
+            <span class="poster-meta">PRODUCT TOUR</span>
+          </div>
+          <span class="film-play" aria-hidden="true">
+            <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+          </span>
+        </button>
+        <div class="film-copy">
+          <p class="tagline">产品演示 · BILIBILI · 推荐先看</p>
+          <h3>一句话，<br>跑通一整个工程</h3>
+          <p>从打开仓库、让 Agent 规划改动，到改代码、跑测试、写回计划文件，完整走一遍真实任务。</p>
+          <a class="film-link" href="https://www.bilibili.com/video/BV1tjJp6bEvZ" target="_blank" rel="noopener noreferrer">
+            在 B 站打开
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17L17 7M7 7h10v10"/></svg>
+          </a>
+        </div>
+      </article>
+
+      <div class="film-duo">
+        <article class="film film-card reveal">
+          <button class="film-media" type="button" data-bvid="BV1CP3m6NEM9" aria-label="播放影片：更多演示">
+            <div class="film-poster">
+              <span class="poster-idx">02</span>
+              <span class="poster-title">更多演示</span>
+              <span class="poster-meta">MORE DEMOS</span>
+            </div>
+            <span class="film-play" aria-hidden="true">
+              <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+            </span>
+          </button>
+          <div class="film-copy">
+            <p class="tagline">更多演示 · BILIBILI</p>
+            <h3>浏览器与桌面自动化</h3>
+            <p>让 Agent 打开网页、登录、填表、截图，再接管鼠标键盘完成本地操作。</p>
+            <a class="film-link" href="https://www.bilibili.com/video/BV1CP3m6NEM9" target="_blank" rel="noopener noreferrer">
+              在 B 站打开
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17L17 7M7 7h10v10"/></svg>
+            </a>
+          </div>
+        </article>
+
+        <article class="film film-card reveal">
+          <button class="film-media" type="button" data-bvid="BV1NuH762E9k" aria-label="播放影片：学习模式更新">
+            <div class="film-poster">
+              <span class="poster-idx">03</span>
+              <span class="poster-title">学习模式更新</span>
+              <span class="poster-meta">LEARNING MODE</span>
+            </div>
+            <span class="film-play" aria-hidden="true">
+              <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+            </span>
+          </button>
+          <div class="film-copy">
+            <p class="tagline">学习模式更新 · BILIBILI</p>
+            <h3>把讲解留在编辑器里</h3>
+            <p>代码旁生成讲解、公式与图示，复习时不用再切去别的窗口。</p>
+            <a class="film-link" href="https://www.bilibili.com/video/BV1NuH762E9k" target="_blank" rel="noopener noreferrer">
+              在 B 站打开
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17L17 7M7 7h10v10"/></svg>
+            </a>
+          </div>
+        </article>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ░░ 下载 ░░ -->
+<section id="download">
+  <div class="container section-pad">
+    <div class="sec-head reveal">
+      <div class="sec-eyebrow"><span class="h">##</span>Download</div>
+      <h2 class="sec-title">下载安装</h2>
+      <p class="sec-desc">macOS 已更新到 v0.2.1 修复版，Windows 当前为 v0.2.0，两个平台功能保持一致。</p>
+    </div>
+    <div class="dl-grid">
+      <article class="dl-card reveal" data-os="mac">
+        <div class="dl-label">macOS<span class="dl-badge">你的系统</span></div>
+        <div class="dl-head">
+          <div class="dl-name">
+            <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M17.05 12.53c-.02-2.2 1.8-3.26 1.88-3.31-1.02-1.5-2.62-1.7-3.19-1.72-1.36-.14-2.65.8-3.34.8-.69 0-1.75-.78-2.87-.76-1.48.02-2.84.86-3.6 2.18-1.53 2.66-.39 6.6 1.1 8.76.73 1.06 1.6 2.25 2.74 2.2 1.1-.04 1.51-.71 2.84-.71 1.32 0 1.7.71 2.86.69 1.18-.02 1.94-1.08 2.66-2.14.84-1.23 1.18-2.42 1.2-2.48-.03-.01-2.3-.88-2.32-3.5zM14.9 6.02c.6-.73 1.01-1.75.9-2.76-.87.04-1.93.58-2.55 1.3-.56.65-1.05 1.68-.92 2.67.97.08 1.96-.49 2.57-1.21z"/></svg>
+            Apple Silicon / Intel
+          </div>
+          <span class="dl-ver">v0.2.1</span>
+        </div>
+        <p class="dl-desc">原生支持 M 系列与 Intel 芯片，内置完整 Agent 引擎、终端与代码检索。</p>
+        <div class="dl-actions">
+          <a class="dl-btn primary" href="https://github.com/ueuiuiuu/ueui/releases/download/v0.2.1/CodeDash-0.2.1-arm64.dmg" target="_blank" rel="noopener noreferrer">
+            Apple Silicon（M 系列）<span class="hint">.dmg</span>
+          </a>
+          <a class="dl-btn" href="https://github.com/ueuiuiuu/ueui/releases/download/v0.2.1/CodeDash-0.2.1-x64.dmg" target="_blank" rel="noopener noreferrer">
+            Intel 芯片<span class="hint">.dmg</span>
+          </a>
+        </div>
+        <p class="dl-note">
+          首次打开会被 macOS 拦截（未使用 Apple 开发者证书签名）。在「系统设置 → 隐私与安全性」点「仍要打开」，或执行：
+          <code>xattr -dr com.apple.quarantine /Applications/CodeDash.app</code>
+        </p>
+      </article>
+
+      <article class="dl-card reveal" data-os="win">
+        <div class="dl-label">Windows<span class="dl-badge">你的系统</span></div>
+        <div class="dl-head">
+          <div class="dl-name">
+            <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M3 5.5l7.2-1v7.1H3V5.5zm8.2-1.15L21 3v8.6h-9.8V4.35zM3 12.6h7.2v7.1L3 18.6v-6zm8.2 0H21V21l-9.8-1.35V12.6z"/></svg>
+            Windows 10 / 11
+          </div>
+          <span class="dl-ver">v0.2.0</span>
+        </div>
+        <p class="dl-desc">提供图形化安装程序，安装过程可选择安装目录，与 macOS 版功能一致。</p>
+        <div class="dl-actions">
+          <a class="dl-btn primary" href="https://github.com/ueuiuiuu/ueui/releases/download/v0.2.0/CodeDash.Setup.0.2.0.exe" target="_blank" rel="noopener noreferrer">
+            安装程序<span class="hint">.exe</span>
+          </a>
+          <a class="dl-btn" href="https://github.com/ueuiuiuu/ueui/releases" target="_blank" rel="noopener noreferrer">
+            全部版本与更新日志<span class="hint">↗</span>
+          </a>
+        </div>
+        <p class="dl-note">
+          安装包未做代码签名，首次运行可能被 SmartScreen 拦截，选择「仍要运行」即可。
+          Agent 引擎通过系统 Node.js 启动，请先确认机器上已安装 Node.js。
+        </p>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- ░░ 技术栈 ░░ -->
+<section id="tech">
+  <div class="container section-pad">
+    <div class="sec-head reveal">
+      <div class="sec-eyebrow"><span class="h">##</span>Stack</div>
+      <h2 class="sec-title">从桌面壳到 AI 引擎</h2>
+      <p class="sec-desc">全栈自研，零 Agent 框架依赖。下面是真正跑在进程里的东西。</p>
+    </div>
+    <div class="tech-grid">
+      <div class="tech-card reveal">
+        <div class="tech-label">Frontend</div>
+        <div class="tech-name">界面</div>
+        <div class="chip-wrap">
+          <span class="chip">Electron 32</span><span class="chip">React 18</span><span class="chip">TypeScript</span><span class="chip">Vite 5</span><span class="chip">Monaco Editor</span><span class="chip">Xterm.js</span>
+        </div>
+      </div>
+      <div class="tech-card reveal">
+        <div class="tech-label">Engine</div>
+        <div class="tech-name">引擎</div>
+        <div class="chip-wrap">
+          <span class="chip">agent-core</span><span class="chip">JSON-RPC 2.0</span><span class="chip">Node-PTY</span><span class="chip">Simple-Git</span><span class="chip">Workflow</span>
+        </div>
+      </div>
+      <div class="tech-card reveal">
+        <div class="tech-label">Intelligence</div>
+        <div class="tech-name">理解与感知</div>
+        <div class="chip-wrap">
+          <span class="chip">Tree-sitter</span><span class="chip">Xenova Transformers</span><span class="chip">MiniSearch</span><span class="chip">Vosk</span><span class="chip">nut.js</span><span class="chip">KaTeX</span>
+        </div>
+      </div>
+    </div>
+    <p class="tech-note reveal"><span class="path">$</span> Electron + agent-core 双进程 · 安装包经 GitHub Releases 分发 · 开源免费</p>
+  </div>
+</section>
+
+<!-- ░░ CTA ░░ -->
+<section>
+  <div class="container section-pad">
+    <div class="band-invert reveal">
+      <span class="g1" aria-hidden="true">`</span>
+      <div class="band-chip">OPEN SOURCE · FREE</div>
+      <h2 class="band-title">把下一个需求，交给它跑一遍</h2>
+      <p class="band-desc">下载即用。选一个你手边的小重构，交给 Agent，看它自己规划、改完、跑测试。</p>
+      <div class="hero-actions">
+        <a class="btn btn-white btn-lg" id="ctaDl" href="https://github.com/ueuiuiuu/ueui/releases" target="_blank" rel="noopener noreferrer">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+          <span id="ctaDlText">下载安装</span>
+        </a>
+        <a class="btn btn-ghost-light btn-lg" id="ctaAlt" href="https://github.com/ueuiuiuu/ueui/releases" target="_blank" rel="noopener noreferrer"><span id="ctaAltText">全部版本</span></a>
+        <a class="btn btn-ghost-light btn-lg" href="https://github.com/ueuiuiuu" target="_blank" rel="noopener noreferrer">GitHub</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ░░ FOOTER ░░ -->
+<footer class="site-footer">
+  <div class="container">
+    <div class="footer-grid">
+      <div>
+        <div class="footer-brand">
+          <svg viewBox="0 0 128 128" aria-hidden="true">
+            <rect width="128" height="128" rx="16" fill="#0d1117"/>
+            <rect width="48" height="26" fill="#f0f0f0"/>
+            <rect x="48" width="40" height="26" fill="#c0c0c0"/>
+            <rect x="88" width="40" height="26" fill="#808080"/>
+            <rect x="0" y="19" width="128" height="7" fill="#0d1117"/>
+            <text x="64" y="82" font-family="'Courier New',monospace" font-size="42" font-weight="bold" fill="#e6edf3" text-anchor="middle">cd</text>
+            <rect x="38" y="100" width="52" height="4" rx="2" fill="#8b949e"/>
+          </svg>
+          CodeDash
+        </div>
+        <p class="footer-tagline">AI 原生桌面 IDE — 自研 Agent 引擎，把「说一句」变成「跑通一整套」。</p>
+      </div>
+      <div class="footer-col">
+        <h4>产品</h4>
+        <div><a href="#features">特性</a></div>
+        <div><a href="#architecture">双进程架构</a></div>
+        <div><a href="#videos">视频</a></div>
+        <div><a href="#download">下载安装</a></div>
+      </div>
+      <div class="footer-col">
+        <h4>更多页面</h4>
+        <div><a href="features.html">功能清单</a></div>
+        <div><a href="docs.html">文档</a></div>
+        <div><a href="log.html">更新日志</a></div>
+        <div><a href="articles.html">文章</a></div>
+      </div>
+      <div class="footer-col">
+        <h4>集市</h4>
+        <div><a href="../tools/index.html">工具</a></div>
+        <div><a href="../whiteboard/index.html">白板</a></div>
+        <div><a href="../recalltry.html">存档</a></div>
+        <div><a href="../../index.html">回首页</a></div>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>© 2026 CodeDash <span class="sep">·</span> 开源 · 免费 <span class="sep">·</span> v0.2.1</span>
+      <span>Built for developers <span class="sep">·</span> Windows / macOS</span>
+    </div>
+  </div>
+</footer>
+
+<script>
+(function () {
+  'use strict';
+
+  var html = document.documentElement;
+
+  /* ---------- 导航收缩 ---------- */
+  var nav = document.getElementById('nav');
+  var drawer = document.getElementById('drawer');
+  var menuBtn = document.getElementById('menuBtn');
+
+  function onScroll() {
+    if (!nav) return;
+    nav.classList.toggle('is-pinned', window.scrollY > 36);
+  }
+  window.addEventListener('scroll', onScroll, { passive: true });
+  onScroll();
+
+  if (menuBtn) {
+    menuBtn.addEventListener('click', function () {
+      var open = drawer.classList.toggle('open');
+      menuBtn.setAttribute('aria-expanded', open ? 'true' : 'false');
+    });
+    drawer.querySelectorAll('a').forEach(function (a) {
+      a.addEventListener('click', function () {
+        drawer.classList.remove('open');
+        menuBtn.setAttribute('aria-expanded', 'false');
+      });
+    });
+  }
+
+  /* ---------- 主题切换（支持 View Transitions 圆形揭示） ---------- */
+  var toggle = document.getElementById('themeToggle');
+  function applyTheme(dark) {
+    html.classList.toggle('dark', dark);
+    var meta = document.querySelector('meta[name="theme-color"]');
+    if (meta) meta.setAttribute('content', dark ? '#0a0a0a' : '#ffffff');
+    try { localStorage.setItem('codedash-theme', dark ? 'dark' : 'light'); } catch (e) {}
+  }
+  if (toggle) {
+    toggle.addEventListener('click', function (e) {
+      var next = !html.classList.contains('dark');
+      if (!document.startViewTransition) { applyTheme(next); return; }
+      var r = toggle.getBoundingClientRect();
+      var x = r.left + r.width / 2, y = r.top + r.height / 2;
+      var end = Math.hypot(Math.max(x, window.innerWidth - x), Math.max(y, window.innerHeight - y));
+      var t = document.startViewTransition(function () { applyTheme(next); });
+      t.ready.then(function () {
+        html.animate(
+          { clipPath: ['circle(0px at ' + x + 'px ' + y + 'px)', 'circle(' + end + 'px at ' + x + 'px ' + y + 'px)'] },
+          { duration: 480, easing: 'cubic-bezier(.22,1,.36,1)', pseudoElement: '::view-transition-new(root)' }
+        );
+      });
+    });
+  }
+
+  /* ---------- 按系统匹配下载 ---------- */
+  var DL = {
+    macArm: 'https://github.com/ueuiuiuu/ueui/releases/download/v0.2.1/CodeDash-0.2.1-arm64.dmg',
+    macX64: 'https://github.com/ueuiuiuu/ueui/releases/download/v0.2.1/CodeDash-0.2.1-x64.dmg',
+    win: 'https://github.com/ueuiuiuu/ueui/releases/download/v0.2.0/CodeDash.Setup.0.2.0.exe',
+    releases: 'https://github.com/ueuiuiuu/ueui/releases'
+  };
+
+  /* ?os=win / ?os=mac 可强制指定平台，便于在单一设备上预览另一套按钮文案 */
+  function forcedOS() {
+    var q = '';
+    try { q = new URLSearchParams(location.search).get('os') || ''; } catch (e) {}
+    q = q.toLowerCase();
+    if (q === 'win' || q === 'windows') return 'win';
+    if (q === 'mac' || q === 'macos') return 'mac';
+    return '';
+  }
+
+  function detectOS() {
+    var force = forcedOS();
+    if (force) return force;
+    var ua = navigator.userAgent || '';
+    var data = navigator.userAgentData;
+    var plat = (data && data.platform) || navigator.platform || '';
+    if (/win/i.test(plat) || /Windows/i.test(ua)) return 'win';
+    if (/mac/i.test(plat) || /Macintosh|Mac OS X/i.test(ua)) return 'mac';
+    return 'other';
+  }
+
+  function setLink(el, href, external) {
+    if (!el) return;
+    el.setAttribute('href', href);
+    if (external) {
+      el.setAttribute('target', '_blank');
+      el.setAttribute('rel', 'noopener noreferrer');
+    } else {
+      el.removeAttribute('target');
+      el.removeAttribute('rel');
+    }
+  }
+
+  function wireDownload(os, href, label) {
+    var hero = document.getElementById('heroDl');
+    var heroText = document.getElementById('heroDlText');
+    var navDl = document.getElementById('navDl');
+    var note = document.getElementById('heroNote');
+    var ctaDl = document.getElementById('ctaDl');
+    var ctaText = document.getElementById('ctaDlText');
+    var ctaAlt = document.getElementById('ctaAlt');
+    var ctaAltText = document.getElementById('ctaAltText');
+    var known = os === 'win' || os === 'mac';
+
+    if (hero) {
+      if (known) {
+        setLink(hero, href, true);
+        hero.setAttribute('aria-label', '下载 CodeDash ' + label + ' 版');
+        if (heroText) heroText.textContent = '下载 ' + label + ' 版';
+      } else {
+        setLink(hero, '#download', false);
+        hero.removeAttribute('aria-label');
+        if (heroText) heroText.textContent = '下载';
+      }
+    }
+    if (navDl) {
+      if (known) {
+        setLink(navDl, href, true);
+        navDl.setAttribute('aria-label', '下载 CodeDash ' + label + ' 版');
+        navDl.setAttribute('title', '下载 ' + label + ' 版');
+      } else {
+        setLink(navDl, '#download', false);
+        navDl.removeAttribute('aria-label');
+        navDl.removeAttribute('title');
+      }
+    }
+    if (note && known) {
+      note.textContent = '已为 ' + label + ' 匹配安装包 · 开源 · 免费';
+    }
+    if (ctaDl && ctaText) {
+      if (known) {
+        setLink(ctaDl, href, true);
+        ctaText.textContent = '下载 ' + label + ' 版';
+      } else {
+        setLink(ctaDl, '#download', false);
+        ctaText.textContent = '下载安装';
+      }
+    }
+    if (ctaAlt && ctaAltText) {
+      setLink(ctaAlt, DL.releases, true);
+      ctaAltText.textContent = known ? ((os === 'win' ? 'macOS' : 'Windows') + ' 版与历史版本') : '全部版本';
+    }
+
+    var card = document.querySelector('.dl-card[data-os="' + os + '"]');
+    if (card) card.classList.add('is-detected');
+  }
+
+  var forced = forcedOS();
+  var os = detectOS();
+  if (os === 'mac') {
+    wireDownload('mac', DL.macArm, 'macOS');
+    if (!forced && navigator.userAgentData && navigator.userAgentData.getHighEntropyValues) {
+      navigator.userAgentData.getHighEntropyValues(['architecture']).then(function (v) {
+        if (v && v.architecture === 'x86') wireDownload('mac', DL.macX64, 'macOS');
+      }).catch(function () {});
+    }
+  } else if (os === 'win') {
+    wireDownload('win', DL.win, 'Windows');
+  } else {
+    wireDownload('other', DL.releases, '');
+  }
+
+  /* ---------- 滚动显现 ---------- */
+  var reveals = document.querySelectorAll('.reveal');
+  if ('IntersectionObserver' in window) {
+    var ro = new IntersectionObserver(function (entries) {
+      entries.forEach(function (en) {
+        if (en.isIntersecting) { en.target.classList.add('in'); ro.unobserve(en.target); }
+      });
+    }, { threshold: .08, rootMargin: '0px 0px -40px 0px' });
+    reveals.forEach(function (el) {
+      // 首屏内的元素立即显示，避免观察器回调延迟时出现空白
+      if (el.getBoundingClientRect().top < window.innerHeight * 0.92) el.classList.add('in');
+      else ro.observe(el);
+    });
+  } else {
+    reveals.forEach(function (el) { el.classList.add('in'); });
+  }
+
+  /* ---------- 数字递增 ---------- */
+  var nums = document.querySelectorAll('.stat-num[data-count]');
+  var reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  function finalText(el) {
+    var target = parseFloat(el.getAttribute('data-count'));
+    var decimals = parseInt(el.getAttribute('data-decimals') || '0', 10);
+    var suffix = el.getAttribute('data-suffix') || '';
+    el.textContent = target.toFixed(decimals) + suffix;
+  }
+  function runCount(el) {
+    if (reduceMotion) { finalText(el); return; }
+    var target = parseFloat(el.getAttribute('data-count'));
+    var decimals = parseInt(el.getAttribute('data-decimals') || '0', 10);
+    var suffix = el.getAttribute('data-suffix') || '';
+    var dur = 1400, start = null;
+    function step(ts) {
+      if (start === null) start = ts;
+      var p = Math.min((ts - start) / dur, 1);
+      var eased = 1 - Math.pow(1 - p, 3);
+      el.textContent = (target * eased).toFixed(decimals) + suffix;
+      if (p < 1) requestAnimationFrame(step);
+      else el.textContent = target.toFixed(decimals) + suffix;
+    }
+    requestAnimationFrame(step);
+  }
+  if (nums.length && 'IntersectionObserver' in window) {
+    var no = new IntersectionObserver(function (entries) {
+      entries.forEach(function (en) {
+        if (en.isIntersecting) { runCount(en.target); no.unobserve(en.target); }
+      });
+    }, { threshold: .6 });
+    nums.forEach(function (el) {
+      if (el.getBoundingClientRect().top < window.innerHeight) runCount(el);
+      else no.observe(el);
+    });
+  } else {
+    nums.forEach(runCount);
+  }
+
+  /* ---------- 影片：点击在页内加载 B 站播放器 ---------- */
+  document.querySelectorAll('.film-media[data-bvid]').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      if (btn.classList.contains('is-playing')) return;
+      var bvid = btn.getAttribute('data-bvid');
+      var frame = document.createElement('iframe');
+      frame.src = 'https://player.bilibili.com/player.html?bvid=' + encodeURIComponent(bvid) +
+                  '&page=1&high_quality=1&danmaku=1&autoplay=1';
+      frame.setAttribute('allowfullscreen', 'true');
+      frame.setAttribute('scrolling', 'no');
+      frame.setAttribute('frameborder', '0');
+      frame.title = btn.getAttribute('aria-label') || '视频播放器';
+      btn.appendChild(frame);
+      btn.classList.add('is-playing');
+    });
+  });
+
+  /* ---------- 锚点平滑滚动（clip 顶部留白） ---------- */
+  document.querySelectorAll('a[href^="#"]').forEach(function (a) {
+    a.addEventListener('click', function (e) {
+      var id = a.getAttribute('href');
+      if (id.length < 2) return;
+      var target = document.querySelector(id);
+      if (!target) return;
+      e.preventDefault();
+      target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      history.replaceState(null, '', id);
+    });
+  });
+})();
+</script>
 </body>
 </html>
