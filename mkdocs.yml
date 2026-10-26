@@ -41,7 +41,8 @@ nav:
       - 存档: market/recalltry.md
       - 白板: market/whiteboard/index.html
   - 文章:
-    - 学习日志:
+    - 日志:
+        - OpenGL与图形渲染管线: txt13.md
         - 智能体消息缓冲机制: txt11.md
         - 抢单接口压测过程: txt1.md
         - 以目标为导向: txt2.md

@@ -650,6 +650,32 @@ body, body * {
   border-bottom-color: var(--md-typeset-a-color);
 }
 
+/* 正文里的链接默认带下划线，未悬停时也能和普通文字区分开 */
+.md-typeset p a,
+.md-typeset li a,
+.md-typeset dd a,
+.md-typeset blockquote a,
+.md-typeset td a,
+.md-typeset th a {
+  color: var(--md-default-fg-color) !important;
+  border-bottom: none !important;
+  text-decoration-line: underline !important;
+  text-decoration-thickness: 0.06rem !important;
+  text-underline-offset: 0.22rem;
+  text-decoration-color: currentColor !important;
+}
+
+.md-typeset p a:hover,
+.md-typeset li a:hover,
+.md-typeset dd a:hover,
+.md-typeset blockquote a:hover,
+.md-typeset td a:hover,
+.md-typeset th a:hover {
+  color: var(--md-default-fg-color) !important;
+  text-decoration-thickness: 0.1rem !important;
+  text-decoration-color: currentColor !important;
+}
+
 /* --- Horizontal rule --- */
 .md-typeset hr {
   border-bottom: 1px solid var(--md-default-fg-color--lighter) !important;
