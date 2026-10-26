@@ -41,16 +41,15 @@ nav:
       - 存档: market/recalltry.md
       - 白板: market/whiteboard/index.html
   - 文章:
-    - 日志:
-        - OpenGL与图形渲染管线: txt13.md
-        - 智能体消息缓冲机制: txt11.md
-        - 抢单接口压测过程: txt1.md
-        - 以目标为导向: txt2.md
-        - 前端部署记录: txt3.md
-        - 压缩Java内存: txt4.md
-        - 传播App经验: txt5.md
-        - 粗浅理解深度学习: txt6.md
-    - 回顾近两年来的历程: txt12.md
+      - OpenGL与图形渲染管线: txt13.md
+      - 回顾近两年来的历程: txt12.md
+      - 智能体消息缓冲机制: txt11.md
+      - 抢单接口压测过程: txt1.md
+      - 以目标为导向: txt2.md
+      - 前端部署记录: txt3.md
+      - 压缩Java内存: txt4.md
+      - 传播App经验: txt5.md
+      - 粗浅理解深度学习: txt6.md
   - 算法:
       - 自制Skill进行代码转化的情况: txt10.md
       - 像写Java一样写C++: txt7.md
