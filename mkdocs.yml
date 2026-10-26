@@ -41,7 +41,7 @@ nav:
       - 存档: market/recalltry.md
       - 白板: market/whiteboard/index.html
   - 文章:
-      - OpenGL与图形渲染管线: txt13.md
+      - OpenGL与图形渲染: txt13.md
       - 回顾近两年来的历程: txt12.md
       - 智能体消息缓冲机制: txt11.md
       - 抢单接口压测过程: txt1.md

@@ -1,4 +1,4 @@
-# OpenGL 与图形渲染管线
+# OpenGL 与图形渲染
 
 ## 一、OpenGL 是什么
 
