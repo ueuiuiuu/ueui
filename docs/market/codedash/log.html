@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>更新日志 — CodeDash · AI 原生桌面 IDE</title>
-<meta name="description" content="CodeDash 版本更新记录：v0.2.1 macOS 修复版、v0.2.0 学习模式上线、v0.1.0 首次发布。">
+<meta name="description" content="CodeDash 版本更新记录：v0.3.0 Langfuse 评测工作区、v0.2.1 macOS 修复版、v0.2.0 学习模式上线、v0.1.0 首次发布。">
 <meta name="theme-color" content="#ffffff">
 <link rel="icon" href="icon-codedash.svg">
 <script>
@@ -459,8 +459,9 @@
     <h1 class="page-title">更新日志</h1>
     <p class="page-desc">从首次发布到现在的每一次改动，按版本倒序排列。每个版本都写清楚改了什么、为什么改，以及升级时要注意的地方。</p>
     <div class="page-tags">
-      <span><i class="dot"></i>最新 v0.2.1 · 2026-10-10</span>
-      <span>3 个版本</span>
+      <span><i class="dot"></i>最新 v0.3.0 · 2026-10-22</span>
+      <span>4 个版本</span>
+      <span>v0.3.0 安装包待发布</span>
       <span>开源 · 免费</span>
     </div>
   </div>
@@ -471,7 +472,8 @@
     <aside class="log-side">
       <div class="side-label">版本索引</div>
       <ul class="log-nav">
-        <li><a href="#v021" class="active">v0.2.1<span class="d">2026-10-10</span></a></li>
+        <li><a href="#v030" class="active">v0.3.0<span class="d">2026-10-22</span></a></li>
+        <li><a href="#v021">v0.2.1<span class="d">2026-10-10</span></a></li>
         <li><a href="#v020">v0.2.0<span class="d">2026-10-04</span></a></li>
         <li><a href="#v010">v0.1.0<span class="d">2026-07-27</span></a></li>
       </ul>
@@ -479,6 +481,60 @@
     </aside>
 
     <div class="log-content">
+      <article class="log-entry" id="v030">
+        <div class="log-meta"><span class="tag">UNRELEASED</span><span>v0.3.0</span><span>2026-10-22</span></div>
+        <h2>v0.3.0 — Langfuse 评测工作区 · 联网与图片输入 · 命令行版 Agent</h2>
+        <p>这一版的主线是把「评测」做进 CodeDash：新增第五种项目类型 <code>langfuse</code>，数据集、评测器、评测记录与追踪分析全部落在本机一个 SQLite 文件里，运行时不需要 Docker，也不需要额外的常驻服务。同时补上联网搜索、思考强度、图片输入，并把 Agent 引擎单独做成了一个命令行版本。以下按 10 月 15 日以来的提交顺序整理。</p>
+
+        <h3>Langfuse 项目 · 评测与追踪</h3>
+        <ol class="log-list">
+          <li><strong>第五种项目类型</strong> — 全局单例项目，数据存放在 <code>&lt;userData&gt;/langfuse</code> 下的单个 <code>langfuse.db</code>：数据集、条目、评测器与版本、评测规则、任务、评分、追踪与观测、采集开关、评测模型共 12 张表。沿用学习模式的无框架迁移方式（<code>EXPECTED_COLUMNS</code> + <code>ALTER TABLE</code>）与孤儿数据恢复，老库升级自动补列且不丢原有配置。</li>
+          <li><strong>规则型评测</strong> — 9 种算子（包含、正则、精确匹配、JSON Schema、长度、是否合法 JSON 等），纯函数判定。刻意不启沙箱：需求本质是「按固定条件判一段文本」，上沙箱只会把复杂度提高一个数量级。</li>
+          <li><strong>LLM 型评测</strong> — 提示词模板 + 变量映射 + 结构化输出（数值 / 布尔 / 分类）。模型可见字段用 <code>scoreExplanation</code> 而非 <code>reasoning</code>：思考型模型会把 <code>reasoning</code> 当自己的草稿通道，常只填它而丢掉分数。评测模型默认实时跟随对话模型（读 agent-core 配置，不复制），也可单独指定，配置不完整时直接报错而不是静默回退。</li>
+          <li><strong>幂等的分数</strong> — 分数 ID 用 uuid v5 从「执行 ID + 分数名 + 序号」确定性派生，重跑不会产生重复分数。</li>
+          <li><strong>任务队列</strong> — 新建、串行排队、执行、重跑、导出对话。每轮结束后由裁判模型判断目标是否达成，未达成则写下一步指令自动推进，停止条件为达成、达到最大轮数或总超时；裁判调用失败只停止推进，不会把任务判成失败。每轮过程落库，刷新或重启后仍可回看；执行改为后台进行，进度经通知推送，长任务不再阻塞界面。</li>
+          <li><strong>数据集与会话集</strong> — 数据集条目改为「按轮次的输入」，一条即一次会话的输入（可多轮），执行时按顺序发送再自动推进；会话集是把数据集跑一遍的结果快照，一个数据集可跑多组，详情为左侧会话列表 + 右侧只读对话。CSV 导入导出同步支持。</li>
+          <li><strong>独立的评测记录</strong> — 评测改为有名字的独立记录，每次运行都留痕、互不覆盖；新建评测与查看结论统一到「评测结果」栏，不再和会话集混在一起。</li>
+          <li><strong>提示词版本管理</strong> — 所有系统提示词与工具描述都可存多版本，分「控制台激活」与「推到 UDash」两个开关。</li>
+          <li><strong>用例级记忆模式</strong> — 数据集条目支持逐条或批量设置同步 / 异步记忆模式，从数据集建会话集时按条目取模式传入 <code>session/create</code>。会话增加 <code>origin</code>（chat / eval），标注为 eval 的会话不再出现在用户的会话列表里，只留在控制台的追踪与会话集中。</li>
+          <li><strong>追踪采集</strong> — agent-core 新增 trace 埋点在 runTurn 上采集模型调用、工具执行与子 Agent，每轮批量提交一次，避免高频小 RPC；<code>LlmClient</code> 打开 <code>stream_options.include_usage</code> 并在 SSE 解析器里捕获 usage，此前只能按字符估算 token；用 <code>try / catch / finally</code> 保证所有退出路径都提交观测树，失败的一轮不再从追踪里消失。</li>
+          <li><strong>观测原文可见</strong> — <code>get_trace</code> 输出带 <code>observationId</code> 的观测清单，支持 <code>includeModelInput</code> 展开模型实际收到的 messages；新增 <code>get_observation</code> 取单条观测的完整输入 / 输出 JSON。<code>compactMessages</code> 改为保留全部 system 消息，分层记忆注入的冷 / 热摘要、召回结果、时间线不再被整段裁掉。</li>
+          <li><strong>追踪补建</strong> — 历史会话可转成 traces + observations，采集上线前的对话也能在追踪视图里看。不编造数据：历史里没有的耗时、用量、成本一律留空并标记 <code>synthesized</code>；ID 由会话与轮次确定性派生，重复补建幂等。</li>
+          <li><strong>复用 Langfuse 自己的前端</strong> — 追踪树、IO 查看器、图表全部是上游实现（vendored 进 <code>electron-shell/src/langfuse/vendor/</code>），只把取数层替换为 IPC + SQLite，并用 <code>data/mappers.ts</code> 转换领域类型。裁掉 <code>@langfuse/shared</code> 桶文件里拖入的服务端依赖（bullmq、clickhouse、kysely、邮件模板等 100+ 个浏览器跑不了的包）。</li>
+          <li><strong>样式隔离</strong> — <code>App.css</code> 整体包进 <code>@layer udash</code> 并声明层序，让 Tailwind 工具类能压过它；Langfuse 用独立的 Tailwind v4 入口且不导 preflight，避免全局重置破坏现有界面；主题经 <code>.lf-dark</code> 桥接到 CodeDash 的 <code>data-theme</code>。</li>
+          <li><strong>同步模式补上阻塞压缩</strong> — 复用 <code>compressFull</code> / <code>runBlockingCompression</code>，摘要写回会话，只有越阈值才压。</li>
+          <li><strong>入口</strong> — 顶栏新增「Langfuse」入口，控制台内可「返回上一个项目」。</li>
+        </ol>
+
+        <h3>联网工具 · 思考强度 · 图片输入</h3>
+        <ol class="log-list">
+          <li><strong>联网工具</strong> — 新增 <code>web_search</code> 与 <code>web_read_page</code>，走 <code>/v1/tools/*</code> 并复用同一个 API Key；设置里加了「联网工具」总开关，RBAC 工具目录同步登记，老存档做一次性迁移。</li>
+          <li><strong>思考强度</strong> — 输入区新增「关闭 / 低 / 高 / 最高」下拉（对应 <code>thinking</code> 与 <code>reasoning_effort</code>）；输出上限默认从 4096 提升到 8192，可在设置里调整；服务端返回 400 时自动降级重试。</li>
+          <li><strong>图片输入</strong> — 接入 Files API（upload / list / get / delete），支持选图与 Ctrl+V 粘贴，缩略图可点击放大；移除未发送的附件时会清理远端文件。多模态消息在追踪里保留文字并标注图片。</li>
+          <li><strong>外观开关</strong> — 新增「简洁模式选择器」与「左右分栏气泡布局」两个开关。</li>
+        </ol>
+
+        <h3>命令行版 Agent</h3>
+        <ol class="log-list">
+          <li>agent-core 新增交互式命令行版，复用同一套编排与工具，只替换传输层与宿主实现，默认复用 CodeDash 的模型与设置。</li>
+        </ol>
+
+        <h3>修复</h3>
+        <ol class="log-list">
+          <li><strong>模型配置自愈式同步</strong> — active model 失效或进程重启后不再退回默认 baseUrl + 空 key；模型凭据持久化到 <code>llm.json</code>（含 BOM 容错）。</li>
+          <li><strong>开发模式白屏</strong> — 打包会摇掉未使用的文件、开发模式不摇树，那些在模块作用域读 <code>process.env</code> 的文件会被执行并抛 <code>ReferenceError</code>，导致整张模块图加载失败。改为在入口注入 process shim。</li>
+          <li><strong>追踪重建数据形状</strong> — 修掉重建时把扁平消息喂给按轮次的结构、以及评测批次覆盖旧分两处问题。</li>
+          <li><strong>测试</strong> — Langfuse 相关 215 项全通过（数据层 70 / 评测引擎 111 / 聚合层 34），本次提交另新增 6 个测试文件、离线用例 82 个。</li>
+        </ol>
+
+        <h3>说明</h3>
+        <ol class="log-list">
+          <li>该版本的安装包尚未发布，<a href="index.html#download">下载页</a>目前仍提供 v0.2.1（macOS 修复版）与 v0.2.0（Windows）。</li>
+          <li>Langfuse 项目的数据与配置全部存在本机，删除项目目录会同时删除其中已产出的数据集、评测记录与追踪数据。</li>
+          <li>联网工具依赖所选服务商提供的检索接口，换用不提供该接口的服务端时功能不可用；思考强度同理，服务端不接受时会自动降级重试。</li>
+        </ol>
+      </article>
+
       <article class="log-entry" id="v021">
         <div class="log-meta"><span class="tag">LATEST</span><span>v0.2.1</span><span>2026-10-10</span></div>
         <h2>v0.2.1 — macOS 修复版</h2>

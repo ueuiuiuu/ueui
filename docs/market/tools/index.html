@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>工具箱 — UEUI</title>
-<meta name="description" content="我自己在用的六件工具：记录、刷题、数据库、代码转换、题库导出与 Agent 解剖。">
+<meta name="description" content="我自己在用的七件工具：记录、刷题、数据库、代码转换、题库导出、Agent 解剖与让 Agent 操作桌面的 MCP 注册。">
 <meta name="theme-color" content="#0a0a0a">
 <link rel="icon" href="../codedash/icon-codedash.svg">
 <script>document.documentElement.classList.add('js');</script>
@@ -235,6 +235,13 @@
     font-size: clamp(15.5px, 1.5vw, 18px); line-height: 1.85;
     opacity: .82; max-width: 34em;
   }
+  .tool-lead code, .points code {
+    font-family: var(--mono); font-size: .9em;
+    padding: 1px 5px; border-radius: 5px;
+    background: color-mix(in srgb, var(--ink) 14%, transparent);
+    border: 1px solid color-mix(in srgb, var(--ink) 22%, transparent);
+    white-space: nowrap;
+  }
 
   .points { margin-top: clamp(22px, 3vw, 32px); display: grid; gap: 10px; }
   .points li {
@@ -257,6 +264,22 @@
     content: ''; width: 6px; height: 6px; border-radius: 50%;
     background: currentColor;
   }
+
+  /* 源码链接胶囊 */
+  .tool-repo {
+    display: inline-flex; align-items: center; gap: 8px;
+    margin-top: clamp(22px, 3vw, 30px);
+    padding: 9px 15px; border-radius: 100px;
+    border: 1px solid color-mix(in srgb, var(--ink) 34%, transparent);
+    font-family: var(--mono); font-size: 11.5px; letter-spacing: .06em;
+    transition: background .2s, color .2s, border-color .2s, opacity .2s;
+    opacity: .9;
+  }
+  .tool-repo:hover {
+    background: var(--ink); color: var(--c); border-color: var(--ink); opacity: 1;
+  }
+  .tool-repo svg { width: 12px; height: 12px; opacity: .75; }
+  .tool-repo + .tool-note { display: flex; margin-top: 12px; }
 
   /* ---------- 贴纸 ---------- */
   .sticker {
@@ -489,11 +512,11 @@
   <!-- ░░ 00 · 开场 + 目录 ░░ -->
   <section class="screen intro" data-c="#0a0a0a" data-ink="#fafafa" style="--c:#0a0a0a;--ink:#fafafa" data-name="INDEX" data-idx="00">
     <div class="container">
-      <div class="intro-eyebrow rv"><i></i>6 TOOLS · 自用 · 部分开源</div>
+      <div class="intro-eyebrow rv"><i></i>7 TOOLS · 自用 · 部分开源</div>
       <h1 class="intro-title rv d1">工具箱<br><em>TOOLBOX</em></h1>
       <p class="intro-sub rv d2">
-        记录时间、刷题复习、看数据库、做语言转换、导出题库、解剖 Agent。
-        六件自己天天在用的工具，往下滚，一屏一个。
+        记录时间、刷题复习、看数据库、做语言转换、导出题库、解剖 Agent，
+        再加上把桌面操作交给 Agent。七件自己攒下来的工具，往下滚，一屏一个。
       </p>
 
       <div class="index-list rv d3">
@@ -531,6 +554,12 @@
           <span class="no">06</span>
           <span class="nm">Agent-Dissector</span>
           <span class="cat">Skill · 架构拆解</span>
+          <span class="go"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="4" x2="12" y2="20"/><polyline points="6 14 12 20 18 14"/></svg></span>
+        </button>
+        <button class="index-row" type="button" data-target="t7">
+          <span class="no">07</span>
+          <span class="nm">CUA Driver MCP</span>
+          <span class="cat">Skill · 桌面操作</span>
           <span class="go"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="4" x2="12" y2="20"/><polyline points="6 14 12 20 18 14"/></svg></span>
         </button>
       </div>
@@ -842,10 +871,67 @@
     <span class="watermark" aria-hidden="true">06</span>
   </section>
 
+  <!-- ░░ 07 · CUA Driver MCP ░░ -->
+  <section class="screen tool" id="t7" data-c="#c8f24f" data-ink="#101408" style="--c:#c8f24f;--ink:#101408" data-name="CUA Driver MCP" data-idx="07">
+    <div class="container">
+      <div class="tool-grid">
+        <div class="tool-copy">
+          <div class="tool-head rv">
+            <span class="tool-idx">07</span>
+            <span class="tool-cat">Skill · 桌面操作</span>
+          </div>
+          <h2 class="tool-name rv d1">CUA Driver<br>MCP</h2>
+          <p class="tool-lead rv d2">
+            让 Agent 真的能点鼠标、敲键盘、截图、读窗口。前提是本机装好
+            <code>cua-driver</code>，再把它的 MCP server 注册进客户端——
+            而这两步在不同平台、不同客户端上的写法和坑都不一样。
+            这个 Skill 把整条链路固化成固定流程：先探测，再安装，然后确认，最后注册与验证。
+          </p>
+          <ul class="points rv d3">
+            <li><b>先探测</b>：脚本输出 JSON，再用 doctor / status / manifest 判断现状</li>
+            <li><b>安装不盲跑</b>：先落盘、看内容，最后才执行</li>
+            <li><b>一次问清</b>：注册到哪个客户端、要不要开机自启、PATH 怎么处理</li>
+            <li><b>验证到位</b>：doctor 全绿、工具齐全，再实跑一次 <code>run_steps</code></li>
+          </ul>
+          <a class="tool-repo rv d3" href="https://github.com/ueuiuiuu/cua-driver-mcp" target="_blank" rel="noopener">
+            GitHub · ueuiuiuu/cua-driver-mcp
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17L17 7M7 7h10v10"/></svg>
+          </a>
+          <span class="tool-note rv d3">Windows / macOS · 覆盖 Claude Code、Codex、Cursor、Qwen</span>
+        </div>
+
+        <div class="art rv d2">
+          <div class="art-card">
+            <div class="card-head"><span>BOOTSTRAP</span><span class="badge">5 STEPS</span></div>
+            <div class="trace">
+              <div class="trace-node"><span>detect.ps1 · detect.sh</span><span class="k">PROBE</span></div>
+              <div class="trace-arrow">↓</div>
+              <div class="trace-node"><span>install · 先落盘</span><span class="k">WRITE</span></div>
+              <div class="trace-arrow">↓</div>
+              <div class="trace-node"><span>确认客户端 / 自启 / PATH</span><span class="k">CONFIRM</span></div>
+              <div class="trace-arrow">↓</div>
+              <div class="trace-node"><span>mcp-config --client</span><span class="k">REGISTER</span></div>
+              <div class="trace-arrow">↓</div>
+              <div class="trace-node"><span>doctor · run_steps</span><span class="k">VERIFY</span></div>
+            </div>
+          </div>
+          <div class="art-card">
+            <div class="card-head"><span>LIST-TOOLS</span><span class="badge">DESKTOP</span></div>
+            <div class="log-line"><span class="slot">屏幕</span><span class="txt">get_screen_size</span><span class="dur">ok</span></div>
+            <div class="log-line"><span class="slot">窗口</span><span class="txt">get_window_state</span><span class="dur">ok</span></div>
+            <div class="log-line"><span class="slot">动作</span><span class="txt">run_steps · 点击 / 输入</span><span class="dur">live</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="sticker" aria-hidden="true">CLICK<br>TYPE<br>SCREENSHOT</div>
+    <span class="watermark" aria-hidden="true">07</span>
+  </section>
+
   <!-- ░░ 结尾 ░░ -->
   <section class="screen outro" data-c="#0a0a0a" data-ink="#fafafa" style="--c:#0a0a0a;--ink:#fafafa" data-name="END" data-idx="END">
     <div class="container">
-      <p class="mono-label rv" style="margin-bottom:18px">THAT'S ALL · 06 TOOLS</p>
+      <p class="mono-label rv" style="margin-bottom:18px">THAT'S ALL · 07 TOOLS</p>
       <h2 class="outro-title rv d1">大多是开源的，<br>少数只做了 Windows 打包。</h2>
       <p class="outro-sub rv d2">
         需要哪个，直接联系我；源码在哪，我也尽量标在对应的页面里。
@@ -865,7 +951,7 @@
       </div>
       <div class="outro-foot">
         <span>UEUI · TOOLBOX</span>
-        <span>SCROLL COLOR · 06 SECTIONS</span>
+        <span>SCROLL COLOR · 07 SECTIONS</span>
       </div>
     </div>
     <span class="watermark" aria-hidden="true">/</span>
