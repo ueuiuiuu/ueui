@@ -1,12 +1,12 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>更新日志 — CodeDash · AI 原生桌面 IDE</title>
 <meta name="description" content="CodeDash 版本更新记录：v0.3.0 Langfuse 评测工作区、v0.2.1 macOS 修复版、v0.2.0 学习模式上线、v0.1.0 首次发布。">
 <meta name="theme-color" content="#ffffff">
-<link rel="icon" href="icon-codedash.svg">
+    <link rel="icon" href="icon-codedash.svg">
 <script>
   /* 主题初始化：与官网首页共用同一个 localStorage 键 */
   (function () {
@@ -18,7 +18,7 @@
     if (dark) document.documentElement.classList.add('dark');
   })();
 </script>
-<style>
+    <style>
   /* ==========================================================
      更新日志 — 沿用官网首页的单色设计系统
      标题：衬线大字 · 正文：系统无衬线 · 标注：等宽 · 分隔：1px 细线
@@ -394,7 +394,7 @@
   }
 
   ::view-transition-old(root), ::view-transition-new(root) { animation: none; mix-blend-mode: normal; }
-</style>
+    </style>
 </head>
 <body>
 
@@ -411,8 +411,8 @@
         <text x="64" y="82" font-family="'Courier New',monospace" font-size="42" font-weight="bold" fill="#e6edf3" text-anchor="middle">cd</text>
         <rect x="38" y="100" width="52" height="4" rx="2" fill="#8b949e"/>
       </svg>
-      CodeDash
-    </a>
+            CodeDash
+        </a>
     <ul class="nav-links">
       <li><a href="index.html#features">特性</a></li>
       <li><a href="index.html#architecture">架构</a></li>
@@ -420,7 +420,7 @@
       <li><a href="index.html#download">下载</a></li>
       <li><a href="index.html#tech">技术栈</a></li>
       <li><a href="log.html" class="active" aria-current="page">更新日志</a></li>
-    </ul>
+        </ul>
     <div class="nav-right">
       <a class="icon-btn" href="https://github.com/ueuiuiuu" target="_blank" rel="noopener noreferrer" aria-label="GitHub">
         <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 .5C5.65.5.5 5.65.5 12c0 5.08 3.29 9.39 7.86 10.91.58.1.79-.25.79-.55 0-.27-.01-1.17-.02-2.12-3.2.7-3.87-1.36-3.87-1.36-.52-1.33-1.28-1.68-1.28-1.68-1.04-.71.08-.7.08-.7 1.15.08 1.76 1.18 1.76 1.18 1.03 1.76 2.69 1.25 3.35.96.1-.75.4-1.25.72-1.54-2.55-.29-5.23-1.28-5.23-5.68 0-1.26.45-2.28 1.18-3.09-.12-.29-.51-1.46.11-3.05 0 0 .96-.31 3.15 1.18a10.9 10.9 0 0 1 5.74 0c2.19-1.49 3.15-1.18 3.15-1.18.62 1.59.23 2.76.11 3.05.73.81 1.18 1.83 1.18 3.09 0 4.41-2.69 5.38-5.25 5.66.41.35.77 1.05.77 2.12 0 1.53-.01 2.76-.01 3.14 0 .3.2.66.8.55A11.51 11.51 0 0 0 23.5 12C23.5 5.65 18.35.5 12 .5z"/></svg>
@@ -438,7 +438,7 @@
       </button>
     </div>
   </div>
-</nav>
+    </nav>
 <div class="nav-drawer" id="drawer">
   <ul class="nav-drawer-links">
     <li><a href="index.html#features">特性</a></li>
@@ -454,7 +454,7 @@
 <!-- ░░ 页头 ░░ -->
 <header class="page-head">
   <span class="glyph g1" aria-hidden="true">#</span>
-  <div class="container">
+    <div class="container">
     <div class="sec-eyebrow"><span class="h">##</span>Changelog</div>
     <h1 class="page-title">更新日志</h1>
     <p class="page-desc">从首次发布到现在的每一次改动，按版本倒序排列。每个版本都写清楚改了什么、为什么改，以及升级时要注意的地方。</p>
@@ -471,14 +471,14 @@
   <div class="log-wrap">
     <aside class="log-side">
       <div class="side-label">版本索引</div>
-      <ul class="log-nav">
+                <ul class="log-nav">
         <li><a href="#v030" class="active">v0.3.0<span class="d">2026-10-22</span></a></li>
         <li><a href="#v021">v0.2.1<span class="d">2026-10-10</span></a></li>
         <li><a href="#v020">v0.2.0<span class="d">2026-10-04</span></a></li>
         <li><a href="#v010">v0.1.0<span class="d">2026-07-27</span></a></li>
-      </ul>
+                </ul>
       <p class="side-note">历史安装包都在 <a href="https://github.com/ueuiuiuu/ueui/releases" target="_blank" rel="noopener noreferrer">GitHub Releases</a>。</p>
-    </aside>
+            </aside>
 
     <div class="log-content">
       <article class="log-entry" id="v030">
@@ -542,10 +542,10 @@
 
         <h3>修复</h3>
         <ol class="log-list">
-          <li><strong>填完 API Key 不生效</strong> — 在设置里填好 Base URL / API Key 后直接开始对话，会报 <code>You didn't provide an API key</code>，日志显示 <code>Key: (empty)</code>。原因是模型配置只写进了本地存储，没有推送给 Agent 引擎，必须重启应用才生效。现在保存后立即生效，新添加的模型也会马上出现在聊天面板的模型下拉里。</li>
-          <li><strong>关掉窗口再打开会报错</strong> — macOS 上关闭窗口不会退出应用，再点 Dock 图标重新打开时窗口起不来（<code>Attempted to register a second handler</code>）。原因是重建窗口时重复注册了内部通信通道。现在可以反复关闭、重开。</li>
-          <li><strong>左上角图标显示成占位图</strong> — 标题栏的 CodeDash 图标加载失败，显示为碎图。原因是图标用了绝对路径，打包后走 <code>file://</code> 协议会解析到文件系统根目录，已改为相对路径。</li>
-          <li><strong>数据被写进应用包内部</strong> — 会话历史与代码索引原先写在 app 包里的 <code>Contents/Resources/agent-core/dist</code> 下，导致每次更新或重装应用都会丢失历史记录，且索引会持续撑大应用包。现已统一改到 <code>~/Library/Application Support/</code> 下。</li>
+            <li><strong>填完 API Key 不生效</strong> — 在设置里填好 Base URL / API Key 后直接开始对话，会报 <code>You didn't provide an API key</code>，日志显示 <code>Key: (empty)</code>。原因是模型配置只写进了本地存储，没有推送给 Agent 引擎，必须重启应用才生效。现在保存后立即生效，新添加的模型也会马上出现在聊天面板的模型下拉里。</li>
+            <li><strong>关掉窗口再打开会报错</strong> — macOS 上关闭窗口不会退出应用，再点 Dock 图标重新打开时窗口起不来（<code>Attempted to register a second handler</code>）。原因是重建窗口时重复注册了内部通信通道。现在可以反复关闭、重开。</li>
+            <li><strong>左上角图标显示成占位图</strong> — 标题栏的 CodeDash 图标加载失败，显示为碎图。原因是图标用了绝对路径，打包后走 <code>file://</code> 协议会解析到文件系统根目录，已改为相对路径。</li>
+            <li><strong>数据被写进应用包内部</strong> — 会话历史与代码索引原先写在 app 包里的 <code>Contents/Resources/agent-core/dist</code> 下，导致每次更新或重装应用都会丢失历史记录，且索引会持续撑大应用包。现已统一改到 <code>~/Library/Application Support/</code> 下。</li>
         </ol>
 
         <h3>说明</h3>
@@ -616,7 +616,7 @@
       </article>
     </div>
   </div>
-</main>
+            </main>
 
 <!-- ░░ FOOTER ░░ -->
 <footer class="site-footer">
@@ -664,9 +664,9 @@
       <span>Built for developers <span class="sep">·</span> Windows / macOS</span>
     </div>
   </div>
-</footer>
+    </footer>
 
-<script>
+    <script>
 (function () {
   'use strict';
 
@@ -747,6 +747,6 @@
     });
   });
 })();
-</script>
+    </script>
 </body>
 </html>

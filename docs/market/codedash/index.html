@@ -1,17 +1,17 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>CodeDash — AI 原生桌面 IDE</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CodeDash — AI 原生桌面 IDE</title>
 <meta name="description" content="CodeDash 是一款 AI 原生桌面 IDE：自研 Agent 引擎、深度代码理解、浏览器自动化、计算机控制。">
 <meta name="keywords" content="CodeDash, AI IDE, Agent 引擎, 代码理解, 浏览器自动化">
-<meta name="author" content="CodeDash Team">
-<meta property="og:title" content="CodeDash — AI 原生桌面 IDE">
-<meta property="og:description" content="自研 Agent 引擎、深度代码理解、浏览器自动化、计算机控制。">
-<meta property="og:type" content="website">
+    <meta name="author" content="CodeDash Team">
+    <meta property="og:title" content="CodeDash — AI 原生桌面 IDE">
+    <meta property="og:description" content="自研 Agent 引擎、深度代码理解、浏览器自动化、计算机控制。">
+    <meta property="og:type" content="website">
 <meta name="theme-color" content="#ffffff">
-<link rel="icon" href="icon-codedash.svg">
+    <link rel="icon" href="icon-codedash.svg">
 <script>
   /* 主题初始化：首载跟随系统，之后记 localStorage；html 加 .js 才启用滚动显现 */
   (function () {
@@ -23,7 +23,7 @@
     if (dark) document.documentElement.classList.add('dark');
   })();
 </script>
-<style>
+    <style>
   /* ==========================================================
      CodeDash 官网 — 单色设计系统
      标题：衬线大字（Songti / Noto Serif / Georgia）
@@ -94,15 +94,15 @@
   }
   html.dark body { background: var(--bg); }
 
-  body {
+        body {
     font-family: var(--sans);
-    background: var(--bg);
+            background: var(--bg);
     color: var(--fg);
     font-size: 15.5px;
     line-height: 1.75;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-    overflow-x: hidden;
+            overflow-x: hidden;
     padding-top: var(--nav-h);
     transition: background-color .3s ease, color .3s ease;
   }
@@ -201,7 +201,7 @@
   .nav-drawer-links a {
     display: flex; align-items: center; justify-content: space-between;
     padding: 13px 2px; font-size: 15px; color: var(--text-2);
-    border-bottom: 1px solid var(--border);
+                border-bottom: 1px solid var(--border);
   }
   .nav-drawer-links li:last-child a { border-bottom: none; }
 
@@ -506,7 +506,7 @@
     background: rgba(10, 10, 10, .35);
     -webkit-backdrop-filter: blur(10px);
     backdrop-filter: blur(10px);
-    z-index: 2;
+            z-index: 2;
     transition: transform .35s var(--ease), background .3s;
   }
   .film-play svg { width: 26px; height: 26px; fill: #fff; margin-left: 4px; }
@@ -561,7 +561,7 @@
   .dl-card {
     border: 1px solid var(--border); border-radius: 10px;
     background: var(--card); padding: 26px 24px;
-    display: flex; flex-direction: column;
+            display: flex; flex-direction: column;
     transition: border-color .2s ease;
   }
   .dl-card:hover { border-color: var(--border-strong); }
@@ -713,7 +713,7 @@
     .footer-grid { grid-template-columns: 1fr 1fr; }
   }
 
-  @media (max-width: 900px) {
+        @media (max-width: 900px) {
     .stat-grid { grid-template-columns: repeat(2, 1fr); }
     .dl-grid { grid-template-columns: 1fr; }
     .feat-grid { grid-template-columns: 1fr; }
@@ -738,12 +738,12 @@
     .band-invert { padding: 34px 22px; }
     .term-body { font-size: 11.5px; }
     .stat { padding: 24px 16px; }
-  }
+        }
 
-  @media (prefers-reduced-motion: reduce) {
+        @media (prefers-reduced-motion: reduce) {
     *, *::before, *::after {
       animation-duration: .001ms !important;
-      animation-iteration-count: 1 !important;
+                animation-iteration-count: 1 !important;
       transition-duration: .001ms !important;
     }
     html { scroll-behavior: auto; }
@@ -753,7 +753,7 @@
 
   /* 主题切换的圆形揭示（View Transitions 可用时） */
   ::view-transition-old(root), ::view-transition-new(root) { animation: none; mix-blend-mode: normal; }
-</style>
+    </style>
 </head>
 <body id="top">
 
@@ -770,7 +770,7 @@
         <text x="64" y="82" font-family="'Courier New',monospace" font-size="42" font-weight="bold" fill="#e6edf3" text-anchor="middle">cd</text>
         <rect x="38" y="100" width="52" height="4" rx="2" fill="#8b949e"/>
       </svg>
-      CodeDash
+            CodeDash
     </a>
     <ul class="nav-links">
       <li><a href="#features">特性</a></li>
@@ -779,7 +779,7 @@
       <li><a href="#download">下载</a></li>
       <li><a href="#tech">技术栈</a></li>
       <li><a href="log.html">更新日志</a></li>
-    </ul>
+        </ul>
     <div class="nav-right">
       <a class="icon-btn" href="https://github.com/ueuiuiuu" target="_blank" rel="noopener noreferrer" aria-label="GitHub">
         <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 .5C5.65.5.5 5.65.5 12c0 5.08 3.29 9.39 7.86 10.91.58.1.79-.25.79-.55 0-.27-.01-1.17-.02-2.12-3.2.7-3.87-1.36-3.87-1.36-.52-1.33-1.28-1.68-1.28-1.68-1.04-.71.08-.7.08-.7 1.15.08 1.76 1.18 1.76 1.18 1.03 1.76 2.69 1.25 3.35.96.1-.75.4-1.25.72-1.54-2.55-.29-5.23-1.28-5.23-5.68 0-1.26.45-2.28 1.18-3.09-.12-.29-.51-1.46.11-3.05 0 0 .96-.31 3.15 1.18a10.9 10.9 0 0 1 5.74 0c2.19-1.49 3.15-1.18 3.15-1.18.62 1.59.23 2.76.11 3.05.73.81 1.18 1.83 1.18 3.09 0 4.41-2.69 5.38-5.25 5.66.41.35.77 1.05.77 2.12 0 1.53-.01 2.76-.01 3.14 0 .3.2.66.8.55A11.51 11.51 0 0 0 23.5 12C23.5 5.65 18.35.5 12 .5z"/></svg>
@@ -797,7 +797,7 @@
       </button>
     </div>
   </div>
-</nav>
+    </nav>
 <div class="nav-drawer" id="drawer">
   <ul class="nav-drawer-links">
     <li><a href="#features">特性</a></li>
@@ -814,7 +814,7 @@
 <section class="hero">
   <span class="glyph g1" aria-hidden="true">#</span>
   <span class="glyph g2" aria-hidden="true">&gt;</span>
-  <div class="container">
+    <div class="container">
     <div class="hero-copy">
       <div class="hero-chip reveal"><span class="dot"></span>v0.2.1 · Windows / macOS 双平台</div>
       <h1 class="hero-title reveal">重新定义<br><em>AI 编码</em>体验</h1>
@@ -828,17 +828,17 @@
           <span id="heroDlText">下载</span>
         </a>
         <a class="btn btn-ghost btn-lg" href="#videos">看演示</a>
-      </div>
+                </div>
       <p class="hero-note reveal" id="heroNote">Apple Silicon / Intel · Windows 10 / 11 · 开源 · 免费</p>
-    </div>
-  </div>
+            </div>
+                </div>
   <div class="container hero-shot reveal">
     <div class="term">
       <div class="term-bar">
         <span class="dot"></span><span class="dot"></span><span class="dot"></span>
         <span class="term-title">CodeDash — agent-core</span>
         <span class="term-mode">AGENT</span>
-      </div>
+                    </div>
       <div class="term-body">
         <div class="line"><span class="prompt">❯</span> <span class="u">重构 user 服务的缓存层，别动对外接口</span></div>
         <div class="line m"><span class="k">think</span> 定位 3 个热点文件…</div>
@@ -847,10 +847,10 @@
         <div class="line m"><span class="k">run</span> npm test <span class="ok">✓ 38 passed</span></div>
         <div class="line m"><span class="k">plan</span> 写入 .plan.md <span class="dim">3 steps</span></div>
         <div class="line"><span class="prompt">❯</span> <span class="cursor"></span></div>
-      </div>
-    </div>
+                    </div>
+                    </div>
     <p class="shot-cap"><span class="path">~/project</span> — Agent 会话 · 双进程架构</p>
-  </div>
+                    </div>
   <a class="scroll-hint" href="#features" aria-label="向下滚动查看特性">
     <span>SCROLL</span>
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
@@ -865,9 +865,9 @@
       <div class="stat"><div class="stat-num" data-count="28.5" data-suffix="k" data-decimals="1">0</div><div class="stat-label">代码行数</div></div>
       <div class="stat"><div class="stat-num" data-count="15" data-suffix="">0</div><div class="stat-label">内置工具</div></div>
       <div class="stat"><div class="stat-num" data-count="42" data-suffix="">0</div><div class="stat-label">UI 组件</div></div>
-    </div>
-  </div>
-</section>
+                </div>
+            </div>
+        </section>
 
 <!-- ░░ 特性 ░░ -->
 <section id="features">
@@ -876,38 +876,38 @@
       <div class="sec-eyebrow"><span class="h">##</span>Features</div>
       <h2 class="sec-title">九项能力，都指向同一件事</h2>
       <p class="sec-desc">从读代码、改代码到跑测试、控浏览器，Agent 需要的能力都做进同一个进程里。</p>
-    </div>
+                        </div>
     <div class="feat-grid">
       <div class="feat-cell reveal">
         <div class="feat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a3 3 0 0 1 3 3v1a3 3 0 0 1 3 3v1a3 3 0 0 1 0 6v1a3 3 0 0 1-3 3v1a3 3 0 0 1-6 0v-1a3 3 0 0 1-3-3v-1a3 3 0 0 1 0-6V9a3 3 0 0 1 3-3V5a3 3 0 0 1 3-3z"/><circle cx="12" cy="12" r="2.5"/></svg></div>
         <div class="feat-name">自研 Agent 引擎</div>
         <div class="feat-desc">零框架依赖的 <code>agent-core</code>，think → act → stream 循环；Plan、Agent、Chain 三种模式共用一套工具协议。</div>
-      </div>
+                    </div>
       <div class="feat-cell reveal">
         <div class="feat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M8 6L2 12l6 6M16 6l6 6-6 6"/></svg></div>
         <div class="feat-name">深度代码理解</div>
         <div class="feat-desc">tree-sitter 解析 + bge-small-zh 语义嵌入，BM25 与向量双层召回，索引可完全离线。</div>
-      </div>
+                    </div>
       <div class="feat-cell reveal">
         <div class="feat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg></div>
         <div class="feat-name">浏览器自动化</div>
         <div class="feat-desc">内置 Chromium 控制器，导航、点击、输入、滚动、截图等 12+ 操作，AI 像人一样用网页。</div>
-      </div>
+                </div>
       <div class="feat-cell reveal">
         <div class="feat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg></div>
         <div class="feat-name">计算机控制</div>
         <div class="feat-desc">基于 <code>@nut-tree/nut-js</code> 驱动鼠标、键盘与屏幕，桌面也被 Agent 接管。</div>
-      </div>
+                        </div>
       <div class="feat-cell reveal">
         <div class="feat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="8" rx="2"/><rect x="2" y="14" width="20" height="8" rx="2"/><line x1="6" y1="6" x2="6.01" y2="6"/><line x1="6" y1="18" x2="6.01" y2="18"/></svg></div>
         <div class="feat-name">双进程架构</div>
         <div class="feat-desc">Electron 前端与 Agent 后端以 JSON-RPC 2.0 over stdio 通信，一方崩溃不影响另一方。</div>
-      </div>
+                    </div>
       <div class="feat-cell reveal">
         <div class="feat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg></div>
         <div class="feat-name">三层记忆</div>
         <div class="feat-desc">任务摘要 + 轮次向量索引 + RRF 融合召回，长会话不丢上下文。</div>
-      </div>
+                    </div>
       <div class="feat-cell reveal">
         <div class="feat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15.5 14"/></svg></div>
         <div class="feat-name">自动化调度</div>
@@ -923,9 +923,9 @@
         <div class="feat-name">工作流编排</div>
         <div class="feat-desc">并行、串行、Pipeline、Loop 四种执行模式，复杂任务一键编排。</div>
       </div>
-    </div>
-  </div>
-</section>
+                </div>
+            </div>
+        </section>
 
 <!-- ░░ 架构 ░░ -->
 <section id="architecture">
@@ -983,8 +983,8 @@
         </div>
       </div>
     </div>
-  </div>
-</section>
+            </div>
+        </section>
 
 <!-- ░░ 模式 ░░ -->
 <section id="modes">
@@ -993,7 +993,7 @@
       <div class="sec-eyebrow"><span class="h">##</span>Modes</div>
       <h2 class="sec-title">三种工作模式</h2>
       <p class="sec-desc">从安全只读，到全权执行，再到自动队列——按任务的危险程度选。</p>
-    </div>
+                </div>
     <div class="mode-grid">
       <article class="mode-card reveal">
         <div class="mode-label">PLAN</div>
@@ -1013,8 +1013,8 @@
         <p>Plan → Agent → Plan → Agent 自动循环，直到队列清空。适合一次交代一串活儿。</p>
         <span class="mode-meta">无人值守</span>
       </article>
-    </div>
-  </div>
+                </div>
+                </div>
 </section>
 
 <!-- ░░ 视频（影片卡片布局参考 workflow 站点） ░░ -->
@@ -1024,7 +1024,7 @@
       <div class="sec-eyebrow"><span class="h">##</span>Videos</div>
       <h2 class="sec-title">先看一遍，再动手</h2>
       <p class="sec-desc">三段真实录屏。点画面直接在页内播放，完整版与弹幕在 B 站。</p>
-    </div>
+                </div>
 
     <div class="films">
       <article class="film film-split reveal">
@@ -1033,7 +1033,7 @@
             <span class="poster-idx">01 / FEATURED</span>
             <span class="poster-title">产品演示</span>
             <span class="poster-meta">PRODUCT TOUR</span>
-          </div>
+                </div>
           <span class="film-play" aria-hidden="true">
             <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
           </span>
@@ -1046,7 +1046,7 @@
             在 B 站打开
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17L17 7M7 7h10v10"/></svg>
           </a>
-        </div>
+                </div>
       </article>
 
       <div class="film-duo">
@@ -1056,7 +1056,7 @@
               <span class="poster-idx">02</span>
               <span class="poster-title">更多演示</span>
               <span class="poster-meta">MORE DEMOS</span>
-            </div>
+                </div>
             <span class="film-play" aria-hidden="true">
               <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
             </span>
@@ -1069,7 +1069,7 @@
               在 B 站打开
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17L17 7M7 7h10v10"/></svg>
             </a>
-          </div>
+                </div>
         </article>
 
         <article class="film film-card reveal">
@@ -1094,9 +1094,9 @@
           </div>
         </article>
       </div>
-    </div>
-  </div>
-</section>
+                </div>
+            </div>
+        </section>
 
 <!-- ░░ 下载 ░░ -->
 <section id="download">
@@ -1137,9 +1137,9 @@
           <div class="dl-name">
             <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M3 5.5l7.2-1v7.1H3V5.5zm8.2-1.15L21 3v8.6h-9.8V4.35zM3 12.6h7.2v7.1L3 18.6v-6zm8.2 0H21V21l-9.8-1.35V12.6z"/></svg>
             Windows 10 / 11
-          </div>
+                </div>
           <span class="dl-ver">v0.2.0</span>
-        </div>
+                </div>
         <p class="dl-desc">提供图形化安装程序，安装过程可选择安装目录，与 macOS 版功能一致。</p>
         <div class="dl-actions">
           <a class="dl-btn primary" href="https://github.com/ueuiuiuu/ueui/releases/download/v0.2.0/CodeDash.Setup.0.2.0.exe" target="_blank" rel="noopener noreferrer">
@@ -1154,9 +1154,9 @@
           Agent 引擎通过系统 Node.js 启动，请先确认机器上已安装 Node.js。
         </p>
       </article>
-    </div>
-  </div>
-</section>
+                </div>
+            </div>
+        </section>
 
 <!-- ░░ 技术栈 ░░ -->
 <section id="tech">
@@ -1165,15 +1165,15 @@
       <div class="sec-eyebrow"><span class="h">##</span>Stack</div>
       <h2 class="sec-title">从桌面壳到 AI 引擎</h2>
       <p class="sec-desc">全栈自研，零 Agent 框架依赖。下面是真正跑在进程里的东西。</p>
-    </div>
+                </div>
     <div class="tech-grid">
       <div class="tech-card reveal">
         <div class="tech-label">Frontend</div>
         <div class="tech-name">界面</div>
         <div class="chip-wrap">
           <span class="chip">Electron 32</span><span class="chip">React 18</span><span class="chip">TypeScript</span><span class="chip">Vite 5</span><span class="chip">Monaco Editor</span><span class="chip">Xterm.js</span>
-        </div>
-      </div>
+                </div>
+                </div>
       <div class="tech-card reveal">
         <div class="tech-label">Engine</div>
         <div class="tech-name">引擎</div>
@@ -1190,8 +1190,8 @@
       </div>
     </div>
     <p class="tech-note reveal"><span class="path">$</span> Electron + agent-core 双进程 · 安装包经 GitHub Releases 分发 · 开源免费</p>
-  </div>
-</section>
+            </div>
+        </section>
 
 <!-- ░░ CTA ░░ -->
 <section>
@@ -1209,9 +1209,9 @@
         <a class="btn btn-ghost-light btn-lg" id="ctaAlt" href="https://github.com/ueuiuiuu/ueui/releases" target="_blank" rel="noopener noreferrer"><span id="ctaAltText">全部版本</span></a>
         <a class="btn btn-ghost-light btn-lg" href="https://github.com/ueuiuiuu" target="_blank" rel="noopener noreferrer">GitHub</a>
       </div>
-    </div>
-  </div>
-</section>
+                </div>
+            </div>
+        </section>
 
 <!-- ░░ FOOTER ░░ -->
 <footer class="site-footer">
@@ -1229,9 +1229,9 @@
             <rect x="38" y="100" width="52" height="4" rx="2" fill="#8b949e"/>
           </svg>
           CodeDash
-        </div>
+    </div>
         <p class="footer-tagline">AI 原生桌面 IDE — 自研 Agent 引擎，把「说一句」变成「跑通一整套」。</p>
-      </div>
+        </div>
       <div class="footer-col">
         <h4>产品</h4>
         <div><a href="#features">特性</a></div>
@@ -1259,9 +1259,9 @@
       <span>Built for developers <span class="sep">·</span> Windows / macOS</span>
     </div>
   </div>
-</footer>
+    </footer>
 
-<script>
+    <script>
 (function () {
   'use strict';
 
@@ -1513,6 +1513,6 @@
     });
   });
 })();
-</script>
+    </script>
 </body>
 </html>
