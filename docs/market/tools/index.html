@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>工具箱 — UEUI</title>
-<meta name="description" content="我自己在用的七件工具：记录、刷题、数据库、代码转换、题库导出、Agent 解剖与让 Agent 操作桌面的 MCP 注册。">
+<meta name="description" content="我自己在用的八件工具：记录、刷题、数据库、代码转换、题库导出、Agent 解剖、桌面操作 MCP 与 Android 上的 Markdown 笔记本。">
 <meta name="theme-color" content="#0a0a0a">
 <link rel="icon" href="../codedash/icon-codedash.svg">
 <script>document.documentElement.classList.add('js');</script>
@@ -281,6 +281,23 @@
   .tool-repo svg { width: 12px; height: 12px; opacity: .75; }
   .tool-repo + .tool-note { display: flex; margin-top: 12px; }
 
+  /* 多个链接并排 */
+  .tool-links { display: flex; flex-wrap: wrap; gap: 10px; margin-top: clamp(22px, 3vw, 30px); }
+  .tool-links .tool-repo { margin-top: 0; }
+  .tool-links + .tool-note { display: flex; margin-top: 12px; }
+
+  /* 演示截图卡片 */
+  .art-shot img {
+    display: block; width: 100%; max-height: 360px;
+    object-fit: cover; object-position: top center;
+    border-radius: 10px; background: #000;
+    border: 1px solid color-mix(in srgb, var(--ink) 16%, transparent);
+  }
+  .art-shot .video-cap {
+    display: flex; align-items: center; justify-content: space-between; gap: 10px;
+    margin-top: 10px; font-size: 9.5px; letter-spacing: .1em; opacity: .55;
+  }
+
   /* ---------- 贴纸 ---------- */
   .sticker {
     position: absolute; z-index: 3;
@@ -332,6 +349,8 @@
   }
   .log-line .txt { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .log-line .dur { opacity: .55; font-size: 10.5px; }
+  /* 只有「标签 / 内容 / 状态」三列的记录行 */
+  .log-line.log-3 { grid-template-columns: 34px 1fr auto; }
   .heat { display: grid; grid-template-columns: repeat(14, 1fr); gap: 4px; margin-top: 16px; }
   .heat i {
     aspect-ratio: 1; border-radius: 2px; display: block;
@@ -512,11 +531,12 @@
   <!-- ░░ 00 · 开场 + 目录 ░░ -->
   <section class="screen intro" data-c="#0a0a0a" data-ink="#fafafa" style="--c:#0a0a0a;--ink:#fafafa" data-name="INDEX" data-idx="00">
     <div class="container">
-      <div class="intro-eyebrow rv"><i></i>7 TOOLS · 自用 · 部分开源</div>
+      <div class="intro-eyebrow rv"><i></i>8 TOOLS · 自用 · 部分开源</div>
       <h1 class="intro-title rv d1">工具箱<br><em>TOOLBOX</em></h1>
       <p class="intro-sub rv d2">
         记录时间、刷题复习、看数据库、做语言转换、导出题库、解剖 Agent，
-        再加上把桌面操作交给 Agent。七件自己攒下来的工具，往下滚，一屏一个。
+        把桌面操作交给 Agent，还有一个装在手机上的 Markdown 笔记本。
+        八件自己攒下来的工具，往下滚，一屏一个。
       </p>
 
       <div class="index-list rv d3">
@@ -560,6 +580,12 @@
           <span class="no">07</span>
           <span class="nm">CUA Driver MCP</span>
           <span class="cat">Skill · 桌面操作</span>
+          <span class="go"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="4" x2="12" y2="20"/><polyline points="6 14 12 20 18 14"/></svg></span>
+        </button>
+        <button class="index-row" type="button" data-target="t8">
+          <span class="no">08</span>
+          <span class="nm">速记</span>
+          <span class="cat">Android · Kotlin Compose</span>
           <span class="go"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="4" x2="12" y2="20"/><polyline points="6 14 12 20 18 14"/></svg></span>
         </button>
       </div>
@@ -893,10 +919,12 @@
             <li><b>一次问清</b>：注册到哪个客户端、要不要开机自启、PATH 怎么处理</li>
             <li><b>验证到位</b>：doctor 全绿、工具齐全，再实跑一次 <code>run_steps</code></li>
           </ul>
-          <a class="tool-repo rv d3" href="https://github.com/ueuiuiuu/cua-driver-mcp" target="_blank" rel="noopener">
-            GitHub · ueuiuiuu/cua-driver-mcp
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17L17 7M7 7h10v10"/></svg>
-          </a>
+          <div class="tool-links rv d3">
+            <a class="tool-repo" href="https://github.com/ueuiuiuu/cua-driver-mcp" target="_blank" rel="noopener">
+              GitHub · ueuiuiuu/cua-driver-mcp
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17L17 7M7 7h10v10"/></svg>
+            </a>
+          </div>
           <span class="tool-note rv d3">Windows / macOS · 覆盖 Claude Code、Codex、Cursor、Qwen</span>
         </div>
 
@@ -917,9 +945,9 @@
           </div>
           <div class="art-card">
             <div class="card-head"><span>LIST-TOOLS</span><span class="badge">DESKTOP</span></div>
-            <div class="log-line"><span class="slot">屏幕</span><span class="txt">get_screen_size</span><span class="dur">ok</span></div>
-            <div class="log-line"><span class="slot">窗口</span><span class="txt">get_window_state</span><span class="dur">ok</span></div>
-            <div class="log-line"><span class="slot">动作</span><span class="txt">run_steps · 点击 / 输入</span><span class="dur">live</span></div>
+            <div class="log-line log-3"><span class="slot">屏幕</span><span class="txt">get_screen_size</span><span class="dur">ok</span></div>
+            <div class="log-line log-3"><span class="slot">窗口</span><span class="txt">get_window_state</span><span class="dur">ok</span></div>
+            <div class="log-line log-3"><span class="slot">动作</span><span class="txt">run_steps · 点击 / 输入</span><span class="dur">live</span></div>
           </div>
         </div>
       </div>
@@ -928,10 +956,66 @@
     <span class="watermark" aria-hidden="true">07</span>
   </section>
 
+  <!-- ░░ 08 · 速记 / InitTry ░░ -->
+  <section class="screen tool" id="t8" data-c="#0f6f5c" data-ink="#f4fffb" style="--c:#0f6f5c;--ink:#f4fffb" data-name="速记" data-idx="08">
+    <div class="container">
+      <div class="tool-grid">
+        <div class="tool-copy">
+          <div class="tool-head rv">
+            <span class="tool-idx">08</span>
+            <span class="tool-cat">Android · Kotlin Compose</span>
+          </div>
+          <h2 class="tool-name rv d1">速记<br>ShuJi</h2>
+          <p class="tool-lead rv d2">
+            一个用 Kotlin + Jetpack Compose 手写的 Markdown 笔记本。Markdown 解析、
+            按真实文字缩小的小地图、流式 HTTP 客户端和 Agent 的工具循环都写在自己的工程里，
+            没有引入第三方 Markdown 解析器、图片加载库和 AI SDK。
+          </p>
+          <ul class="points rv d3">
+            <li><b>编辑 ↔ 渲染分栏</b>：四档比例随手拖，中间夹着一条按比例缩小的真实文字小地图</li>
+            <li><b>全文搜索与多标签</b>：按文件分组、带行号点击定位；笔记库可以建多个</li>
+            <li><b>提醒落到系统</b>：待做提示能写进系统闹钟与日历，清掉后台也不漏</li>
+            <li><b>AI 直接改笔记</b>：DeepSeek Agent 可读可写、会网页搜索，也会反问后再动手</li>
+          </ul>
+          <div class="tool-links rv d3">
+            <a class="tool-repo" href="https://ueuiuiuu.github.io/ShuJi-MarkDown/" target="_blank" rel="noopener">
+              官网 · 下载 APK
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17L17 7M7 7h10v10"/></svg>
+            </a>
+            <a class="tool-repo" href="https://github.com/ueuiuiuu/ShuJi-MarkDown" target="_blank" rel="noopener">
+              GitHub · ShuJi-MarkDown
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17L17 7M7 7h10v10"/></svg>
+            </a>
+          </div>
+          <span class="tool-note rv d3">本地工程 InitTry · Android 7.0+ · 笔记全部存本机</span>
+        </div>
+
+        <div class="art rv d2">
+          <div class="art-card art-shot">
+            <div class="card-head"><span>SCREENSHOT</span><span class="badge">30S ON BILIBILI</span></div>
+            <a href="https://www.bilibili.com/video/BV1PCsu6wEso" target="_blank" rel="noopener">
+              <img src="https://ueuiuiuu.github.io/ShuJi-MarkDown/03-split.png" alt="速记的编辑与预览分栏，中间是真实文字小地图" loading="lazy" width="460" height="1024">
+            </a>
+            <div class="video-cap"><span>B 站 · 30 秒宣传片</span><span>点开观看</span></div>
+          </div>
+          <div class="art-card">
+            <div class="card-head"><span>AGENT TOOLS</span><span class="badge">9 TOOLS</span></div>
+            <div class="log-line log-3"><span class="slot">读</span><span class="txt">list_notes · read_note</span><span class="dur">auto</span></div>
+            <div class="log-line log-3"><span class="slot">写</span><span class="txt">create_note · append_note · replace_line</span><span class="dur">ask</span></div>
+            <div class="log-line log-3"><span class="slot">目录</span><span class="txt">create_folder</span><span class="dur">auto</span></div>
+            <div class="log-line log-3"><span class="slot">其它</span><span class="txt">web_search · ask_user · write_css_theme</span><span class="dur">ok</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="sticker" aria-hidden="true">MD<br>ON<br>PHONE</div>
+    <span class="watermark" aria-hidden="true">08</span>
+  </section>
+
   <!-- ░░ 结尾 ░░ -->
   <section class="screen outro" data-c="#0a0a0a" data-ink="#fafafa" style="--c:#0a0a0a;--ink:#fafafa" data-name="END" data-idx="END">
     <div class="container">
-      <p class="mono-label rv" style="margin-bottom:18px">THAT'S ALL · 07 TOOLS</p>
+      <p class="mono-label rv" style="margin-bottom:18px">THAT'S ALL · 08 TOOLS</p>
       <h2 class="outro-title rv d1">大多是开源的，<br>少数只做了 Windows 打包。</h2>
       <p class="outro-sub rv d2">
         需要哪个，直接联系我；源码在哪，我也尽量标在对应的页面里。
@@ -951,7 +1035,7 @@
       </div>
       <div class="outro-foot">
         <span>UEUI · TOOLBOX</span>
-        <span>SCROLL COLOR · 07 SECTIONS</span>
+        <span>SCROLL COLOR · 08 SECTIONS</span>
       </div>
     </div>
     <span class="watermark" aria-hidden="true">/</span>

@@ -47,7 +47,7 @@
 <a class="uh-card uh-reveal" href="market/tools/" style="--d:.02s">
 <span class="uh-card-top"><span>01</span><span>Toolbox</span></span>
 <span class="uh-card-name">工具</span>
-<p class="uh-card-desc">六件自用工具：时间记录、题库复习、数据库、代码转换与 Agent 解剖。</p>
+<p class="uh-card-desc">八件自用工具：时间记录、题库复习、数据库、代码转换、Agent 解剖，还有 Android 上的 Markdown 笔记。</p>
 <span class="uh-card-go">查看<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17L17 7M7 7h10v10"/></svg></span>
 </a>
 <a class="uh-card uh-reveal" href="market/codedash/" style="--d:.06s">
@@ -107,7 +107,7 @@
 </section>
 <section class="uh-sec" id="videos">
 <div class="uh-band">
-<span class="uh-sticker" aria-hidden="true">3 FILMS<br>ON BILIBILI</span>
+<span class="uh-sticker" aria-hidden="true">4 FILMS<br>ON BILIBILI</span>
 <div class="uh-sec-head uh-reveal" style="margin-bottom:0">
 <div>
 <p class="uh-eyebrow"><span class="h">##</span>Videos</p>
@@ -153,6 +153,19 @@
 <p class="uh-film-desc">代码旁生成讲解、公式与图示，复习的时候不用再切去别的窗口。</p>
 <p class="uh-film-time">BILIBILI</p>
 <a class="uh-film-link" href="https://www.bilibili.com/video/BV1NuH762E9k" target="_blank" rel="noopener noreferrer">在 B 站打开<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17L17 7M7 7h10v10"/></svg></a>
+</div>
+</article>
+<article class="uh-film uh-reveal">
+<a class="uh-poster" href="https://www.bilibili.com/video/BV1PCsu6wEso" target="_blank" rel="noopener noreferrer" style="--pc:#0f6f5c;--pi:#f4fffb" aria-label="在 B 站观看：速记 30 秒宣传片">
+<span class="uh-poster-top"><span class="uh-poster-idx">04</span><span class="uh-play"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg></span></span>
+<span><span class="uh-poster-name">速记</span><span class="uh-poster-en">SHUJI</span></span>
+</a>
+<div class="uh-film-copy">
+<p class="uh-film-tag">速记 · Android Markdown 笔记</p>
+<h3 class="uh-film-title">手机上写 Markdown</h3>
+<p class="uh-film-desc">编辑与预览分栏、按真实文字缩小的小地图、全文搜索，还有一个能直接改笔记的 DeepSeek Agent。</p>
+<p class="uh-film-time">BILIBILI · ANDROID</p>
+<a class="uh-film-link" href="https://www.bilibili.com/video/BV1PCsu6wEso" target="_blank" rel="noopener noreferrer">在 B 站打开<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17L17 7M7 7h10v10"/></svg></a>
 </div>
 </article>
 </div>
